@@ -17,7 +17,10 @@
     #auth-guard p{font-size:15px;color:var(--mu)}
     @keyframes spin{to{transform:rotate(360deg)}}
     .site-header{background:var(--sur);border-bottom:1px solid var(--bd);box-shadow:0 1px 8px rgba(0,0,0,0.06);position:sticky;top:0;z-index:50}
-    .header-inner{max-width:960px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
+    .header-inner{max-width:960px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
+    .logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .logo-icon{width:38px;height:38px;border-radius:9px;background:var(--gr-bg);border:1px solid rgba(22,163,74,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .logo-text{font-family:'Kanit',sans-serif;font-size:20px;font-weight:600}
     .page{max-width:960px;margin:0 auto;padding:24px 16px}
     .back-btn{font-family:'Sarabun','Kanit',sans-serif;font-size:15px;padding:7px 16px;border-radius:99px;cursor:pointer;border:1px solid rgba(220,38,38,0.4);background:rgba(220,38,38,0.06);color:var(--rd);text-decoration:none;white-space:nowrap;transition:all .15s}
     .back-btn:hover{background:rgba(220,38,38,0.12);border-color:rgba(220,38,38,0.6)}
@@ -38,10 +41,20 @@
     .empty-row{text-align:center;padding:40px;color:var(--mu);font-size:16px}
     .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:99px;font-size:16px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:999}
     .toast.show{opacity:1}
-    @media(max-width:600px){
-      .u-row{grid-template-columns:1fr 1fr;gap:8px;min-width:0}
-      .u-row.head .u-devcount,.u-row.head .save-btn{display:none}
-      .u-name,.u-email{font-size:16px}
+    @media(max-width:640px){
+      .header-inner{height:56px;padding:0 12px}
+      .logo-text{font-size:17px}
+      .logo-icon{width:32px;height:32px;font-size:17px}
+      .back-btn{font-size:14px;padding:6px 12px}
+      .card{overflow-x:auto}
+      .u-row{min-width:520px}
+    }
+    @media(max-width:480px){
+      .u-row{grid-template-columns:1.5fr 1fr 80px 80px;min-width:0;gap:6px}
+      .u-row .u-email{display:none}
+      .u-row.head div:nth-child(2){display:none}
+      .u-name{font-size:16px}
+      .role-sel{font-size:14px;padding:5px 8px}
     }
   </style>
 </head>
@@ -51,7 +64,10 @@
 
 <div class="site-header">
   <div class="header-inner">
-    <div class="page-title">👥 จัดการผู้ใช้ <span class="badge">Admin</span></div>
+    <div class="logo">
+      <div class="logo-icon">👥</div>
+      <div class="logo-text">จัดการผู้ใช้</div>
+    </div>
     <a class="back-btn" href="admin.html">ย้อนกลับ</a>
   </div>
 </div>

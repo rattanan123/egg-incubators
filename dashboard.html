@@ -103,14 +103,26 @@
     .sec-tab{flex:1;text-align:center;padding:7px 12px;border-radius:99px;font-size:15px;cursor:pointer;border:none;background:transparent;color:var(--mu);font-family:'Kanit',sans-serif;transition:all .15s}
     .sec-tab.active{background:var(--sur);color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,0.1)}
 
+    @media(max-width:640px){
+      .header-inner{height:56px;padding:0 12px}
+      .logo-text{font-size:17px}
+      .user-email{display:none}
+      .btn-sm,.btn-add{font-size:14px;padding:6px 12px}
+      .btn-logout,.btn-admin{font-size:14px;padding:6px 10px}
+      .grid{grid-template-columns:1fr}
+      .section-title{font-size:20px}
+    }
     @media(max-width:480px){
+      .logo-icon{width:32px;height:32px;font-size:17px}
+      .user-name{font-size:15px}
       .irow2{grid-template-columns:1fr}
-      .hright{gap:6px}
+      .hright{gap:5px}
       .dbtns{flex-direction:column-reverse}
       .dconfirm,.dcancel{width:100%;text-align:center}
       .ifield{font-size:20px}
       .sec-field{grid-template-columns:120px 1fr;font-size:14px}
       .sec-val{font-size:15px}
+      .dev-name{font-size:18px}
     }
   </style>
 </head>
