@@ -259,6 +259,7 @@
   <div class="header-right">
     <div class="online-pill"><div class="dot" id="odot"></div><span id="otxt">connecting…</span></div>
     <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙 Dark</button>
+    <a href="dashboard.html" style="font-family:'Kanit',sans-serif;font-size:14px;padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);text-decoration:none;white-space:nowrap">← กลับ</a>
   </div>
 </header>
 
@@ -456,22 +457,6 @@
     </ul>
   </div>
 
-  <div class="card" id="line-card">
-    <div class="card-title" style="margin-bottom:12px;">🔔 LINE Notify</div>
-    <div class="ig" style="gap:8px;">
-      <div class="ilabel">LINE Notify Token</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <div class="iwrap" style="flex:1;">
-          <input class="ifield" type="password" id="line-tok"
-            placeholder="วาง Token ที่นี่"
-            style="font-size:16px;padding:10px 14px;padding-right:14px;">
-        </div>
-        <button class="btn-go" id="line-save-btn" onclick="saveLineToken()" style="padding:10px 20px;font-size:16px;white-space:nowrap;">บันทึก</button>
-      </div>
-      <div class="ihint">สร้าง Token ได้ที่ <a href="https://notify-bot.line.me/" target="_blank" style="color:var(--gr)">notify-bot.line.me</a> · แจ้งเตือนเมื่อ เริ่ม / หยุด / ค่าผิดปกติ</div>
-      <div id="line-status" style="font-size:13px;color:var(--mu);margin-top:2px;"></div>
-    </div>
-  </div>
 
   <div class="cwrap">
     <div class="cheader">
@@ -539,25 +524,6 @@
     </table>
   </div>
 
-  <div class="lwrap">
-    <div class="lheader">
-      <div class="lhl">
-        <div class="card-title" style="margin:0;">ประวัติการฟัก</div>
-        <div style="font-size:14px;color:var(--mu);font-family:'Kanit',sans-serif;" id="runs-ts">--</div>
-      </div>
-    </div>
-    <table>
-      <thead><tr>
-        <th style="width:90px;">วันที่เริ่ม</th>
-        <th style="width:80px;">โปรไฟล์</th>
-        <th style="width:65px;">ไข่</th>
-        <th style="width:65px;">ฟักได้</th>
-        <th style="width:70px;">อัตรา</th>
-        <th style="width:70px;">สถานะ</th>
-      </tr></thead>
-      <tbody id="runs-body"></tbody>
-    </table>
-  </div>
 
 </div>
 
@@ -629,7 +595,7 @@ const PROFILES = {
     stages:{
       "0":{name:"ระยะฟัก (ต้น)",  dayStart:1,  dayEnd:10, tempMin:36.5,tempMax:37.5,humMin:55,humMax:56,servoHoldHours:1,  turning:true},
       "1":{name:"ระยะฟัก (ปลาย)", dayStart:11, dayEnd:18, tempMin:36.5,tempMax:37.5,humMin:55,humMax:56,servoHoldHours:2,  turning:true},
-      "2":{name:"ระยะเกิด",        dayStart:19, dayEnd:21, tempMin:36.8,tempMax:37.0,humMin:64,humMax:65,servoHoldHours:2,  turning:false}
+      "2":{name:"ระยะเกิด",        dayStart:19, dayEnd:21, tempMin:36.8,tempMax:37.0,humMin:69,humMax:70,servoHoldHours:2,  turning:false}
     },
     candlingDays:[10,18]
   },

@@ -4,38 +4,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — ตู้ฟักไข่</title>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{--bg:#f5f6f8;--sur:#fff;--sur2:#f0f2f5;--bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.15);--tx:#1a1a1a;--mu:#6b7280;--gr:#16a34a;--gr-bg:rgba(22,163,74,0.08);--rd:#dc2626;--am:#d97706;--ra:14px;--rs:10px}
     [data-theme="dark"]{--bg:#0e0f11;--sur:#161719;--sur2:#1e2023;--bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.12);--tx:#f0f0ef;--mu:#6b6e74;--gr:#4ade80;--gr-bg:rgba(74,222,128,0.08);--rd:#f87171;--am:#fbbf24}
-    body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:16px 14px 48px}
+    html{font-size:18px}
+    body{font-family:'Sarabun','Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:16px 14px 48px}
     header{display:flex;align-items:center;justify-content:space-between;max-width:960px;margin:0 auto 24px;padding-bottom:16px;border-bottom:1px solid var(--bd);gap:10px;flex-wrap:wrap}
     .logo{display:flex;align-items:center;gap:10px}
     .logo-icon{width:40px;height:40px;border-radius:9px;background:var(--sur2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:22px}
-    .logo-text{font-size:22px;font-weight:500}
+    .logo-text{font-family:'Kanit',sans-serif;font-size:22px;font-weight:500}
     .hright{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
     .user-info{display:flex;flex-direction:column;align-items:flex-end}
-    .user-name{font-size:15px;font-weight:500}
-    .user-email{font-size:12px;color:var(--mu)}
-    .btn-sm{font-family:'Kanit',sans-serif;font-size:14px;padding:7px 16px;border-radius:99px;cursor:pointer;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);white-space:nowrap}
+    .user-name{font-size:18px;font-weight:500}
+    .user-email{font-size:16px;color:var(--mu)}
+    .btn-sm{font-family:'Kanit',sans-serif;font-size:18px;padding:7px 16px;border-radius:99px;cursor:pointer;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);white-space:nowrap}
     .btn-sm:hover{background:var(--sur);color:var(--tx)}
     .btn-add{border-color:rgba(22,163,74,0.4);color:var(--gr);background:var(--gr-bg)}
     .btn-add:hover{background:rgba(22,163,74,0.15)!important;color:var(--gr)!important}
     .wrap{max-width:960px;margin:0 auto}
-    .section-title{font-size:13px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+    .section-title{font-family:'Kanit',sans-serif;font-size:26px;font-weight:500;color:var(--tx);margin-bottom:14px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
     .dev-card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:20px;cursor:pointer;transition:all 0.15s;text-decoration:none;color:var(--tx);display:block;position:relative}
     .dev-card:hover{border-color:rgba(22,163,74,0.4);box-shadow:0 2px 12px rgba(0,0,0,0.06);transform:translateY(-1px)}
     .dev-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
     .dev-icon{width:44px;height:44px;border-radius:10px;background:var(--gr-bg);border:1px solid rgba(22,163,74,0.2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-    .dev-name{font-size:18px;font-weight:500;line-height:1.2}
-    .dev-id{font-size:12px;color:var(--mu);font-family:'Kanit',sans-serif;margin-top:2px}
+    .dev-name{font-family:'Kanit',sans-serif;font-size:24px;font-weight:500;line-height:1.2}
+    .dev-id{font-size:16px;color:var(--mu);font-family:'Kanit',sans-serif;margin-top:2px}
     .dev-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd)}
     .dev-row:last-child{border-bottom:none}
-    .dev-label{font-size:14px;color:var(--mu)}
-    .dev-val{font-family:'Kanit',sans-serif;font-size:15px;font-weight:500}
-    .status-badge{font-size:12px;padding:3px 10px;border-radius:99px;font-family:'Kanit',sans-serif;font-weight:500}
+    .dev-label{font-size:18px;color:var(--mu)}
+    .dev-val{font-family:'Kanit',sans-serif;font-size:18px;font-weight:500}
+    .status-badge{font-size:16px;padding:3px 10px;border-radius:99px;font-family:'Kanit',sans-serif;font-weight:500}
     .status-badge.run{background:var(--gr-bg);color:var(--gr);border:1px solid rgba(22,163,74,0.3)}
     .status-badge.stop{background:var(--sur2);color:var(--mu);border:1px solid var(--bd)}
     .status-badge.offline{background:rgba(220,38,38,0.08);color:var(--rd);border:1px solid rgba(220,38,38,0.3)}
@@ -51,34 +54,35 @@
     /* Dialog */
     .dov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
     .dov.show{display:flex}
-    .dbox{background:var(--sur);border:1px solid var(--bd2);border-radius:18px;padding:28px 24px 24px;max-width:480px;width:100%;margin:auto}
-    .dtitle{font-size:20px;font-weight:600;margin-bottom:4px}
-    .dsub{font-size:14px;color:var(--mu);margin-bottom:20px;line-height:1.5}
-    .section-sep{font-size:12px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.08em;margin:18px 0 10px;padding-top:18px;border-top:1px solid var(--bd)}
+    .dbox{background:var(--sur);border:1px solid var(--bd2);border-radius:18px;padding:28px 24px 24px;max-width:calc(100vw - 32px);width:480px;margin:auto}
+    .dtitle{font-family:'Kanit',sans-serif;font-size:26px;font-weight:600;margin-bottom:4px}
+    .dsub{font-size:18px;color:var(--mu);margin-bottom:20px;line-height:1.5}
+    .section-sep{font-size:16px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.08em;margin:18px 0 10px;padding-top:18px;border-top:1px solid var(--bd)}
     .ig{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
-    .ilabel{font-size:13px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.04em}
-    .ifield{width:100%;background:var(--sur2);border:1px solid var(--bd2);border-radius:var(--rs);padding:11px 14px;font-family:'Kanit',sans-serif;font-size:16px;color:var(--tx);outline:none}
+    .ilabel{font-size:16px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.04em}
+    .ifield{width:100%;background:var(--sur2);border:1px solid var(--bd2);border-radius:var(--rs);padding:11px 14px;font-family:'Kanit',sans-serif;font-size:24px;color:var(--tx);outline:none}
     .ifield:focus{border-color:rgba(22,163,74,0.5)}
-    .ihint{font-size:12px;color:var(--mu);line-height:1.4}
+    .ihint{font-size:16px;color:var(--mu);line-height:1.4}
     .irow2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .dbtns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
-    .dcancel{font-family:'Kanit',sans-serif;font-size:15px;padding:10px 20px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer}
-    .dconfirm{font-family:'Kanit',sans-serif;font-size:15px;padding:10px 24px;border-radius:99px;border:none;background:var(--gr);color:#fff;cursor:pointer;font-weight:500}
+    .dcancel{font-family:'Kanit',sans-serif;font-size:18px;padding:10px 20px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer}
+    .dconfirm{font-family:'Kanit',sans-serif;font-size:18px;padding:10px 24px;border-radius:99px;border:none;background:var(--gr);color:#fff;cursor:pointer;font-weight:500}
     .dconfirm:hover{opacity:0.88}
-    .derr{font-size:13px;color:var(--rd);margin-top:8px;min-height:18px}
+    .derr{font-size:16px;color:var(--rd);margin-top:8px;min-height:18px}
     .pass-wrap{position:relative}
     .pass-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;color:var(--mu);background:none;border:none;padding:4px}
 
     /* auth guard overlay */
     #auth-guard{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
     #auth-guard .spin{width:36px;height:36px;border:3px solid var(--bd2);border-top-color:var(--gr);border-radius:50%;animation:spin 0.7s linear infinite}
-    #auth-guard p{font-size:15px;color:var(--mu)}
+    #auth-guard p{font-size:18px;color:var(--mu)}
     @keyframes spin{to{transform:rotate(360deg)}}
     @media(max-width:480px){
       .irow2{grid-template-columns:1fr}
       .hright{gap:6px}
       .dbtns{flex-direction:column-reverse}
       .dconfirm,.dcancel{width:100%;text-align:center}
+      .ifield{font-size:20px}
     }
   </style>
 </head>
@@ -147,36 +151,14 @@
 <div class="dov" id="scanner-dlg">
   <div class="dbox" style="max-width:400px">
     <div class="dtitle">📷 สแกน QR Code</div>
-
-    <!-- Tab switch -->
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <button id="tab-camera" onclick="switchScanTab('camera')" style="flex:1;font-family:'Kanit',sans-serif;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--gr);background:var(--gr);color:#fff;cursor:pointer">📷 กล้อง</button>
-      <button id="tab-upload" onclick="switchScanTab('upload')" style="flex:1;font-family:'Kanit',sans-serif;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer">🖼 อัปโหลดรูป</button>
-    </div>
-
-    <!-- Camera view -->
-    <div id="scan-camera-view">
-      <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:1;margin-bottom:12px">
-        <video id="scanner-video" autoplay playsinline style="width:100%;height:100%;object-fit:cover;display:block"></video>
-        <canvas id="scanner-canvas" style="display:none"></canvas>
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
-          <div style="width:60%;aspect-ratio:1;border:3px solid rgba(255,255,255,0.8);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.35)"></div>
-        </div>
+    <div class="dsub">จ่อกล้องไปที่ QR Code บนกล่องตู้ฟักไข่</div>
+    <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:1;margin-bottom:12px">
+      <video id="scanner-video" autoplay playsinline style="width:100%;height:100%;object-fit:cover;display:block"></video>
+      <canvas id="scanner-canvas" style="display:none"></canvas>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <div style="width:60%;aspect-ratio:1;border:3px solid rgba(255,255,255,0.8);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.35)"></div>
       </div>
-      <div style="font-size:13px;color:var(--mu);text-align:center;margin-bottom:8px">จ่อกล้องไปที่ QR Code บนกล่องตู้</div>
     </div>
-
-    <!-- Upload view -->
-    <div id="scan-upload-view" style="display:none">
-      <label for="qr-file-input" style="display:block;border:2px dashed var(--bd2);border-radius:12px;padding:32px 16px;text-align:center;cursor:pointer;margin-bottom:12px;transition:border-color .15s" id="qr-drop-zone">
-        <div style="font-size:36px;margin-bottom:8px">🖼</div>
-        <div style="font-size:15px;font-weight:500;margin-bottom:4px">คลิกหรือลากรูปมาวางที่นี่</div>
-        <div style="font-size:13px;color:var(--mu)">รองรับ JPG, PNG, GIF</div>
-        <input type="file" id="qr-file-input" accept="image/*" style="display:none">
-      </label>
-      <canvas id="qr-decode-canvas" style="display:none"></canvas>
-    </div>
-
     <div class="derr" id="scanner-err" style="text-align:center"></div>
     <div class="dbtns" style="justify-content:center">
       <button class="dcancel" onclick="closeScanner()">ยกเลิก</button>
@@ -291,7 +273,6 @@
 
 <style>@keyframes sk{0%,100%{opacity:1}50%{opacity:0.4}}</style>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
 
 <script type="module">
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -637,26 +618,6 @@ window.claimDevice = claimDevice;
 let scannerStream = null;
 let scannerRaf    = null;
 
-function switchScanTab(tab) {
-  const isCamera = tab === 'camera';
-  document.getElementById('scan-camera-view').style.display = isCamera ? '' : 'none';
-  document.getElementById('scan-upload-view').style.display = isCamera ? 'none' : '';
-  document.getElementById('tab-camera').style.cssText = isCamera
-    ? 'flex:1;font-family:Kanit,sans-serif;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--gr);background:var(--gr);color:#fff;cursor:pointer'
-    : 'flex:1;font-family:Kanit,sans-serif;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer';
-  document.getElementById('tab-upload').style.cssText = isCamera
-    ? 'flex:1;font-family:Kanit,sans-serif;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer'
-    : 'flex:1;font-family:Kanit,sans-serif;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--gr);background:var(--gr);color:#fff;cursor:pointer';
-  document.getElementById('scanner-err').textContent = '';
-  document.getElementById('qr-file-input').value = '';
-  if (isCamera) {
-    startCamera();
-  } else {
-    stopCamera();
-  }
-}
-window.switchScanTab = switchScanTab;
-
 async function startCamera() {
   document.getElementById('scanner-err').textContent = '';
   try {
@@ -666,8 +627,7 @@ async function startCamera() {
     await video.play();
     tickScan();
   } catch(e) {
-    document.getElementById('scanner-err').textContent = 'ไม่สามารถเข้าถึงกล้องได้ — ลองอัปโหลดรูปแทน';
-    switchScanTab('upload');
+    document.getElementById('scanner-err').textContent = 'ไม่สามารถเข้าถึงกล้องได้';
   }
 }
 
@@ -680,9 +640,8 @@ function stopCamera() {
 
 async function openScanner() {
   document.getElementById('scanner-err').textContent = '';
-  document.getElementById('qr-file-input').value = '';
   document.getElementById('scanner-dlg').classList.add('show');
-  switchScanTab('camera');
+  startCamera();
 }
 
 function tickScan() {
@@ -705,70 +664,6 @@ function tickScan() {
   }
   scannerRaf = requestAnimationFrame(tickScan);
 }
-
-async function decodeQrFromFile(file) {
-  if (!file) return;
-  const err = document.getElementById('scanner-err');
-  err.style.color = 'var(--mu)';
-  err.textContent = 'กำลังอ่าน QR…';
-
-  // โหลดรูปผ่าน Image element
-  const url = URL.createObjectURL(file);
-  const img = await new Promise((res, rej) => {
-    const i = new Image();
-    i.onload = () => res(i);
-    i.onerror = rej;
-    i.src = url;
-  }).catch(() => null);
-  URL.revokeObjectURL(url);
-
-  if (!img) {
-    err.style.color = 'var(--rd)';
-    err.textContent = 'ไม่สามารถโหลดรูปภาพได้';
-    return;
-  }
-
-  const canvas = document.getElementById('qr-decode-canvas');
-  const ctx    = canvas.getContext('2d', { willReadFrequently: true });
-  const W = img.naturalWidth, H = img.naturalHeight;
-
-  // ลองหลายขนาด: ต้นฉบับ → 600px → 300px → 1200px
-  const scales = [1, 600/Math.max(W,H), 300/Math.max(W,H), 1200/Math.max(W,H)];
-  for (const s of scales) {
-    const w = Math.round(W*s), h = Math.round(H*s);
-    canvas.width = w; canvas.height = h;
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, w, h);
-    ctx.drawImage(img, 0, 0, w, h);
-    const d = ctx.getImageData(0, 0, w, h);
-    for (const m of ['attemptBoth', 'dontInvert', 'invertFirst']) {
-      const code = jsQR(d.data, w, h, { inversionAttempts: m });
-      if (code && code.data) { onQrFound(code.data); return; }
-    }
-  }
-
-  err.style.color = 'var(--rd)';
-  err.textContent = `ไม่พบ QR Code (รูป ${W}×${H}px) — ลองดาวน์โหลด PNG ใหม่จาก Admin แล้วอัปโหลด`;
-  document.getElementById('qr-file-input').value = '';
-}
-
-function onQrFound(text) {
-  closeScanner();
-  document.getElementById('claim-id').value = text.trim();
-  searchDevice();
-}
-// bind file input + drag-drop inside module (ไม่ใช้ onchange attribute)
-document.getElementById('qr-file-input').addEventListener('change', e => {
-  if (e.target.files[0]) decodeQrFromFile(e.target.files[0]);
-});
-const dropZone = document.getElementById('qr-drop-zone');
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--gr)'; });
-dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'var(--bd2)'; });
-dropZone.addEventListener('drop', e => {
-  e.preventDefault(); dropZone.style.borderColor = 'var(--bd2)';
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) decodeQrFromFile(file);
-});
 
 function closeScanner() {
   stopCamera();
