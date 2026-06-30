@@ -68,6 +68,23 @@
     .cd-chip.today{background:rgba(217,119,6,0.12);border-color:rgba(217,119,6,0.4);color:var(--am);font-weight:500}
 
     .metrics-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .water-card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+    .water-section{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .water-label{font-size:15px;font-weight:500;color:var(--mu)}
+    .water-pct{font-family:'Kanit',sans-serif;font-size:22px;font-weight:600}
+    .water-bar-wrap{width:100%;height:8px;background:var(--sur2);border-radius:99px;overflow:hidden}
+    .water-bar{height:100%;border-radius:99px;transition:width 0.6s,background 0.4s;background:var(--gr)}
+    .water-bar.low{background:var(--rd)}
+    .water-divider{border:none;border-top:1px solid var(--bd);margin:0}
+    .pump-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .pump-info{}
+    .pump-label{font-size:15px;font-weight:500;color:var(--tx);margin-bottom:2px;display:flex;align-items:center;gap:6px}
+    .pump-status{font-size:13px;color:var(--mu)}
+    .pump-btn{font-family:'Kanit',sans-serif;font-size:14px;padding:7px 18px;border-radius:99px;border:1.5px solid;cursor:pointer;transition:all .15s;font-weight:500;white-space:nowrap}
+    .pump-btn.off{background:rgba(37,99,235,0.07);color:#2563eb;border-color:rgba(37,99,235,0.35)}
+    .pump-btn.off:hover{background:rgba(37,99,235,0.16)}
+    .pump-btn.on{background:rgba(220,38,38,0.07);color:var(--rd);border-color:rgba(220,38,38,0.35)}
+    .pump-btn.on:hover{background:rgba(220,38,38,0.16)}
     .mc{background:var(--sur2);border:1.5px solid var(--bd);border-radius:var(--rs);padding:16px 18px 20px;position:relative;overflow:hidden;transition:border-color 0.2s}
     .mc.ok{border-color:rgba(22,163,74,0.5)}
     .mc.warn{border-color:rgba(220,38,38,0.5)}
@@ -168,7 +185,7 @@
     .btn-clr:hover{background:rgba(220,38,38,0.12)}
     .btn-csv{font-family:'Kanit',sans-serif;font-size:16px;padding:7px 18px;border-radius:99px;border:1px solid rgba(22,163,74,0.35);background:rgba(22,163,74,0.06);color:var(--gr);cursor:pointer;white-space:nowrap}
     .btn-csv:hover{background:rgba(22,163,74,0.12)}
-    table{width:100%;border-collapse:collapse;min-width:460px;table-layout:fixed}
+    table{width:100%;border-collapse:collapse;min-width:820px;table-layout:fixed}
     thead th{font-size:14px;letter-spacing:0.06em;color:var(--mu);text-transform:uppercase;text-align:left;padding:0 10px 12px;border-bottom:1px solid var(--bd);white-space:nowrap}
     tbody tr:hover{background:var(--sur2)}
     tbody td{font-size:17px;padding:12px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
@@ -372,6 +389,21 @@
         </div>
       </div>
     </div>
+
+    <div class="water-card" id="water-card">
+      <div class="water-section">
+        <div class="water-label">ถังพ่นหมอก</div>
+        <div id="fog-badge" style="font-family:'Kanit',sans-serif;font-size:13px;padding:3px 12px;border-radius:99px;background:var(--sur2);color:var(--mu);border:1px solid var(--bd2)">--</div>
+      </div>
+      <hr class="water-divider">
+      <div class="water-section" style="margin-bottom:6px">
+        <div class="water-label">ถังสำรองน้ำ</div>
+        <div class="water-pct" id="water-pct">--%</div>
+      </div>
+      <div class="water-bar-wrap">
+        <div class="water-bar" id="water-bar" style="width:0%"></div>
+      </div>
+    </div>
   </div>
 
   <div class="sys-card" id="syscard">
@@ -479,6 +511,7 @@
       <li class="rrow"><span class="rname">พัดลมหมอก</span><span class="badge off" id="r2">ปิด</span></li>
       <li class="rrow"><span class="rname">พัดลมดูด</span><span class="badge off" id="r3">ปิด</span></li>
       <li class="rrow"><span class="rname">พัดลมระบาย</span><span class="badge off" id="r4">ปิด</span></li>
+      <li class="rrow"><span class="rname">ปั๊มน้ำ</span><span class="badge off" id="r-pump">ปิด</span></li>
       <li class="rrow" style="border-top:1px solid var(--bd);margin-top:6px;padding-top:12px;">
         <span class="rname">สถานะเซอร์โวมอเตอร์</span><span class="badge off" id="sstatus">--</span>
       </li>
@@ -523,10 +556,10 @@
       <thead><tr>
         <th style="width:90px;">วันที่/เวลา</th>
         <th style="width:80px;">การกระทำ</th>
-        <th style="width:75px;">T min</th>
-        <th style="width:75px;">T max</th>
-        <th style="width:65px;">H min</th>
-        <th style="width:65px;">H max</th>
+        <th style="width:75px;">อุณหภูมิต่ำ</th>
+        <th style="width:75px;">อุณหภูมิสูง</th>
+        <th style="width:65px;">ความชื้นต่ำ</th>
+        <th style="width:65px;">ความชื้นสูง</th>
       </tr></thead>
       <tbody id="slog-body"></tbody>
     </table>
@@ -546,11 +579,12 @@
     <table>
       <thead><tr>
         <th class="sortable" style="width:90px;" onclick="sortLog('time')">วันที่/เวลา</th>
-        <th class="sortable" style="width:55px;" onclick="sortLog('temp')">°C</th>
-        <th class="sortable" style="width:55px;" onclick="sortLog('hum')">%RH</th>
+        <th class="sortable" style="width:65px;" onclick="sortLog('temp')">อุณหภูมิ</th>
+        <th class="sortable" style="width:65px;" onclick="sortLog('hum')">ความชื้น</th>
         <th style="width:60px;">ฮีตเตอร์</th><th style="width:60px;">หมอก</th>
         <th style="width:65px;">พัดลมหมอก</th><th style="width:65px;">พัดลมดูด</th>
         <th style="width:70px;">พัดลมระบาย</th>
+        <th style="width:55px;">ปั๊มน้ำ</th>
         <th style="width:55px;">เซอร์โว</th><th style="width:90px;">สถานะ</th>
       </tr></thead>
       <tbody id="hlog-body"></tbody>
@@ -1129,11 +1163,12 @@ function doExportCSV(all=false){
     if(!entries.length){alert("ไม่พบข้อมูลในช่วงที่เลือก");return;}
     suffix=from+(from!==to?'_to_'+to:'');
   }
-  const header="timestamp,datetime,temp,humidity,heater,fog,fanMain,fan3,fan4,servoPosition,servoStatus\n";
+  const header="timestamp,datetime,temp,humidity,heater,fog,fanMain,fan3,fan4,pump,servoPosition,servoStatus\n";
   const rows=entries.map(([id,v])=>{
     const ms=parseInt(v.timestamp)||parseInt(id);
     const dt=new Date(ms).toLocaleString("th-TH");
-    return `${ms},"${dt}",${v.temp??''},${v.humidity??''},${v.heater??''},${v.fog??''},${v.fanMain??''},${v.fan3??''},${v.fan4??''},${v.servoPosition??''},${v.servoStatus??''}`;
+    const pump=v.pumpOn===true?"ON":v.pumpOn===false?"OFF":'';
+    return `${ms},"${dt}",${v.temp??''},${v.humidity??''},${v.heater??''},${v.fog??''},${v.fanMain??''},${v.fan3??''},${v.fan4??''},${pump},${v.servoPosition??''},${v.servoStatus??''}`;
   }).join('\n');
   const blob=new Blob(['﻿'+header+rows],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
@@ -1182,6 +1217,7 @@ function renderHLog(){
       <td><span class="dbadge ${v.fanMain==="ON"?"on":"off"}">${v.fanMain??"--"}</span></td>
       <td><span class="dbadge ${v.fan3==="ON"?"on":"off"}">${v.fan3??"--"}</span></td>
       <td><span class="dbadge ${v.fan4==="ON"?"on":"off"}">${v.fan4??"--"}</span></td>
+      <td><span class="dbadge ${v.pumpOn===true?"on":v.pumpOn===false?"off":""}">${v.pumpOn===true?"ON":v.pumpOn===false?"OFF":"--"}</span></td>
       <td class="tm">${v.servoPosition!=null?v.servoPosition+"°":"--"}</td>
       <td class="tmu" style="font-size:14px;">${v.servoStatus??"--"}</td>`;
     b.appendChild(tr);
@@ -1269,6 +1305,24 @@ function toggleTheme(){
   applyTheme(isDark);
 }
 window.toggleTheme=toggleTheme;
+
+async function togglePumpManual(){
+  const btn=$('pump-btn');
+  btn.disabled=true;
+  try{
+    const isManual=btn.textContent!=='Manual';
+    if(isManual){
+      // ออกจาก manual → กลับ auto
+      await set(ref(db,fbp('control/pumpManual')),false);
+    } else {
+      // เข้า manual และเปิดปั๊ม
+      await set(ref(db,fbp('control/pumpManual')),true);
+      await set(ref(db,fbp('control/pumpOn')),true);
+    }
+  } catch(e){ console.error(e); }
+  btn.disabled=false;
+}
+window.togglePumpManual=togglePumpManual;
 applyTheme(localStorage.getItem('theme')==='dark');
 
 if (lineToken && $('line-tok')) $('line-tok').value = lineToken;
@@ -1360,8 +1414,50 @@ onValue(ref(db, fbp('current')),snap=>{
     }
   }
 
+  // ถังสำรอง (HC-SR04)
+  const wPct = d.waterLevel;
+  if (wPct != null && wPct >= 0) {
+    const p = Math.round(wPct);
+    $('water-pct').textContent = p + '%';
+    $('water-bar').style.width = p + '%';
+    $('water-bar').className = 'water-bar' + (p < 20 ? ' low' : '');
+    $('water-pct').style.color = p < 20 ? 'var(--rd)' : 'var(--gr)';
+  } else {
+    $('water-pct').textContent = '--';
+  }
+  // ถังหมอก (float switch)
+  const fogBadge = $('fog-badge');
+  if (d.fogTankLow === true) {
+    fogBadge.textContent = 'น้ำน้อย';
+    fogBadge.style.cssText = 'font-family:Kanit,sans-serif;font-size:14px;padding:4px 14px;border-radius:99px;background:rgba(220,38,38,0.08);color:var(--rd);border:1px solid rgba(220,38,38,0.3)';
+  } else if (d.fogTankLow === false) {
+    fogBadge.textContent = 'น้ำพอ';
+    fogBadge.style.cssText = 'font-family:Kanit,sans-serif;font-size:14px;padding:4px 14px;border-radius:99px;background:rgba(22,163,74,0.08);color:var(--gr);border:1px solid rgba(22,163,74,0.3)';
+  }
+  // pump status
+  const pump = d.pumpOn === true;
+  const manual = d.pumpManual === true;
+  const btn = $('pump-btn');
+  const badge = $('pump-mode-badge');
+  const autoStatus = $('pump-auto-status');
+  btn.textContent = manual ? (pump ? 'ปิดปั๊ม' : 'เปิดปั๊ม') : 'Manual';
+  btn.className = 'pump-btn ' + (manual && pump ? 'on' : 'off');
+  badge.textContent = manual ? 'Manual' : 'อัตโนมัติ';
+  badge.style.background = manual ? 'rgba(220,38,38,0.08)' : 'var(--sur2)';
+  badge.style.color = manual ? 'var(--rd)' : 'var(--mu)';
+  badge.style.borderColor = manual ? 'rgba(220,38,38,0.3)' : 'var(--bd2)';
+  if (!manual) {
+    const f = fPct ?? -1, w = wPct ?? -1;
+    if (pump) autoStatus.textContent = `กำลังสูบน้ำ… (หมอก ${Math.round(f)}%)`;
+    else if (f >= 0 && f < 30) autoStatus.textContent = `รอสูบ — ถังสำรองต่ำ (${Math.round(w)}%)`;
+    else autoStatus.textContent = `ปกติ — ถังหมอก ${f >= 0 ? Math.round(f) + '%' : '--'}`;
+  } else {
+    autoStatus.textContent = pump ? 'ปั๊มทำงาน (manual)' : 'ปั๊มหยุด (manual)';
+  }
+
   setBadge("r1",d.relay?.fog);setBadge("r2",d.relay?.fanMain);
   setBadge("r3",d.relay?.fan3);setBadge("r4",d.relay?.fan4);setBadge("r5",d.relay?.heater);
+  setBadge("r-pump", d.pumpOn===true ? "ON" : d.pumpOn===false ? "OFF" : null);
   $('sstatus').textContent=d.servo?.status??"--"; $('sstatus').className='badge';
   $('spos').textContent=(d.servo?.position??'--')+'°'; $('spos').className='badge';
 
