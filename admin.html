@@ -635,7 +635,7 @@ function askDelUser(uid, name, isSelf) {
   if(isSelf==='true') { toast('ไม่สามารถลบบัญชีของตัวเองได้'); return; }
   document.getElementById('confirm-icon').textContent  = '👤';
   document.getElementById('confirm-title').textContent = `ลบผู้ใช้ "${name}"?`;
-  document.getElementById('confirm-desc').textContent  = 'ข้อมูลผู้ใช้และรายการตู้จะถูกลบออกจากระบบ (บัญชี Firebase Auth ยังคงอยู่)';
+  document.getElementById('confirm-desc').textContent  = 'ข้อมูลผู้ใช้และรายการตู้จะถูกลบออกจากฐานข้อมูล\n⚠️ บัญชี Firebase Auth ต้องลบแยกที่ Firebase Console';
   document.getElementById('confirm-ok-btn').textContent = 'ลบผู้ใช้';
   confirmCb = async () => {
     await remove(ref(db,`users/${uid}`));

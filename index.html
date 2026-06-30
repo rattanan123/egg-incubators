@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -76,15 +76,6 @@
     .water-bar{height:100%;border-radius:99px;transition:width 0.6s,background 0.4s;background:var(--gr)}
     .water-bar.low{background:var(--rd)}
     .water-divider{border:none;border-top:1px solid var(--bd);margin:0}
-    .pump-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .pump-info{}
-    .pump-label{font-size:15px;font-weight:500;color:var(--tx);margin-bottom:2px;display:flex;align-items:center;gap:6px}
-    .pump-status{font-size:13px;color:var(--mu)}
-    .pump-btn{font-family:'Kanit',sans-serif;font-size:14px;padding:7px 18px;border-radius:99px;border:1.5px solid;cursor:pointer;transition:all .15s;font-weight:500;white-space:nowrap}
-    .pump-btn.off{background:rgba(37,99,235,0.07);color:#2563eb;border-color:rgba(37,99,235,0.35)}
-    .pump-btn.off:hover{background:rgba(37,99,235,0.16)}
-    .pump-btn.on{background:rgba(220,38,38,0.07);color:var(--rd);border-color:rgba(220,38,38,0.35)}
-    .pump-btn.on:hover{background:rgba(220,38,38,0.16)}
     .mc{background:var(--sur2);border:1.5px solid var(--bd);border-radius:var(--rs);padding:16px 18px 20px;position:relative;overflow:hidden;transition:border-color 0.2s}
     .mc.ok{border-color:rgba(22,163,74,0.5)}
     .mc.warn{border-color:rgba(220,38,38,0.5)}
@@ -234,9 +225,12 @@
     }
     @media(max-width:480px){
       body{padding:12px 10px 48px}.wrap{gap:12px}
-      .logo-text{font-size:18px}
-      .online-pill{font-size:14px;padding:5px 10px}
-      .theme-btn{font-size:14px;padding:5px 10px}
+      .header-inner{height:56px;padding:0 12px}
+      .logo-icon{width:32px;height:32px;font-size:17px}
+      .logo-text{font-size:17px}
+      .online-pill{display:none}
+      .theme-btn{font-size:13px;padding:5px 8px}
+      .back-link{font-size:13px;padding:5px 10px}
       .sys-label{font-size:18px}.ifield{font-size:22px}.ilabel{font-size:13px}
       .btn-go,.btn-stop{font-size:18px;padding:13px 0;width:100%;min-width:unset}
       .sys-btns{flex-direction:column}
@@ -1306,22 +1300,6 @@ function toggleTheme(){
 }
 window.toggleTheme=toggleTheme;
 
-async function togglePumpManual(){
-  const btn=$('pump-btn');
-  btn.disabled=true;
-  try{
-    const isManual=btn.textContent!=='Manual';
-    if(isManual){
-      // ออกจาก manual → กลับ auto
-      await set(ref(db,fbp('control/pumpManual')),false);
-    } else {
-      // เข้า manual และเปิดปั๊ม
-      await set(ref(db,fbp('control/pumpManual')),true);
-      await set(ref(db,fbp('control/pumpOn')),true);
-    }
-  } catch(e){ console.error(e); }
-  btn.disabled=false;
-}
 window.togglePumpManual=togglePumpManual;
 applyTheme(localStorage.getItem('theme')==='dark');
 
@@ -1434,26 +1412,8 @@ onValue(ref(db, fbp('current')),snap=>{
     fogBadge.textContent = 'น้ำพอ';
     fogBadge.style.cssText = 'font-family:Kanit,sans-serif;font-size:14px;padding:4px 14px;border-radius:99px;background:rgba(22,163,74,0.08);color:var(--gr);border:1px solid rgba(22,163,74,0.3)';
   }
-  // pump status
+  // pump status — แสดงใน device status card (r-pump badge)
   const pump = d.pumpOn === true;
-  const manual = d.pumpManual === true;
-  const btn = $('pump-btn');
-  const badge = $('pump-mode-badge');
-  const autoStatus = $('pump-auto-status');
-  btn.textContent = manual ? (pump ? 'ปิดปั๊ม' : 'เปิดปั๊ม') : 'Manual';
-  btn.className = 'pump-btn ' + (manual && pump ? 'on' : 'off');
-  badge.textContent = manual ? 'Manual' : 'อัตโนมัติ';
-  badge.style.background = manual ? 'rgba(220,38,38,0.08)' : 'var(--sur2)';
-  badge.style.color = manual ? 'var(--rd)' : 'var(--mu)';
-  badge.style.borderColor = manual ? 'rgba(220,38,38,0.3)' : 'var(--bd2)';
-  if (!manual) {
-    const f = fPct ?? -1, w = wPct ?? -1;
-    if (pump) autoStatus.textContent = `กำลังสูบน้ำ… (หมอก ${Math.round(f)}%)`;
-    else if (f >= 0 && f < 30) autoStatus.textContent = `รอสูบ — ถังสำรองต่ำ (${Math.round(w)}%)`;
-    else autoStatus.textContent = `ปกติ — ถังหมอก ${f >= 0 ? Math.round(f) + '%' : '--'}`;
-  } else {
-    autoStatus.textContent = pump ? 'ปั๊มทำงาน (manual)' : 'ปั๊มหยุด (manual)';
-  }
 
   setBadge("r1",d.relay?.fog);setBadge("r2",d.relay?.fanMain);
   setBadge("r3",d.relay?.fan3);setBadge("r4",d.relay?.fan4);setBadge("r5",d.relay?.heater);

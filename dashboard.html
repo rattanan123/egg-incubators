@@ -898,7 +898,10 @@ function closeDelDlg() { document.getElementById('del-dlg').classList.remove('sh
 async function confirmDelete() {
   if (!deleteTarget || !currentUser) return;
   if (liveUnsubs[deleteTarget]) { liveUnsubs[deleteTarget](); delete liveUnsubs[deleteTarget]; }
-  await remove(ref(masterDb, `users/${currentUser.uid}/devices/${deleteTarget}`));
+  await Promise.all([
+    remove(ref(masterDb, `users/${currentUser.uid}/devices/${deleteTarget}`)),
+    update(ref(masterDb, `devices/${deleteTarget}`), { status: 'unclaimed', ownerUid: null })
+  ]);
   closeDelDlg();
 }
 window.openDelDlg   = openDelDlg;
