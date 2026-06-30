@@ -4,39 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — จัดการผู้ใช้</title>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{--bg:#f5f6f8;--sur:#fff;--sur2:#f0f2f5;--bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.15);--tx:#1a1a1a;--mu:#6b7280;--gr:#16a34a;--gr-bg:rgba(22,163,74,0.08);--rd:#dc2626;--ra:14px}
-    body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:20px 16px 48px}
+    html{font-size:18px}
+    body{font-family:'Sarabun','Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:0 0 60px}
     #auth-guard{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
     #auth-guard .spin{width:36px;height:36px;border:3px solid var(--bd2);border-top-color:var(--rd);border-radius:50%;animation:spin 0.7s linear infinite}
     #auth-guard p{font-size:15px;color:var(--mu)}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .page{max-width:960px;margin:0 auto}
-    header{display:flex;align-items:center;gap:12px;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--bd);flex-wrap:wrap}
-    .back-btn{font-family:'Kanit',sans-serif;font-size:14px;padding:7px 16px;border-radius:99px;cursor:pointer;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);text-decoration:none;white-space:nowrap}
-    .back-btn:hover{background:var(--sur);color:var(--tx)}
-    .page-title{font-size:20px;font-weight:600}
-    .badge{font-size:12px;background:rgba(220,38,38,0.1);color:var(--rd);border:1px solid rgba(220,38,38,0.3);border-radius:99px;padding:2px 10px;font-weight:500}
-    .card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);overflow:hidden}
-    .u-row{display:grid;grid-template-columns:2fr 2fr 1fr 1fr 80px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--bd);gap:12px}
+    .site-header{background:var(--sur);border-bottom:1px solid var(--bd);box-shadow:0 1px 8px rgba(0,0,0,0.06);position:sticky;top:0;z-index:50}
+    .header-inner{max-width:960px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
+    .page{max-width:960px;margin:0 auto;padding:24px 16px}
+    .back-btn{font-family:'Sarabun','Kanit',sans-serif;font-size:15px;padding:7px 16px;border-radius:99px;cursor:pointer;border:1px solid rgba(220,38,38,0.4);background:rgba(220,38,38,0.06);color:var(--rd);text-decoration:none;white-space:nowrap;transition:all .15s}
+    .back-btn:hover{background:rgba(220,38,38,0.12);border-color:rgba(220,38,38,0.6)}
+    .page-title{font-size:22px;font-weight:700;font-family:'Kanit',sans-serif;display:flex;align-items:center;gap:10px}
+    .badge{font-size:13px;background:rgba(220,38,38,0.1);color:var(--rd);border:1px solid rgba(220,38,38,0.25);border-radius:99px;padding:3px 12px;font-weight:500}
+    .card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);overflow:hidden;overflow-x:auto}
+    .u-row{display:grid;grid-template-columns:2fr 2fr 1fr 1fr 90px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--bd);gap:12px;min-width:560px}
     .u-row:last-child{border-bottom:none}
-    .u-row.head{background:var(--sur2);font-size:12px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em}
-    .u-name{font-size:15px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .u-email{font-size:13px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .u-devcount{font-size:14px;text-align:center}
-    .role-sel{font-family:'Kanit',sans-serif;font-size:13px;padding:5px 10px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--tx);cursor:pointer;outline:none}
+    .u-row.head{background:var(--sur2);font-size:13px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em}
+    .u-name{font-size:18px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .u-email{font-size:15px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .u-devcount{font-size:16px;text-align:center}
+    .role-sel{font-family:'Kanit',sans-serif;font-size:16px;padding:7px 12px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--tx);cursor:pointer;outline:none}
     .role-sel.admin{border-color:rgba(220,38,38,0.4);color:var(--rd);background:rgba(220,38,38,0.06)}
     .role-sel.user{border-color:var(--bd2);color:var(--mu)}
-    .save-btn{font-family:'Kanit',sans-serif;font-size:13px;padding:5px 14px;border-radius:99px;border:none;background:var(--gr);color:#fff;cursor:pointer;opacity:0;transition:opacity 0.15s}
+    .save-btn{font-family:'Kanit',sans-serif;font-size:15px;padding:7px 16px;border-radius:99px;border:none;background:var(--gr);color:#fff;cursor:pointer;opacity:0;transition:opacity 0.15s}
     .save-btn.visible{opacity:1}
-    .empty-row{text-align:center;padding:40px;color:var(--mu);font-size:14px}
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:99px;font-size:14px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:999}
+    .empty-row{text-align:center;padding:40px;color:var(--mu);font-size:16px}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:99px;font-size:16px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:999}
     .toast.show{opacity:1}
     @media(max-width:600px){
-      .u-row{grid-template-columns:1fr 1fr;gap:8px}
+      .u-row{grid-template-columns:1fr 1fr;gap:8px;min-width:0}
       .u-row.head .u-devcount,.u-row.head .save-btn{display:none}
+      .u-name,.u-email{font-size:16px}
     }
   </style>
 </head>
@@ -44,20 +49,21 @@
 <div id="auth-guard"><div class="spin"></div><p>กำลังตรวจสอบสิทธิ์…</p></div>
 <div class="toast" id="toast"></div>
 
+<div class="site-header">
+  <div class="header-inner">
+    <div class="page-title">👥 จัดการผู้ใช้ <span class="badge">Admin</span></div>
+    <a class="back-btn" href="admin.html">ย้อนกลับ</a>
+  </div>
+</div>
+
 <div class="page">
-  <header>
-    <a class="back-btn" href="admin.html">← Admin Panel</a>
-    <div>
-      <div class="page-title">จัดการผู้ใช้ <span class="badge">Admin</span></div>
-    </div>
-  </header>
 
   <div class="card" id="user-table">
     <div class="u-row head">
       <div>ชื่อ</div>
       <div>อีเมล</div>
       <div class="u-devcount" style="text-align:center">ตู้</div>
-      <div>Role</div>
+      <div>สิทธิ์</div>
       <div></div>
     </div>
     <div class="empty-row">กำลังโหลด…</div>

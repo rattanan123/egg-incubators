@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -31,19 +31,23 @@
     .theme-btn{display:flex;align-items:center;gap:6px;font-family:'Kanit',sans-serif;font-size:16px;padding:6px 14px;border-radius:99px;cursor:pointer;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);transition:all 0.2s}
     .theme-btn:hover{background:var(--sur);color:var(--tx)}
     html{font-size:20px}
-    body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:16px 14px 48px;-webkit-text-size-adjust:100%}
+    body{font-family:'Sarabun','Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:0 0 48px;-webkit-text-size-adjust:100%}
 
-    header{display:flex;align-items:center;justify-content:space-between;max-width:960px;margin:0 auto 20px;padding-bottom:16px;border-bottom:1px solid var(--bd);gap:10px}
-    .header-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+    .site-header{background:var(--sur);border-bottom:1px solid var(--bd);box-shadow:0 1px 8px rgba(0,0,0,0.06);position:sticky;top:0;z-index:50}
+    header{display:flex;align-items:center;justify-content:space-between;max-width:960px;margin:0 auto;padding:0 14px;height:60px;gap:10px}
+    .header-right{display:flex;align-items:center;gap:8px}
     .logo{display:flex;align-items:center;gap:10px}
-    .logo-icon{width:40px;height:40px;border-radius:9px;background:var(--sur2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-    .logo-text{font-size:22px;font-weight:500}
-    .online-pill{display:flex;align-items:center;gap:6px;font-size:16px;color:var(--mu);background:var(--sur);border:1px solid var(--bd);border-radius:99px;padding:6px 14px}
-    .dot{width:8px;height:8px;border-radius:50%;background:var(--gr);animation:pulse 2s ease-in-out infinite}
+    .logo-icon{width:36px;height:36px;border-radius:9px;background:var(--gr-bg);border:1px solid rgba(22,163,74,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .logo-text{font-size:20px;font-weight:600;font-family:'Kanit',sans-serif}
+    .logo-sub{font-size:13px;color:var(--mu);font-family:'Kanit',sans-serif;margin-top:1px}
+    .online-pill{display:flex;align-items:center;gap:6px;font-size:15px;color:var(--mu);background:var(--sur2);border:1px solid var(--bd);border-radius:99px;padding:5px 12px}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--gr);animation:pulse 2s ease-in-out infinite}
     .dot.warn{background:var(--am)}.dot.err{background:var(--rd)}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .back-link{font-family:'Kanit',sans-serif;font-size:15px;padding:6px 14px;border-radius:99px;border:1px solid rgba(220,38,38,0.4);background:rgba(220,38,38,0.06);color:var(--rd);text-decoration:none;white-space:nowrap;transition:all .15s}
+    .back-link:hover{background:rgba(220,38,38,0.12);border-color:rgba(220,38,38,0.6)}
 
-    .wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+    .wrap{max-width:960px;margin:0 auto;padding:16px 14px;display:flex;flex-direction:column;gap:14px}
     .banner{display:none;border-radius:var(--ra);padding:14px 18px;font-size:18px;line-height:1.5}
     .banner.show{display:block!important}
     .b-red{background:var(--rd-bg);border:1px solid rgba(220,38,38,0.3);color:var(--rd)}
@@ -76,12 +80,12 @@
     .mc-range{position:absolute;bottom:14px;right:14px;font-family:'Kanit',sans-serif;font-size:13px;color:var(--mu);text-align:right;line-height:1.6}
 
     .sys-card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:18px 16px}
-    .sys-card.running{border-color:rgba(22,163,74,0.4)}.sys-card.stopped{border-color:rgba(220,38,38,0.3)}
+    .sys-card.running{border-color:rgba(22,163,74,0.4)}.sys-card.stopped{border-color:var(--bd2)}
     .sys-top{display:flex;align-items:center;margin-bottom:18px}
     .sys-status{display:flex;align-items:center;gap:10px}
     .sys-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
     .sys-dot.run{background:var(--gr);box-shadow:0 0 6px rgba(22,163,74,0.4);animation:pulse 2s ease-in-out infinite}
-    .sys-dot.stop{background:var(--rd)}
+    .sys-dot.stop{background:var(--mu)}
     .sys-label{font-size:20px;font-weight:500}
     .sys-sub{font-size:16px;color:var(--mu);font-family:'Kanit',sans-serif;margin-top:2px}
 
@@ -134,12 +138,12 @@
     .rname{font-size:18px}
     .badge{font-family:'Kanit',sans-serif;font-size:15px;font-weight:500;padding:5px 13px;border-radius:99px;background:var(--sur2);color:var(--mu);border:1px solid var(--bd)}
     .badge.lock{background:rgba(217,119,6,0.12);color:var(--am);border:1px solid rgba(217,119,6,0.4)}
-    .badge.on{background:rgba(0,0,0,0.06);color:#1a1a1a;border-color:rgba(0,0,0,0.12)}
-    .badge.off{background:var(--sur2);color:var(--mu);border-color:var(--bd)}
-    [data-theme="dark"] .badge.on{background:rgba(255,255,255,0.08);color:#e8eaf0;border-color:rgba(255,255,255,0.15)}
-    .dbadge.on{background:rgba(0,0,0,0.06);color:#1a1a1a}
-    .dbadge.off{background:var(--sur2);color:var(--mu)}
-    [data-theme="dark"] .dbadge.on{background:rgba(255,255,255,0.08);color:#e8eaf0}
+    .badge.on{background:var(--sur2);color:var(--tx);border-color:var(--bd2)}
+    .badge.off{background:var(--sur2);color:var(--mu);border-color:var(--bd);opacity:0.6}
+    [data-theme="dark"] .badge.on{background:var(--sur2);color:var(--tx);border-color:var(--bd2)}
+    .dbadge.on{background:var(--sur2);color:var(--tx)}
+    .dbadge.off{background:var(--sur2);color:var(--mu);opacity:0.6}
+    [data-theme="dark"] .dbadge.on{background:var(--sur2);color:var(--tx)}
     .svals{display:flex;flex-direction:column;gap:14px}
     .srow{display:flex;justify-content:space-between;align-items:center}
     .skey{font-size:18px;color:var(--mu)}
@@ -248,20 +252,22 @@
 
 <div id="auth-guard"><div class="spin"></div><p>กำลังตรวจสอบสิทธิ์…</p></div>
 
+<div class="site-header">
 <header>
   <div class="logo">
     <div class="logo-icon">🥚</div>
     <div>
       <div class="logo-text">ตู้ฟักไข่</div>
-      <div style="font-size:13px;color:var(--mu);font-family:'Kanit',sans-serif;" id="device-label"></div>
+      <div class="logo-sub" id="device-label"></div>
     </div>
   </div>
   <div class="header-right">
     <div class="online-pill"><div class="dot" id="odot"></div><span id="otxt">connecting…</span></div>
-    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙 Dark</button>
-    <a href="dashboard.html" style="font-family:'Kanit',sans-serif;font-size:14px;padding:6px 14px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);text-decoration:none;white-space:nowrap">← กลับ</a>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙 มืด</button>
+    <a href="dashboard.html" class="back-link">ย้อนกลับ</a>
   </div>
 </header>
+</div>
 
 <div class="dov" id="dlg">
   <div class="dbox">
@@ -271,6 +277,33 @@
     <div class="dbtns">
       <button class="dcancel" onclick="closeDlg()">ยกเลิก</button>
       <button class="dconfirm" onclick="confirmClear()">ลบทั้งหมด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dialog เลือกวันที่ดาวน์โหลด CSV -->
+<div class="dov" id="csv-dlg">
+  <div class="dbox" style="max-width:380px">
+    <div class="dicon">📅</div>
+    <div class="dtitle">ดาวน์โหลด CSV</div>
+    <div class="ddesc" style="margin-bottom:18px">เลือกช่วงวันที่ที่ต้องการ</div>
+    <div style="display:flex;flex-direction:column;gap:14px;text-align:left">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:14px;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;font-weight:500">ตั้งแต่วันที่</label>
+        <input type="date" id="csv-from" class="ifield" style="font-size:20px;padding:10px 14px">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:14px;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em;font-weight:500">ถึงวันที่</label>
+        <input type="date" id="csv-to" class="ifield" style="font-size:20px;padding:10px 14px">
+      </div>
+      <div id="csv-count" style="font-size:15px;color:var(--mu);text-align:center;min-height:20px"></div>
+    </div>
+    <div class="dbtns" style="margin-top:20px">
+      <button class="dbtn sec" onclick="closeCsvDlg()">ยกเลิก</button>
+      <button class="dbtn" id="csv-dl-btn" onclick="doExportCSV()">⬇ ดาวน์โหลด</button>
+    </div>
+    <div style="margin-top:12px;text-align:center">
+      <button onclick="doExportCSV(true)" style="background:none;border:none;color:var(--mu);font-size:15px;cursor:pointer;text-decoration:underline;font-family:'Sarabun','Kanit',sans-serif">ดาวน์โหลดทั้งหมด</button>
     </div>
   </div>
 </div>
@@ -506,7 +539,7 @@
         <div style="font-size:14px;color:var(--mu);font-family:'Kanit',sans-serif;" id="hlog-ts">--</div>
       </div>
       <div class="lhbtns">
-        <button class="btn-csv" onclick="exportCSV()">⬇ CSV</button>
+        <button class="btn-csv" onclick="openCsvDlg()">⬇ CSV</button>
         <button class="btn-clr" onclick="openDlg()">ล้าง Log</button>
       </div>
     </div>
@@ -1060,9 +1093,42 @@ async function submitHatch(){
   });
 }
 
-function exportCSV(){
-  const entries=Object.entries(allHourlyLogs).sort((a,b)=>parseInt(a[0])-parseInt(b[0]));
+function openCsvDlg(){
+  if(!Object.keys(allHourlyLogs).length){alert("ยังไม่มีข้อมูล log");return;}
+  // หา min/max จากข้อมูลจริง
+  const tsList=Object.values(allHourlyLogs).map(v=>parseInt(v.timestamp)||0).filter(Boolean).sort((a,b)=>a-b);
+  const toDate=ms=>new Date(ms).toISOString().slice(0,10);
+  document.getElementById('csv-from').value=tsList.length?toDate(tsList[0]):'';
+  document.getElementById('csv-to').value=tsList.length?toDate(tsList[tsList.length-1]):'';
+  updateCsvCount();
+  document.getElementById('csv-dlg').classList.add('open');
+}
+function closeCsvDlg(){document.getElementById('csv-dlg').classList.remove('open');}
+function updateCsvCount(){
+  const from=document.getElementById('csv-from').value;
+  const to=document.getElementById('csv-to').value;
+  const el=document.getElementById('csv-count');
+  if(!from||!to){el.textContent='';return;}
+  const fromMs=new Date(from).getTime();
+  const toMs=new Date(to).getTime()+86399999;
+  const n=Object.values(allHourlyLogs).filter(v=>{const ms=parseInt(v.timestamp)||0;return ms>=fromMs&&ms<=toMs;}).length;
+  el.textContent=n?`พบ ${n} รายการในช่วงที่เลือก`:'ไม่พบข้อมูลในช่วงนี้';
+  el.style.color=n?'var(--gr)':'var(--rd)';
+}
+function doExportCSV(all=false){
+  let entries=Object.entries(allHourlyLogs).sort((a,b)=>parseInt(a[0])-parseInt(b[0]));
   if(!entries.length){alert("ยังไม่มีข้อมูล log");return;}
+  let suffix='all';
+  if(!all){
+    const from=document.getElementById('csv-from').value;
+    const to=document.getElementById('csv-to').value;
+    if(!from||!to){alert("กรุณาเลือกวันที่");return;}
+    const fromMs=new Date(from).getTime();
+    const toMs=new Date(to).getTime()+86399999;
+    entries=entries.filter(([,v])=>{const ms=parseInt(v.timestamp)||0;return ms>=fromMs&&ms<=toMs;});
+    if(!entries.length){alert("ไม่พบข้อมูลในช่วงที่เลือก");return;}
+    suffix=from+(from!==to?'_to_'+to:'');
+  }
   const header="timestamp,datetime,temp,humidity,heater,fog,fanMain,fan3,fan4,servoPosition,servoStatus\n";
   const rows=entries.map(([id,v])=>{
     const ms=parseInt(v.timestamp)||parseInt(id);
@@ -1072,8 +1138,9 @@ function exportCSV(){
   const blob=new Blob(['﻿'+header+rows],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url; a.download='egg_log_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  a.href=url; a.download=`egg_log_${suffix}.csv`; a.click();
   URL.revokeObjectURL(url);
+  closeCsvDlg();
 }
 
 let logSortKey='time', logSortDir='desc';
@@ -1125,8 +1192,10 @@ function renderHLog(){
 window.validate=validate;window.startSys=startSys;window.stopSys=stopSys;
 window.openDlg=openDlg;window.closeDlg=closeDlg;window.confirmClear=confirmClear;
 window.clearSysLog=clearSysLog;window.closeHatchDlg=closeHatchDlg;window.submitHatch=submitHatch;
-window.exportCSV=exportCSV;window.onProfileChange=onProfileChange;
-window.selectStage=selectStage;window.sortLog=sortLog;
+window.openCsvDlg=openCsvDlg;window.closeCsvDlg=closeCsvDlg;window.doExportCSV=doExportCSV;window.onProfileChange=onProfileChange;
+window.selectStage=selectStage;window.sortLog=sortLog;window.updateCsvCount=updateCsvCount;
+document.getElementById('csv-from').addEventListener('change',updateCsvCount);
+document.getElementById('csv-to').addEventListener('change',updateCsvCount);
 
 let chartRange='24h';
 let unsubChart=null;
@@ -1147,11 +1216,15 @@ function subscribeChart(r){
     unsubChart=onValue(query(ref(db, fbp('logs1m')),limitToLast(60)),snap=>{
       renderChart(snap.val(),60*60*1000);
     });
+  } else if(r==='all'){
+    unsubChart=onValue(ref(db, fbp('logs')),snap=>{
+      renderChart(snap.val(),0);
+    });
   } else {
-    const limit=r==='7d'?168:r==='all'?500:48;
+    const limit=r==='7d'?168:48;
     unsubChart=onValue(query(ref(db, fbp('logs')),limitToLast(limit)),snap=>{
-      const cut=r==='24h'?Date.now()-86400000:r==='7d'?Date.now()-7*86400000:0;
-      renderChart(snap.val(),cut>0?cut:0);
+      const cut=r==='24h'?Date.now()-86400000:Date.now()-7*86400000;
+      renderChart(snap.val(),cut);
     });
   }
 }
@@ -1173,8 +1246,8 @@ function renderChart(logs,cutMs){
 }
 
 function applyTheme(dark){
-  if(dark){document.documentElement.setAttribute('data-theme','dark');$('theme-btn').textContent='☀️ Light';}
-  else{document.documentElement.removeAttribute('data-theme');$('theme-btn').textContent='🌙 Dark';}
+  if(dark){document.documentElement.setAttribute('data-theme','dark');$('theme-btn').textContent='☀️ สว่าง';}
+  else{document.documentElement.removeAttribute('data-theme');$('theme-btn').textContent='🌙 มืด';}
   const gr=dark?'#4ade80':'#16a34a',bl=dark?'#60a5fa':'#3b82f6',gridC=dark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.06)';
   hChart.data.datasets[0].borderColor=gr;
   hChart.data.datasets[0].backgroundColor=dark?'rgba(74,222,128,0.06)':'rgba(22,163,74,0.06)';

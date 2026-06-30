@@ -12,44 +12,55 @@
     :root{--bg:#f5f6f8;--sur:#fff;--sur2:#f0f2f5;--bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.15);--tx:#1a1a1a;--mu:#6b7280;--gr:#16a34a;--gr-bg:rgba(22,163,74,0.08);--rd:#dc2626;--am:#d97706;--ra:14px;--rs:10px}
     [data-theme="dark"]{--bg:#0e0f11;--sur:#161719;--sur2:#1e2023;--bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.12);--tx:#f0f0ef;--mu:#6b6e74;--gr:#4ade80;--gr-bg:rgba(74,222,128,0.08);--rd:#f87171;--am:#fbbf24}
     html{font-size:18px}
-    body{font-family:'Sarabun','Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:16px 14px 48px}
-    header{display:flex;align-items:center;justify-content:space-between;max-width:960px;margin:0 auto 24px;padding-bottom:16px;border-bottom:1px solid var(--bd);gap:10px;flex-wrap:wrap}
-    .logo{display:flex;align-items:center;gap:10px}
-    .logo-icon{width:40px;height:40px;border-radius:9px;background:var(--sur2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:22px}
-    .logo-text{font-family:'Kanit',sans-serif;font-size:22px;font-weight:500}
-    .hright{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
-    .user-info{display:flex;flex-direction:column;align-items:flex-end}
-    .user-name{font-size:18px;font-weight:500}
-    .user-email{font-size:16px;color:var(--mu)}
-    .btn-sm{font-family:'Kanit',sans-serif;font-size:18px;padding:7px 16px;border-radius:99px;cursor:pointer;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);white-space:nowrap}
+    body{font-family:'Sarabun','Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:0 0 60px}
+    .site-header{background:var(--sur);border-bottom:1px solid var(--bd);box-shadow:0 1px 8px rgba(0,0,0,0.06);position:sticky;top:0;z-index:50}
+    .header-inner{max-width:960px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px;flex-wrap:nowrap}
+    .logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .logo-icon{width:38px;height:38px;border-radius:9px;background:var(--gr-bg);border:1px solid rgba(22,163,74,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .logo-text{font-family:'Kanit',sans-serif;font-size:20px;font-weight:600}
+    .hright{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .user-info{display:flex;flex-direction:column;align-items:flex-end;padding-right:8px;border-right:1px solid var(--bd2)}
+    .user-name{font-size:17px;font-weight:600;line-height:1.2}
+    .user-email{font-size:14px;color:var(--mu)}
+    .btn-sm{font-family:'Kanit',sans-serif;font-size:16px;padding:8px 16px;border-radius:99px;cursor:pointer;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);white-space:nowrap;transition:all .15s}
     .btn-sm:hover{background:var(--sur);color:var(--tx)}
-    .btn-add{border-color:rgba(22,163,74,0.4);color:var(--gr);background:var(--gr-bg)}
+    .btn-add{border-color:rgba(22,163,74,0.4);color:var(--gr);background:var(--gr-bg);font-weight:500;box-shadow:0 1px 6px rgba(22,163,74,0.15)}
     .btn-add:hover{background:rgba(22,163,74,0.15)!important;color:var(--gr)!important}
-    .wrap{max-width:960px;margin:0 auto}
-    .section-title{font-family:'Kanit',sans-serif;font-size:26px;font-weight:500;color:var(--tx);margin-bottom:14px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
-    .dev-card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:20px;cursor:pointer;transition:all 0.15s;text-decoration:none;color:var(--tx);display:block;position:relative}
-    .dev-card:hover{border-color:rgba(22,163,74,0.4);box-shadow:0 2px 12px rgba(0,0,0,0.06);transform:translateY(-1px)}
-    .dev-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-    .dev-icon{width:44px;height:44px;border-radius:10px;background:var(--gr-bg);border:1px solid rgba(22,163,74,0.2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-    .dev-name{font-family:'Kanit',sans-serif;font-size:24px;font-weight:500;line-height:1.2}
-    .dev-id{font-size:16px;color:var(--mu);font-family:'Kanit',sans-serif;margin-top:2px}
-    .dev-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd)}
-    .dev-row:last-child{border-bottom:none}
-    .dev-label{font-size:18px;color:var(--mu)}
-    .dev-val{font-family:'Kanit',sans-serif;font-size:18px;font-weight:500}
-    .status-badge{font-size:16px;padding:3px 10px;border-radius:99px;font-family:'Kanit',sans-serif;font-weight:500}
+    .btn-logout{font-family:'Kanit',sans-serif;font-size:15px;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid rgba(220,38,38,0.4);background:rgba(220,38,38,0.06);color:var(--rd);white-space:nowrap;transition:all .15s}
+    .btn-logout:hover{background:rgba(220,38,38,0.12);border-color:rgba(220,38,38,0.6)}
+    .btn-admin{font-family:'Kanit',sans-serif;font-size:15px;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid rgba(22,163,74,0.4);background:rgba(22,163,74,0.06);color:var(--gr);white-space:nowrap;transition:all .15s;text-decoration:none}
+    .btn-admin:hover{background:rgba(22,163,74,0.14);border-color:rgba(22,163,74,0.6)}
+    .wrap{max-width:960px;margin:0 auto;padding:24px 16px}
+    .section-title{font-family:'Kanit',sans-serif;font-size:24px;font-weight:600;color:var(--tx);margin-bottom:16px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+
+    /* Device Card */
+    .dev-card{background:var(--sur);border:1px solid var(--bd);border-radius:18px;cursor:pointer;transition:all 0.18s;text-decoration:none;color:var(--tx);display:block;position:relative;box-shadow:0 1px 6px rgba(0,0,0,0.05);overflow:hidden}
+    .dev-card:hover{border-color:rgba(22,163,74,0.45);box-shadow:0 6px 24px rgba(0,0,0,0.09);transform:translateY(-2px)}
+    .dev-card-head{padding:18px 20px 14px;display:flex;align-items:flex-start;gap:14px;border-bottom:1px solid var(--bd)}
+    .dev-icon{width:48px;height:48px;border-radius:12px;background:var(--gr-bg);border:1px solid rgba(22,163,74,0.18);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+    .dev-head-info{flex:1;min-width:0}
+    .dev-name{font-family:'Kanit',sans-serif;font-size:22px;font-weight:600;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dev-id{font-size:14px;color:var(--mu);font-family:'Kanit',sans-serif;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dev-card-body{padding:14px 20px 16px;display:flex;flex-direction:column;gap:9px}
+    .dev-row{display:flex;justify-content:space-between;align-items:center}
+    .dev-label{font-size:15px;color:var(--mu)}
+    .dev-val{font-family:'Kanit',sans-serif;font-size:16px;font-weight:500}
+
+    /* สถานะ: กดได้ = สี, กดไม่ได้ = เทา */
+    .status-badge{font-size:13px;padding:4px 12px;border-radius:99px;font-family:'Kanit',sans-serif;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+    .status-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;opacity:0.8}
     .status-badge.run{background:var(--gr-bg);color:var(--gr);border:1px solid rgba(22,163,74,0.3)}
-    .status-badge.stop{background:var(--sur2);color:var(--mu);border:1px solid var(--bd)}
-    .status-badge.offline{background:rgba(220,38,38,0.08);color:var(--rd);border:1px solid rgba(220,38,38,0.3)}
-    .dev-del{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;font-family:'Kanit',sans-serif}
-    .dev-card:hover .dev-del{opacity:1}
-    .dev-del:hover{background:rgba(220,38,38,0.1);color:var(--rd);border-color:rgba(220,38,38,0.4)}
-    .dev-dl{position:absolute;top:12px;right:46px;width:28px;height:28px;border-radius:50%;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;font-family:'Kanit',sans-serif}
-    .dev-card:hover .dev-dl{opacity:1}
-    .dev-dl:hover{background:rgba(22,163,74,0.1);color:var(--gr);border-color:rgba(22,163,74,0.4)}
-    .empty{text-align:center;padding:48px 16px;color:var(--mu);grid-column:1/-1}
-    .empty-icon{font-size:48px;margin-bottom:12px}
+    .status-badge.stop{background:var(--sur2);color:var(--mu);border:1px solid var(--bd2)}
+    .status-badge.offline{background:var(--sur2);color:var(--mu);border:1px solid var(--bd2)}
+
+    .dev-card-footer{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--bd);background:var(--sur2)}
+    .dev-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:10px;border:1px solid var(--bd2);background:var(--sur);color:var(--mu);cursor:pointer;font-family:'Kanit',sans-serif;font-size:15px;transition:all .15s;text-align:center}
+    .dev-action-btn.del{background:rgba(220,38,38,0.06);color:var(--rd);border-color:rgba(220,38,38,0.3)}
+    .dev-action-btn.del:hover{background:rgba(220,38,38,0.14);border-color:rgba(220,38,38,0.5)}
+    .dev-action-btn:hover.view{background:rgba(22,163,74,0.08);color:var(--gr);border-color:rgba(22,163,74,0.3)}
+    .empty{text-align:center;padding:60px 16px;color:var(--mu);grid-column:1/-1}
+    .empty-icon{font-size:52px;margin-bottom:16px}
 
     /* Dialog */
     .dov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
@@ -77,12 +88,29 @@
     #auth-guard .spin{width:36px;height:36px;border:3px solid var(--bd2);border-top-color:var(--gr);border-radius:50%;animation:spin 0.7s linear infinite}
     #auth-guard p{font-size:18px;color:var(--mu)}
     @keyframes spin{to{transform:rotate(360deg)}}
+    /* Secrets dialog */
+    .sec-pre{background:#1e1e1e;border-radius:10px;padding:14px 16px;overflow-x:auto;margin:14px 0}
+    .sec-pre pre{font-family:'Courier New',monospace;font-size:13px;color:#d4d4d4;white-space:pre;line-height:1.65;margin:0}
+    .sec-pre .kw{color:#569cd6}.sec-pre .str{color:#ce9178}.sec-pre .cmt{color:#6a9955}
+    .sec-field-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+    .sec-field{display:grid;grid-template-columns:160px 1fr;align-items:center;padding:10px 14px;border-bottom:1px solid var(--bd);font-size:16px}
+    .sec-field:last-child{border-bottom:none}
+    .sec-field:nth-child(even){background:var(--sur2)}
+    .sec-key{color:var(--mu);font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+    .sec-val{font-family:'Kanit',sans-serif;font-size:17px;word-break:break-all;color:var(--tx)}
+    .sec-val.empty{color:var(--mu);font-style:italic;font-size:15px}
+    .sec-tabs{display:flex;gap:4px;margin-bottom:14px;background:var(--sur2);border-radius:99px;padding:3px}
+    .sec-tab{flex:1;text-align:center;padding:7px 12px;border-radius:99px;font-size:15px;cursor:pointer;border:none;background:transparent;color:var(--mu);font-family:'Kanit',sans-serif;transition:all .15s}
+    .sec-tab.active{background:var(--sur);color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+
     @media(max-width:480px){
       .irow2{grid-template-columns:1fr}
       .hright{gap:6px}
       .dbtns{flex-direction:column-reverse}
       .dconfirm,.dcancel{width:100%;text-align:center}
       .ifield{font-size:20px}
+      .sec-field{grid-template-columns:120px 1fr;font-size:14px}
+      .sec-val{font-size:15px}
     }
   </style>
 </head>
@@ -90,60 +118,68 @@
 
 <div id="auth-guard"><div class="spin"></div><p>กำลังตรวจสอบสิทธิ์…</p></div>
 
-<header>
-  <div class="logo">
-    <div class="logo-icon">🥚</div>
-    <div class="logo-text">ตู้ฟักไข่</div>
-  </div>
-  <div class="hright">
-    <div class="user-info">
-      <div class="user-name" id="user-name">--</div>
-      <div class="user-email" id="user-email">--</div>
+<div class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🥚</div>
+      <div class="logo-text">ตู้ฟักไข่</div>
     </div>
-    <button class="btn-sm btn-add" onclick="openClaimDlg()">+ เพิ่มตู้</button>
-    <button class="btn-sm" onclick="logout()">ออกจากระบบ</button>
+    <div class="hright">
+      <div class="user-info">
+        <div class="user-name" id="user-name">--</div>
+        <div class="user-email" id="user-email">--</div>
+      </div>
+      <button class="btn-sm btn-add" onclick="openClaimDlg()">+ เพิ่มตู้</button>
+      <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
+    </div>
   </div>
-</header>
+</div>
 
 <!-- Dialog Claim ตู้ -->
 <div class="dov" id="claim-dlg">
   <div class="dbox" style="max-width:400px;">
-    <div class="dtitle">🥚 เพิ่มตู้ฟักไข่</div>
-    <div class="dsub">พิมพ์รหัสตู้จากสติ๊กเกอร์หรือสแกน QR บนกล่อง</div>
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:22px">
+      <div style="width:52px;height:52px;border-radius:14px;background:var(--gr-bg);border:1px solid rgba(22,163,74,0.2);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px">🥚</div>
+      <div class="dtitle" style="font-size:22px;margin-bottom:4px">เพิ่มตู้ฟักไข่</div>
+      <div style="font-size:15px;color:var(--mu);line-height:1.5">พิมพ์รหัสตู้หรือสแกน QR บนกล่อง</div>
+    </div>
 
     <!-- Step 1: กรอก ID -->
     <div id="claim-step1">
-      <div class="ig">
-        <div class="ilabel">รหัสตู้ (Device ID)</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input class="ifield" id="claim-id" placeholder="incubator_01" autocomplete="off" style="flex:1">
-          <button onclick="openScanner()" style="font-family:'Kanit',sans-serif;font-size:13px;padding:9px 14px;border-radius:10px;border:1px solid var(--bd2);background:var(--sur2);color:var(--tx);cursor:pointer;white-space:nowrap;flex-shrink:0" title="สแกน QR Code">📷 สแกน</button>
-        </div>
+      <div class="ig" style="margin-bottom:10px">
+        <div class="ilabel" style="font-size:13px">รหัสตู้ (Device ID)</div>
+        <input class="ifield" id="claim-id" placeholder="incubator_01" autocomplete="off" style="font-size:22px">
       </div>
+      <button onclick="openScanner()" style="width:100%;font-family:'Kanit',sans-serif;font-size:16px;padding:11px;border-radius:10px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s" onmouseover="this.style.background='var(--sur)'" onmouseout="this.style.background='var(--sur2)'">
+        📷 สแกน QR Code แทน
+      </button>
       <div class="derr" id="claim-err"></div>
-      <div class="dbtns">
-        <button class="dcancel" onclick="closeClaimDlg()">ยกเลิก</button>
-        <button class="dconfirm" id="claim-search-btn" onclick="searchDevice()">ค้นหาตู้ →</button>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="dcancel" onclick="closeClaimDlg()" style="flex:1">ยกเลิก</button>
+        <button class="dconfirm" id="claim-search-btn" onclick="searchDevice()" style="flex:2">ค้นหาตู้ →</button>
       </div>
     </div>
 
     <!-- Step 2: ยืนยัน -->
     <div id="claim-step2" style="display:none;">
-      <div style="background:var(--gr-bg);border:1px solid rgba(22,163,74,0.25);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
-        <div style="font-size:16px;font-weight:500;" id="claim-dev-name">--</div>
-        <div style="font-size:13px;color:var(--mu);margin-top:4px;" id="claim-dev-id">--</div>
+      <div style="background:var(--gr-bg);border:1px solid rgba(22,163,74,0.25);border-radius:12px;padding:16px 18px;margin-bottom:16px">
+        <div style="font-size:18px;font-weight:600;font-family:'Kanit',sans-serif" id="claim-dev-name">--</div>
+        <div style="font-size:14px;color:var(--mu);margin-top:4px;font-family:'Kanit',sans-serif" id="claim-dev-id">--</div>
       </div>
-      <div class="ig">
-        <div class="ilabel">ตั้งชื่อตู้ (ไม่บังคับ)</div>
-        <input class="ifield" id="claim-name-override" placeholder="เช่น ตู้ห้องนอน">
-        <div class="ihint">ถ้าไม่กรอกจะใช้ชื่อเดิม</div>
+      <div class="ig" style="margin-bottom:6px">
+        <div class="ilabel" style="font-size:13px">ตั้งชื่อเรียกตู้ <span style="font-weight:400;text-transform:none;letter-spacing:0">(ไม่บังคับ)</span></div>
+        <input class="ifield" id="claim-name-override" placeholder="เช่น ตู้ห้องนอน" style="font-size:22px">
+        <div class="ihint" style="font-size:13px">ถ้าไม่กรอกจะใช้ชื่อเดิมจากระบบ</div>
       </div>
       <div class="derr" id="claim-err2"></div>
-      <div class="dbtns">
-        <button class="dcancel" onclick="claimBack()">← กลับ</button>
-        <button class="dconfirm" id="claim-confirm-btn" onclick="claimDevice()">เพิ่มตู้นี้ ✓</button>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="dcancel" onclick="claimBack()" style="flex:1">← กลับ</button>
+        <button class="dconfirm" id="claim-confirm-btn" onclick="claimDevice()" style="flex:2">เพิ่มตู้นี้ ✓</button>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -250,6 +286,34 @@
   </div>
 </div>
 
+<!-- Dialog รายละเอียด secrets.h (Admin) -->
+<div class="dov" id="secrets-dlg">
+  <div class="dbox" style="max-width:520px;width:100%">
+    <div class="dtitle">📄 รายละเอียด secrets.h</div>
+    <div class="dsub" id="secrets-dlg-sub" style="margin-bottom:12px">--</div>
+
+    <div class="sec-tabs">
+      <button class="sec-tab active" id="stab-info" onclick="switchSecTab('info')">ข้อมูล</button>
+      <button class="sec-tab" id="stab-preview" onclick="switchSecTab('preview')">ดูโค้ด</button>
+    </div>
+
+    <!-- Info tab -->
+    <div id="sec-info-panel">
+      <div class="sec-field-list" id="secrets-fields"></div>
+    </div>
+
+    <!-- Preview tab -->
+    <div id="sec-preview-panel" style="display:none">
+      <div class="sec-pre"><pre id="secrets-code"></pre></div>
+    </div>
+
+    <div class="dbtns" style="margin-top:16px">
+      <button class="dcancel" onclick="closeSecretsDlg()">ปิด</button>
+      <button class="dconfirm" onclick="doDownloadSecrets()" style="display:flex;align-items:center;gap:6px">⬇ ดาวน์โหลด .h</button>
+    </div>
+  </div>
+</div>
+
 <!-- Dialog ยืนยันลบ -->
 <div class="dov" id="del-dlg">
   <div class="dbox" style="max-width:360px;">
@@ -321,12 +385,12 @@ onAuthStateChanged(auth, async user => {
   }
   document.getElementById('user-name').textContent = p.name || user.displayName || 'ผู้ใช้';
   if (p.role === 'admin') {
-    const btn = document.createElement('button');
-    btn.className = 'btn-sm';
-    btn.style.cssText = 'border-color:rgba(220,38,38,0.4);color:var(--rd);background:rgba(220,38,38,0.06)';
-    btn.textContent = '⚙ Admin Panel';
-    btn.onclick = () => location.href = 'admin.html';
-    document.querySelector('.hright').prepend(btn);
+    const btn = document.createElement('a');
+    btn.className = 'btn-admin';
+    btn.href = 'admin.html';
+    btn.textContent = '⚙ ผู้ดูแล';
+    document.querySelector('.btn-logout').before(btn);
+    document.querySelector('.btn-add')?.remove();
     document.querySelector('.section-title').textContent = 'ตู้ทั้งหมดในระบบ';
     loadAllDevices();
   } else {
@@ -350,29 +414,30 @@ function loadDevices(uid) {
       card.className = 'dev-card';
       card.href = `index.html?device=${devId}`;
       card.innerHTML = `
-        <button class="dev-del" onclick="openDelDlg(event,'${devId}','${cfg.name||devId}')" title="ลบตู้">✕</button>
-        <div class="dev-top">
+        <div class="dev-card-head">
           <div class="dev-icon">🥚</div>
-          <div>
+          <div class="dev-head-info">
             <div class="dev-name">${cfg.name || devId}</div>
             <div class="dev-id">${devId}</div>
           </div>
+          <span class="status-badge offline" id="s-${devId}" style="flex-shrink:0;align-self:flex-start;margin-left:auto">ออฟไลน์</span>
         </div>
-        <div class="dev-row">
-          <span class="dev-label">อุณหภูมิ</span>
-          <span class="dev-val" id="t-${devId}">--°C</span>
+        <div class="dev-card-body">
+          <div class="dev-row">
+            <span class="dev-label">อุณหภูมิ</span>
+            <span class="dev-val" id="t-${devId}">--°C</span>
+          </div>
+          <div class="dev-row">
+            <span class="dev-label">ความชื้น</span>
+            <span class="dev-val" id="h-${devId}">--%</span>
+          </div>
+          <div class="dev-row">
+            <span class="dev-label">WiFi</span>
+            <span class="dev-val" style="font-size:13px;color:var(--mu);max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cfg.wifiSSID || '--'}</span>
+          </div>
         </div>
-        <div class="dev-row">
-          <span class="dev-label">ความชื้น</span>
-          <span class="dev-val" id="h-${devId}">--%</span>
-        </div>
-        <div class="dev-row">
-          <span class="dev-label">WiFi</span>
-          <span class="dev-val" style="font-size:13px;color:var(--mu);">${cfg.wifiSSID || '--'}</span>
-        </div>
-        <div class="dev-row" style="border-bottom:none;">
-          <span class="dev-label">สถานะ</span>
-          <span class="status-badge offline" id="s-${devId}">ไม่ได้เชื่อมต่อ</span>
+        <div class="dev-card-footer">
+          <button class="dev-action-btn del" onclick="openDelDlg(event,'${devId}','${cfg.name||devId}')">ลบตู้</button>
         </div>`;
       grid.appendChild(card);
 
@@ -416,29 +481,30 @@ function loadAllDevices() {
       card.className = 'dev-card';
       card.href = `index.html?device=${devId}`;
       card.innerHTML = `
-        <button class="dev-dl" onclick="downloadSecretsAdmin(event,'${devId}')" title="ดาวน์โหลด secrets.h">⬇</button>
-        <div class="dev-top">
+        <div class="dev-card-head">
           <div class="dev-icon">🥚</div>
-          <div>
+          <div class="dev-head-info">
             <div class="dev-name">${cfg.name || devId}</div>
             <div class="dev-id">${devId}</div>
           </div>
+          <span class="status-badge offline" id="s-${devId}" style="flex-shrink:0;align-self:flex-start;margin-left:auto">ออฟไลน์</span>
         </div>
-        <div class="dev-row">
-          <span class="dev-label">อุณหภูมิ</span>
-          <span class="dev-val" id="t-${devId}">--°C</span>
+        <div class="dev-card-body">
+          <div class="dev-row">
+            <span class="dev-label">อุณหภูมิ</span>
+            <span class="dev-val" id="t-${devId}">--°C</span>
+          </div>
+          <div class="dev-row">
+            <span class="dev-label">ความชื้น</span>
+            <span class="dev-val" id="h-${devId}">--%</span>
+          </div>
+          <div class="dev-row">
+            <span class="dev-label">เจ้าของ</span>
+            <span class="dev-val" style="font-size:13px;color:${claimed?'var(--gr)':'var(--mu)'}">${claimed ? 'มีเจ้าของแล้ว' : 'ยังว่างอยู่'}</span>
+          </div>
         </div>
-        <div class="dev-row">
-          <span class="dev-label">ความชื้น</span>
-          <span class="dev-val" id="h-${devId}">--%</span>
-        </div>
-        <div class="dev-row">
-          <span class="dev-label">เจ้าของ</span>
-          <span class="dev-val" style="font-size:13px;color:var(--mu);">${claimed ? 'มีเจ้าของแล้ว' : 'ยังไม่มีเจ้าของ'}</span>
-        </div>
-        <div class="dev-row" style="border-bottom:none;">
-          <span class="dev-label">สถานะ</span>
-          <span class="status-badge offline" id="s-${devId}">ไม่ได้เชื่อมต่อ</span>
+        <div class="dev-card-footer">
+          <button class="dev-action-btn view" onclick="openSecretsDialog(event,'${devId}')">📄 รายละเอียด</button>
         </div>`;
       grid.appendChild(card);
 
@@ -467,37 +533,125 @@ function loadAllDevices() {
   });
 }
 
-// ── Admin: downloadSecrets จาก /devices ──
-function downloadSecretsAdmin(e, devId) {
-  e.preventDefault(); e.stopPropagation();
-  get(ref(masterDb, `devices/${devId}`)).then(snap => {
-    const c = snap.val(); if (!c) return;
-    const content = `#pragma once
-// Auto-generated by ProjectEgg2026 Dashboard (Admin)
-// Device: ${c.name || devId}
+// ── Admin: เปิด dialog รายละเอียด secrets.h ──
+let _secretsDevId = '';
+let _secretsContent = '';
 
+function openSecretsDialog(e, devId) {
+  e.preventDefault(); e.stopPropagation();
+  _secretsDevId = devId;
+  _secretsContent = '';
+  document.getElementById('secrets-dlg-sub').textContent = 'กำลังโหลด…';
+  document.getElementById('secrets-fields').innerHTML = '';
+  document.getElementById('secrets-code').innerHTML = '';
+  switchSecTab('info');
+  document.getElementById('secrets-dlg').classList.add('show');
+
+  get(ref(masterDb, `devices/${devId}`)).then(snap => {
+    const c = snap.val(); if (!c) {
+      document.getElementById('secrets-dlg-sub').textContent = 'ไม่พบข้อมูล';
+      return;
+    }
+    document.getElementById('secrets-dlg-sub').textContent = `${c.name || devId} · ${devId}`;
+
+    // build field list
+    const fields = [
+      { key: 'Device ID',      val: devId },
+      { key: 'ชื่อตู้',         val: c.name },
+      { key: 'WiFi SSID',      val: c.wifiSSID },
+      { key: 'WiFi Password',  val: c.wifiPassword, mask: true },
+      { key: 'Database URL',   val: c.firebaseDatabaseURL },
+      { key: 'API Key',        val: c.firebaseApiKey, mask: true },
+      { key: 'Project ID',     val: c.firebaseProjectId },
+      { key: 'Auth Email',     val: c.authEmail },
+      { key: 'Auth Password',  val: c.authPassword, mask: true },
+    ];
+    const el = document.getElementById('secrets-fields');
+    el.innerHTML = fields.map(f => {
+      const v = f.val || '';
+      const display = v
+        ? (f.mask ? `<span class="sec-val" style="display:flex;align-items:center;gap:8px">
+            <span id="mv-${f.key.replace(/\s/g,'')}">${'•'.repeat(Math.min(v.length,16))}</span>
+            <button onclick="toggleMask('${f.key.replace(/\s/g,'')}','${v.replace(/'/g,"\\'")}')" style="font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer">แสดง</button>
+          </span>`
+          : `<span class="sec-val">${v}</span>`)
+        : `<span class="sec-val empty">ไม่ได้ตั้งค่า</span>`;
+      return `<div class="sec-field"><span class="sec-key">${f.key}</span>${display}</div>`;
+    }).join('');
+
+    // build content for download/preview
+    _secretsContent = `#pragma once
+// Auto-generated by ProjectEgg2026 Dashboard
+// Device: ${c.name || devId} (${devId})
+// ห้าม commit ไฟล์นี้ขึ้น GitHub
+
+// ── WiFi ──────────────────────────────────────────────────
 #define WIFI_SSID     "${c.wifiSSID || ''}"
 #define WIFI_PASSWORD "${c.wifiPassword || ''}"
 
+// ── Device Identity ───────────────────────────────────────
 #define DEVICE_ID     "${devId}"
 #define DEVICE_NAME   "${c.name || devId}"
 
+// ── Firebase ──────────────────────────────────────────────
 #define API_KEY       "${c.firebaseApiKey || ''}"
 #define DATABASE_URL  "${c.firebaseDatabaseURL || ''}"
 #define PROJECT_ID    "${c.firebaseProjectId || ''}"
 #define USER_EMAIL    "${c.authEmail || ''}"
 #define USER_PASSWORD "${c.authPassword || ''}"
 
+// ── LINE Notify ───────────────────────────────────────────
 #define LINE_TOKEN    "YOUR_LINE_TOKEN_HERE"
+
+// ── OTA Firmware Update ───────────────────────────────────
 #define OTA_PASSWORD  "YOUR_OTA_PASSWORD_HERE"
 `;
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));
-    a.download = `secrets_${devId}.h`; a.click();
-    URL.revokeObjectURL(a.href);
+    // set preview
+    document.getElementById('secrets-code').innerHTML = _secretsContent
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/(\/\/[^\n]*)/g,'<span class="cmt">$1</span>')
+      .replace(/(#pragma once|#define)/g,'<span class="kw">$1</span>')
+      .replace(/"([^"]*)"/g,'<span class="str">"$1"</span>');
   });
 }
-window.downloadSecretsAdmin = downloadSecretsAdmin;
+
+function toggleMask(key, val) {
+  const el = document.getElementById('mv-' + key);
+  const btn = el?.nextElementSibling;
+  if (!el) return;
+  if (el.textContent.includes('•')) {
+    el.textContent = val;
+    if (btn) btn.textContent = 'ซ่อน';
+  } else {
+    el.textContent = '•'.repeat(Math.min(val.length, 16));
+    if (btn) btn.textContent = 'แสดง';
+  }
+}
+
+function switchSecTab(tab) {
+  document.getElementById('sec-info-panel').style.display    = tab === 'info'    ? '' : 'none';
+  document.getElementById('sec-preview-panel').style.display = tab === 'preview' ? '' : 'none';
+  document.getElementById('stab-info').classList.toggle('active',    tab === 'info');
+  document.getElementById('stab-preview').classList.toggle('active', tab === 'preview');
+}
+
+function closeSecretsDlg() {
+  document.getElementById('secrets-dlg').classList.remove('show');
+}
+
+function doDownloadSecrets() {
+  if (!_secretsContent) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([_secretsContent], { type: 'text/plain' }));
+  a.download = `secrets_${_secretsDevId}.h`; a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+window.openSecretsDialog = openSecretsDialog;
+window.closeSecretsDlg   = closeSecretsDlg;
+window.doDownloadSecrets = doDownloadSecrets;
+window.switchSecTab      = switchSecTab;
+window.toggleMask        = toggleMask;
 
 // ── init Firebase app ของตู้ (reuse ถ้ามีแล้ว) ──
 function getOrInitDevApp(devId, cfg) {

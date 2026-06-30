@@ -23,81 +23,100 @@
     #toast.show{opacity:1}
 
     /* Layout */
-    .page{max-width:1040px;margin:0 auto}
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--bd);gap:10px;flex-wrap:wrap}
-    .logo-text{font-family:'Kanit',sans-serif;font-size:26px;font-weight:600;display:flex;align-items:center;gap:8px}
-    .badge{font-family:'Kanit',sans-serif;font-size:16px;background:rgba(220,38,38,0.1);color:var(--rd);border:1px solid rgba(220,38,38,0.3);border-radius:99px;padding:2px 10px}
-    .hright{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .admin-name{font-size:18px;color:var(--mu)}
+    .page{max-width:1040px;margin:0 auto;padding:0 4px}
+    .site-header{background:var(--sur);border-bottom:1px solid var(--bd);box-shadow:0 1px 8px rgba(0,0,0,0.06);position:sticky;top:0;z-index:50;margin-bottom:0}
+    .header-inner{max-width:1040px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
+    .logo-text{font-family:'Kanit',sans-serif;font-size:24px;font-weight:700;display:flex;align-items:center;gap:10px;color:var(--tx)}
+    .badge{font-family:'Kanit',sans-serif;font-size:14px;background:rgba(220,38,38,0.1);color:var(--rd);border:1px solid rgba(220,38,38,0.25);border-radius:99px;padding:3px 12px;font-weight:500}
+    .hright{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .admin-name{font-size:17px;color:var(--mu);padding-right:4px;border-right:1px solid var(--bd2)}
 
     /* Buttons */
-    .btn{font-family:'Kanit',sans-serif;font-size:18px;padding:7px 16px;border-radius:99px;cursor:pointer;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);white-space:nowrap;transition:all .15s}
-    .btn:hover{background:var(--sur);color:var(--tx)}
-    .btn.gr{background:var(--gr);color:#fff;border-color:var(--gr)}
-    .btn.gr:hover{opacity:.88}
-    .btn.rd{background:rgba(220,38,38,0.08);color:var(--rd);border-color:rgba(220,38,38,0.3)}
+    .btn{font-family:'Kanit',sans-serif;font-size:17px;padding:8px 18px;border-radius:99px;cursor:pointer;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);white-space:nowrap;transition:all .15s;line-height:1}
+    .btn:hover{background:var(--sur);color:var(--tx);border-color:var(--bd2)}
+    .btn.gr{background:var(--gr);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(22,163,74,0.25)}
+    .btn.gr:hover{opacity:.88;box-shadow:0 3px 12px rgba(22,163,74,0.35)}
+    .btn.rd{background:rgba(220,38,38,0.08);color:var(--rd);border-color:rgba(220,38,38,0.25)}
     .btn.rd:hover{background:rgba(220,38,38,0.15)}
-    .btn.user-page{border-color:rgba(22,163,74,0.4);color:var(--gr);background:var(--gr-bg)}
-    .btn.sm{font-size:16px;padding:5px 12px}
+    .btn.user-page{border-color:rgba(22,163,74,0.4);color:var(--gr);background:var(--gr-bg);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+    .btn.user-page:hover{background:rgba(22,163,74,0.14)}
+    .btn.sm{font-size:15px;padding:5px 12px}
     .btn:disabled{opacity:.4;cursor:not-allowed}
+    .btn-logout{font-family:'Kanit',sans-serif;font-size:16px;padding:7px 16px;border-radius:99px;cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--mu);white-space:nowrap;transition:all .15s}
+    .btn-logout:hover{background:rgba(220,38,38,0.06);color:var(--rd);border-color:rgba(220,38,38,0.3)}
 
     /* Stats */
-    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:28px}
-    .stat{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:16px 18px}
-    .stat-label{font-size:16px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-    .stat-val{font-family:'Kanit',sans-serif;font-size:30px;font-weight:600;line-height:1}
-    .stat-val.gr{color:var(--gr)} .stat-val.rd{color:var(--rd)} .stat-val.am{color:var(--am)}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:24px 0 32px}
+    .stat{background:var(--sur);border:1px solid var(--bd);border-radius:16px;padding:18px 20px;position:relative;overflow:hidden}
+    .stat::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
+    .stat.c-gr::before{background:var(--gr)}
+    .stat.c-am::before{background:var(--am)}
+    .stat.c-rd::before{background:var(--rd)}
+    .stat.c-bl::before{background:#3b82f6}
+    .stat.c-pu::before{background:#7c3aed}
+    .stat-label{font-size:15px;color:var(--mu);margin-bottom:8px;font-weight:500}
+    .stat-val{font-family:'Kanit',sans-serif;font-size:34px;font-weight:700;line-height:1}
+    .stat-val.gr{color:var(--gr)} .stat-val.rd{color:var(--rd)} .stat-val.am{color:var(--am)} .stat-val.bl{color:#3b82f6} .stat-val.pu{color:#7c3aed}
 
     /* Section */
-    .sec-header{display:flex;align-items:center;justify-content:space-between;margin:28px 0 12px}
-    .sec-title{font-family:'Kanit',sans-serif;font-size:22px;font-weight:600}
-    .sec-count{font-size:18px;color:var(--mu);margin-left:8px}
+    .sec-header{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+    .sec-title{font-family:'Kanit',sans-serif;font-size:21px;font-weight:600;display:flex;align-items:center;gap:8px}
+    .sec-count{font-size:17px;color:var(--mu);background:var(--sur2);border:1px solid var(--bd);border-radius:99px;padding:2px 10px;font-family:'Kanit',sans-serif}
 
     /* Table */
-    .tbl{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);overflow:hidden;overflow-x:auto}
-    .tr{display:grid;align-items:center;padding:11px 16px;border-bottom:1px solid var(--bd);gap:10px}
+    .tbl{background:var(--sur);border:1px solid var(--bd);border-radius:16px;overflow:hidden;overflow-x:auto;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+    .tr{display:grid;align-items:center;padding:14px 20px;border-bottom:1px solid var(--bd);gap:14px;transition:background .1s}
     .tr:last-child{border-bottom:none}
-    .tr.head{background:var(--sur2);font-size:16px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
-    .tr.dev{grid-template-columns:2fr 1.5fr 1fr 1fr 80px}
-    .tr.usr{grid-template-columns:2fr 2fr 1fr 1fr 80px}
+    .tr.head{background:var(--sur2);font-size:13px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;padding:10px 20px}
+    .tr.dev{grid-template-columns:2fr 1.5fr 110px 110px 220px}
+    .tr.usr{grid-template-columns:2fr 2fr 110px 70px 120px}
+    .tr:not(.head):hover{background:rgba(0,0,0,0.015)}
     .cell{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .cell-name{font-size:18px;font-weight:500}
-    .cell-sub{font-size:16px;color:var(--mu);margin-top:1px}
-    .actions{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
-    .icon-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s}
-    .icon-btn:hover.edit{background:rgba(22,163,74,0.1);color:var(--gr);border-color:rgba(22,163,74,0.3)}
-    .icon-btn:hover.del{background:rgba(220,38,38,0.1);color:var(--rd);border-color:rgba(220,38,38,0.3)}
-    .icon-btn:hover.dl{background:rgba(37,99,235,0.1);color:#2563eb;border-color:rgba(37,99,235,0.3)}
-    .icon-btn:hover.qr{background:rgba(124,58,237,0.1);color:#7c3aed;border-color:rgba(124,58,237,0.3)}
-    .pill{font-family:'Kanit',sans-serif;font-size:16px;padding:3px 10px;border-radius:99px;display:inline-block;white-space:nowrap}
+    .cell-sub{font-size:14px;color:var(--mu);margin-top:2px;font-family:'Kanit',sans-serif}
+    .actions{display:flex;gap:6px;justify-content:flex-end}
+    .icon-btn{height:36px;padding:0 14px;border-radius:99px;border:1.5px solid;cursor:pointer;font-size:14px;font-family:'Kanit',sans-serif;font-weight:500;display:flex;align-items:center;justify-content:center;white-space:nowrap;transition:all .15s}
+    .icon-btn.qr{background:rgba(124,58,237,0.08);color:#7c3aed;border-color:rgba(124,58,237,0.35)}
+    .icon-btn.qr:hover{background:rgba(124,58,237,0.18);border-color:rgba(124,58,237,0.6)}
+    .icon-btn.dl{background:rgba(37,99,235,0.08);color:#2563eb;border-color:rgba(37,99,235,0.35)}
+    .icon-btn.dl:hover{background:rgba(37,99,235,0.18);border-color:rgba(37,99,235,0.6)}
+    .icon-btn.edit{background:rgba(22,163,74,0.08);color:var(--gr);border-color:rgba(22,163,74,0.35)}
+    .icon-btn.edit:hover{background:rgba(22,163,74,0.18);border-color:rgba(22,163,74,0.6)}
+    .icon-btn.del{background:rgba(220,38,38,0.08);color:var(--rd);border-color:rgba(220,38,38,0.35)}
+    .icon-btn.del:hover{background:rgba(220,38,38,0.18);border-color:rgba(220,38,38,0.6)}
+    .pill{font-family:'Kanit',sans-serif;font-size:15px;padding:4px 12px;border-radius:99px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-weight:500}
+    .pill::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;opacity:0.7;flex-shrink:0}
     .pill.unclaimed{background:var(--sur2);color:var(--mu);border:1px solid var(--bd2)}
-    .pill.claimed{background:var(--gr-bg);color:var(--gr);border:1px solid rgba(22,163,74,0.3)}
-    .pill.admin{background:rgba(220,38,38,0.08);color:var(--rd);border:1px solid rgba(220,38,38,0.3)}
+    .pill.claimed{background:var(--sur2);color:var(--mu);border:1px solid var(--bd2)}
+    .pill.admin{background:var(--sur2);color:var(--mu);border:1px solid var(--bd2)}
     .pill.user{background:var(--sur2);color:var(--mu);border:1px solid var(--bd2)}
-    .empty{text-align:center;padding:32px;color:var(--mu);font-size:18px}
+    .empty{text-align:center;padding:40px;color:var(--mu);font-size:18px}
+
+    /* Sections wrapper */
+    .sections{display:flex;flex-direction:column;gap:32px;padding:20px 0 60px}
 
     /* Modal */
     .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
     .modal-bg.open{display:flex}
-    .modal{background:var(--sur);border-radius:18px;padding:28px 24px 24px;max-width:calc(100vw - 32px);width:520px;margin:auto}
-    .modal-title{font-family:'Kanit',sans-serif;font-size:26px;font-weight:600;margin-bottom:4px}
-    .modal-sub{font-size:18px;color:var(--mu);margin-bottom:20px;line-height:1.5}
-    .sec-sep{font-size:16px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 10px;padding-top:16px;border-top:1px solid var(--bd)}
+    .modal{background:var(--sur);border-radius:20px;padding:28px 24px 24px;max-width:calc(100vw - 32px);width:520px;margin:auto;box-shadow:0 8px 40px rgba(0,0,0,0.15)}
+    .modal-title{font-family:'Kanit',sans-serif;font-size:24px;font-weight:700;margin-bottom:4px}
+    .modal-sub{font-size:17px;color:var(--mu);margin-bottom:20px;line-height:1.6}
+    .sec-sep{font-size:14px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 10px;padding-top:16px;border-top:1px solid var(--bd)}
     .ig{display:flex;flex-direction:column;gap:5px;margin-bottom:11px}
     .ig:last-of-type{margin-bottom:0}
-    .ilabel{font-size:16px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:.04em}
-    .ifield{width:100%;background:var(--sur2);border:1px solid var(--bd2);border-radius:var(--rs);padding:10px 12px;font-family:'Kanit',sans-serif;font-size:24px;color:var(--tx);outline:none}
+    .ilabel{font-size:15px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.04em}
+    .ifield{width:100%;background:var(--sur2);border:1px solid var(--bd2);border-radius:var(--rs);padding:11px 14px;font-family:'Kanit',sans-serif;font-size:24px;color:var(--tx);outline:none;transition:border-color .15s}
     .ifield:focus{border-color:rgba(22,163,74,.5);background:#fff}
     .irow2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .ihint{font-size:16px;color:var(--mu)}
+    .ihint{font-size:15px;color:var(--mu)}
     .pw-wrap{position:relative}
     .pw-wrap .ifield{padding-right:38px}
-    .pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:15px;color:var(--mu);padding:4px}
+    .pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--mu);padding:4px}
     .derr{font-size:16px;color:var(--rd);margin-top:10px;min-height:18px}
-    .modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+    .modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;flex-wrap:wrap}
 
     /* Confirm modal */
-    .confirm-icon{font-size:36px;margin-bottom:12px}
+    .confirm-icon{font-size:40px;margin-bottom:12px}
 
     @media(max-width:640px){
       .tr.dev,.tr.usr{grid-template-columns:1fr 1fr}
@@ -106,10 +125,12 @@
       .tr.head{display:none}
       .irow2{grid-template-columns:1fr}
       .modal-btns{flex-direction:column-reverse}
+      .admin-name{display:none}
     }
     @media(max-width:480px){
       .logo-text{font-size:20px}
       .ifield{font-size:20px}
+      .header-inner{height:56px}
     }
   </style>
 </head>
@@ -204,7 +225,7 @@
     <div class="modal-sub" id="edit-user-desc"></div>
     <div class="ig"><div class="ilabel">ชื่อ</div><input class="ifield" id="u-name" placeholder="ชื่อผู้ใช้"></div>
     <div class="ig"><div class="ilabel">อีเมล</div><input class="ifield" id="u-email" placeholder="email@example.com" type="email"></div>
-    <div class="ig"><div class="ilabel">Role</div>
+    <div class="ig"><div class="ilabel">สิทธิ์</div>
       <select class="ifield" id="u-role" style="cursor:pointer">
         <option value="user">user</option>
         <option value="admin">admin</option>
@@ -245,60 +266,63 @@
   </div>
 </div>
 
-<!-- ═══ MAIN ═══ -->
-<div class="page">
-  <header>
-    <div class="logo-text">⚙ Admin Panel <span class="badge">ProjectEgg2026</span></div>
+<!-- ═══ STICKY HEADER ═══ -->
+<div class="site-header">
+  <div class="header-inner">
+    <div class="logo-text">⚙ แผงผู้ดูแล</div>
     <div class="hright">
       <span class="admin-name" id="admin-name"></span>
-      <a class="btn user-page" href="dashboard.html">🥚 ดูหน้า User</a>
-      <button class="btn" onclick="doLogout()">ออกจากระบบ</button>
+      <a class="btn user-page" href="dashboard.html">ดูหน้าผู้ใช้</a>
+      <button class="btn-logout" onclick="doLogout()">ออกจากระบบ</button>
     </div>
-  </header>
+  </div>
+</div>
 
+<!-- ═══ MAIN ═══ -->
+<div class="page" style="padding:0 16px">
   <!-- Stats -->
   <div class="stats">
-    <div class="stat"><div class="stat-label">ตู้ทั้งหมด</div><div class="stat-val" id="s-total">—</div></div>
-    <div class="stat"><div class="stat-label">ว่าง</div><div class="stat-val am" id="s-unclaimed">—</div></div>
-    <div class="stat"><div class="stat-label">มีเจ้าของ</div><div class="stat-val gr" id="s-claimed">—</div></div>
-    <div class="stat"><div class="stat-label">ผู้ใช้</div><div class="stat-val" id="s-users">—</div></div>
+    <div class="stat c-bl"><div class="stat-label">ตู้ทั้งหมด</div><div class="stat-val bl" id="s-total">—</div></div>
+    <div class="stat c-am"><div class="stat-label">ว่าง</div><div class="stat-val am" id="s-unclaimed">—</div></div>
+    <div class="stat c-gr"><div class="stat-label">มีเจ้าของ</div><div class="stat-val gr" id="s-claimed">—</div></div>
+    <div class="stat c-pu"><div class="stat-label">ผู้ใช้</div><div class="stat-val pu" id="s-users">—</div></div>
   </div>
 
-  <!-- ── Devices ── -->
-  <div class="sec-header">
-    <div style="display:flex;align-items:baseline;gap:8px">
-      <div class="sec-title">📦 ตู้ฟักไข่</div>
-      <span class="sec-count" id="dev-count"></span>
+  <div class="sections">
+    <!-- ── Devices ── -->
+    <div>
+      <div class="sec-header">
+        <div class="sec-title">📦 ตู้ฟักไข่ <span class="sec-count" id="dev-count"></span></div>
+        <button class="btn gr" onclick="openDevModal()">+ เพิ่มตู้</button>
+      </div>
+      <div class="tbl" id="dev-tbl">
+        <div class="tr dev head">
+          <div>ชื่อตู้ / รหัสตู้</div>
+          <div>WiFi</div>
+          <div>สถานะ</div>
+          <div>เจ้าของ</div>
+          <div>จัดการ</div>
+        </div>
+        <div class="empty">กำลังโหลด…</div>
+      </div>
     </div>
-    <button class="btn gr" onclick="openDevModal()">+ เพิ่มตู้</button>
-  </div>
-  <div class="tbl" id="dev-tbl">
-    <div class="tr dev head">
-      <div>ชื่อตู้ / Device ID</div>
-      <div>WiFi</div>
-      <div>สถานะ</div>
-      <div>เจ้าของ</div>
-      <div></div>
-    </div>
-    <div class="empty">กำลังโหลด…</div>
-  </div>
 
-  <!-- ── Users ── -->
-  <div class="sec-header" style="margin-top:36px">
-    <div style="display:flex;align-items:baseline;gap:8px">
-      <div class="sec-title">👥 ผู้ใช้งาน</div>
-      <span class="sec-count" id="user-count"></span>
+    <!-- ── Users ── -->
+    <div>
+      <div class="sec-header">
+        <div class="sec-title">👥 ผู้ใช้งาน <span class="sec-count" id="user-count"></span></div>
+      </div>
+      <div class="tbl" id="user-tbl">
+        <div class="tr usr head">
+          <div>ชื่อ / อีเมล</div>
+          <div>อีเมล</div>
+          <div>สิทธิ์</div>
+          <div>ตู้</div>
+          <div>จัดการ</div>
+        </div>
+        <div class="empty">กำลังโหลด…</div>
+      </div>
     </div>
-  </div>
-  <div class="tbl" id="user-tbl">
-    <div class="tr usr head">
-      <div>ชื่อ / อีเมล</div>
-      <div>อีเมล</div>
-      <div>Role</div>
-      <div>ตู้</div>
-      <div></div>
-    </div>
-    <div class="empty">กำลังโหลด…</div>
   </div>
 </div>
 
@@ -356,13 +380,13 @@ function loadDevices() {
       row.innerHTML = `
         <div><div class="cell-name">${d.name||id}</div><div class="cell-sub">${id}</div></div>
         <div class="cell">${d.wifiSSID||'—'}</div>
-        <div><span class="pill ${isClaimed?'claimed':'unclaimed'}">${isClaimed?'Claimed':'ว่าง'}</span></div>
+        <div><span class="pill ${isClaimed?'claimed':'unclaimed'}">${isClaimed?'มีเจ้าของ':'ว่าง'}</span></div>
         <div class="cell" style="font-size:13px;color:var(--mu)">${isClaimed?(d.ownerUid||'').substring(0,8)+'…':'—'}</div>
         <div class="actions">
-          <button class="icon-btn qr" title="QR Code" onclick="showQR('${id}','${(d.name||id).replace(/'/g,"\\'")}')">▣</button>
-          <button class="icon-btn dl" title="ดาวน์โหลด secrets.h" onclick="dlSecrets('${id}')">⬇</button>
-          <button class="icon-btn edit" title="แก้ไข" onclick="openEditDev('${id}')">✏️</button>
-          <button class="icon-btn del" title="ลบ" onclick="askDelDev('${id}','${(d.name||id).replace(/'/g,"\\'")}')">🗑</button>
+          <button class="icon-btn qr" onclick="showQR('${id}','${(d.name||id).replace(/'/g,"\\'")}')">QR</button>
+          <button class="icon-btn dl" onclick="dlSecrets('${id}')">โหลด</button>
+          <button class="icon-btn edit" onclick="openEditDev('${id}')">แก้ไข</button>
+          <button class="icon-btn del" onclick="askDelDev('${id}','${(d.name||id).replace(/'/g,"\\'")}')">ลบ</button>
         </div>`;
       tbl.appendChild(row);
     });
@@ -553,11 +577,11 @@ function loadUsers() {
           <div class="cell-sub">${p.email||uid.substring(0,18)+'…'}</div>
         </div>
         <div class="cell" style="font-size:13px">${p.email||'<span style="color:var(--mu)">—</span>'}</div>
-        <div><span class="pill ${role}">${role}</span></div>
+        <div><span class="pill ${role}">${role==='admin'?'ผู้ดูแล':'ผู้ใช้'}</span></div>
         <div style="font-size:14px">${devCount} ตู้</div>
         <div class="actions">
-          <button class="icon-btn edit" title="แก้ไข" onclick="openEditUser('${uid}')">✏️</button>
-          <button class="icon-btn del" title="ลบ" onclick="askDelUser('${uid}','${(p.name||uid).replace(/'/g,"\\'")}','${isSelf}')">🗑</button>
+          <button class="icon-btn edit" onclick="openEditUser('${uid}')">แก้ไข</button>
+          <button class="icon-btn del" onclick="askDelUser('${uid}','${(p.name||uid).replace(/'/g,"\\'")}','${isSelf}')">ลบ</button>
         </div>`;
       tbl.appendChild(row);
     });
