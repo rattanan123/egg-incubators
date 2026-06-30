@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — จัดการผู้ใช้</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#f5f6f8;--sur:#fff;--sur2:#f0f2f5;--bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.15);--tx:#1a1a1a;--mu:#6b7280;--gr:#16a34a;--gr-bg:rgba(22,163,74,0.08);--rd:#dc2626;--ra:14px}
+    body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:20px 16px 48px}
+    #auth-guard{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+    #auth-guard .spin{width:36px;height:36px;border:3px solid var(--bd2);border-top-color:var(--rd);border-radius:50%;animation:spin 0.7s linear infinite}
+    #auth-guard p{font-size:15px;color:var(--mu)}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .page{max-width:960px;margin:0 auto}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+    .back-btn{font-family:'Kanit',sans-serif;font-size:14px;padding:7px 16px;border-radius:99px;cursor:pointer;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);text-decoration:none;white-space:nowrap}
+    .back-btn:hover{background:var(--sur);color:var(--tx)}
+    .page-title{font-size:20px;font-weight:600}
+    .badge{font-size:12px;background:rgba(220,38,38,0.1);color:var(--rd);border:1px solid rgba(220,38,38,0.3);border-radius:99px;padding:2px 10px;font-weight:500}
+    .card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);overflow:hidden}
+    .u-row{display:grid;grid-template-columns:2fr 2fr 1fr 1fr 80px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--bd);gap:12px}
+    .u-row:last-child{border-bottom:none}
+    .u-row.head{background:var(--sur2);font-size:12px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em}
+    .u-name{font-size:15px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .u-email{font-size:13px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .u-devcount{font-size:14px;text-align:center}
+    .role-sel{font-family:'Kanit',sans-serif;font-size:13px;padding:5px 10px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--tx);cursor:pointer;outline:none}
+    .role-sel.admin{border-color:rgba(220,38,38,0.4);color:var(--rd);background:rgba(220,38,38,0.06)}
+    .role-sel.user{border-color:var(--bd2);color:var(--mu)}
+    .save-btn{font-family:'Kanit',sans-serif;font-size:13px;padding:5px 14px;border-radius:99px;border:none;background:var(--gr);color:#fff;cursor:pointer;opacity:0;transition:opacity 0.15s}
+    .save-btn.visible{opacity:1}
+    .empty-row{text-align:center;padding:40px;color:var(--mu);font-size:14px}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:99px;font-size:14px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:999}
+    .toast.show{opacity:1}
+    @media(max-width:600px){
+      .u-row{grid-template-columns:1fr 1fr;gap:8px}
+      .u-row.head .u-devcount,.u-row.head .save-btn{display:none}
+    }
+  </style>
+</head>
+<body>
+<div id="auth-guard"><div class="spin"></div><p>กำลังตรวจสอบสิทธิ์…</p></div>
+<div class="toast" id="toast"></div>
+
+<div class="page">
+  <header>
+    <a class="back-btn" href="admin.html">← Admin Panel</a>
+    <div>
+      <div class="page-title">จัดการผู้ใช้ <span class="badge">Admin</span></div>
+    </div>
+  </header>
+
+  <div class="card" id="user-table">
+    <div class="u-row head">
+      <div>ชื่อ</div>
+      <div>อีเมล</div>
+      <div class="u-devcount" style="text-align:center">ตู้</div>
+      <div>Role</div>
+      <div></div>
+    </div>
+    <div class="empty-row">กำลังโหลด…</div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref, get, set, onValue }
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyCnBjSbD4zZpc-t0QfK7i5PlfQfuSgdyRw",
+  authDomain:"eggproject-cf0bc.firebaseapp.com",
+  databaseURL:"https://eggproject-cf0bc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"eggproject-cf0bc",
+  storageBucket:"eggproject-cf0bc.firebasestorage.app",
+  messagingSenderId:"630146139668",
+  appId:"1:630146139668:web:58b60cbbeb16b6ad7c0901"
+});
+const auth = getAuth(app);
+const db   = getDatabase(app);
+
+let currentUid = null;
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { location.href = 'login.html'; return; }
+  const snap = await get(ref(db, `users/${user.uid}/profile`));
+  if (snap.val()?.role !== 'admin') { location.href = 'dashboard.html'; return; }
+  currentUid = user.uid;
+  document.getElementById('auth-guard').style.display = 'none';
+  loadUsers();
+});
+
+function loadUsers() {
+  onValue(ref(db, 'users'), snap => {
+    const table = document.getElementById('user-table');
+    const head  = table.querySelector('.u-row.head');
+    table.innerHTML = ''; table.appendChild(head);
+
+    if (!snap.exists()) {
+      table.insertAdjacentHTML('beforeend', '<div class="empty-row">ยังไม่มีผู้ใช้</div>');
+      return;
+    }
+
+    Object.entries(snap.val()).forEach(([uid, u]) => {
+      const p    = u.profile || {};
+      const role = p.role || 'user';
+      const devCount = u.devices ? Object.keys(u.devices).length : 0;
+      const isSelf = uid === currentUid;
+
+      const displayName  = p.name  || '<span style="color:var(--mu);font-style:italic">ไม่ระบุชื่อ</span>';
+      const displayEmail = p.email || `<span style="color:var(--mu);font-size:11px" title="${uid}">${uid.substring(0,20)}…</span>`;
+      const row = document.createElement('div');
+      row.className = 'u-row';
+      row.dataset.uid = uid;
+      row.innerHTML = `
+        <div class="u-name">${displayName}${isSelf ? ' <span style="font-size:11px;color:var(--mu)">(คุณ)</span>' : ''}</div>
+        <div class="u-email">${displayEmail}</div>
+        <div class="u-devcount">${devCount}</div>
+        <div>
+          <select class="role-sel ${role}" onchange="onRoleChange(this,'${uid}','${isSelf}')">
+            <option value="user"  ${role==='user' ?'selected':''}>user</option>
+            <option value="admin" ${role==='admin'?'selected':''}>admin</option>
+          </select>
+        </div>
+        <div>
+          <button class="save-btn" id="save-${uid}" onclick="saveRole('${uid}')">บันทึก</button>
+        </div>`;
+      table.appendChild(row);
+    });
+  });
+}
+
+function onRoleChange(sel, uid, isSelf) {
+  sel.className = 'role-sel ' + sel.value;
+  const btn = document.getElementById('save-' + uid);
+  if (btn) btn.classList.add('visible');
+  if (isSelf === 'true' && sel.value !== 'admin') {
+    if (!confirm('คุณกำลังลด role ของตัวเอง — หลังบันทึกจะถูก redirect ไปหน้า User')) {
+      sel.value = 'admin'; sel.className = 'role-sel admin';
+      btn.classList.remove('visible');
+    }
+  }
+}
+window.onRoleChange = onRoleChange;
+
+async function saveRole(uid) {
+  const sel = document.querySelector(`.u-row[data-uid="${uid}"] .role-sel`);
+  const btn = document.getElementById('save-' + uid);
+  if (!sel) return;
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    await set(ref(db, `users/${uid}/profile/role`), sel.value);
+    btn.classList.remove('visible');
+    showToast(`เปลี่ยน role เป็น "${sel.value}" แล้ว`);
+    if (uid === currentUid && sel.value !== 'admin') {
+      setTimeout(() => location.href = 'dashboard.html', 1200);
+    }
+  } catch(e) {
+    showToast('เกิดข้อผิดพลาด: ' + e.message);
+  }
+  btn.disabled = false; btn.textContent = 'บันทึก';
+}
+window.saveRole = saveRole;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

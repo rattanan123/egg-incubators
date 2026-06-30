@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — ตู้ฟักไข่</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#f5f6f8;--sur:#fff;--sur2:#f0f2f5;--bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.15);--tx:#1a1a1a;--mu:#6b7280;--gr:#16a34a;--gr-bg:rgba(22,163,74,0.08);--rd:#dc2626;--am:#d97706;--ra:14px;--rs:10px}
+    [data-theme="dark"]{--bg:#0e0f11;--sur:#161719;--sur2:#1e2023;--bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.12);--tx:#f0f0ef;--mu:#6b6e74;--gr:#4ade80;--gr-bg:rgba(74,222,128,0.08);--rd:#f87171;--am:#fbbf24}
+    body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:16px 14px 48px}
+    header{display:flex;align-items:center;justify-content:space-between;max-width:960px;margin:0 auto 24px;padding-bottom:16px;border-bottom:1px solid var(--bd);gap:10px;flex-wrap:wrap}
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo-icon{width:40px;height:40px;border-radius:9px;background:var(--sur2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:22px}
+    .logo-text{font-size:22px;font-weight:500}
+    .hright{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
+    .user-info{display:flex;flex-direction:column;align-items:flex-end}
+    .user-name{font-size:15px;font-weight:500}
+    .user-email{font-size:12px;color:var(--mu)}
+    .btn-sm{font-family:'Kanit',sans-serif;font-size:14px;padding:7px 16px;border-radius:99px;cursor:pointer;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);white-space:nowrap}
+    .btn-sm:hover{background:var(--sur);color:var(--tx)}
+    .btn-add{border-color:rgba(22,163,74,0.4);color:var(--gr);background:var(--gr-bg)}
+    .btn-add:hover{background:rgba(22,163,74,0.15)!important;color:var(--gr)!important}
+    .wrap{max-width:960px;margin:0 auto}
+    .section-title{font-size:13px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+    .dev-card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:20px;cursor:pointer;transition:all 0.15s;text-decoration:none;color:var(--tx);display:block;position:relative}
+    .dev-card:hover{border-color:rgba(22,163,74,0.4);box-shadow:0 2px 12px rgba(0,0,0,0.06);transform:translateY(-1px)}
+    .dev-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+    .dev-icon{width:44px;height:44px;border-radius:10px;background:var(--gr-bg);border:1px solid rgba(22,163,74,0.2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+    .dev-name{font-size:18px;font-weight:500;line-height:1.2}
+    .dev-id{font-size:12px;color:var(--mu);font-family:'Kanit',sans-serif;margin-top:2px}
+    .dev-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd)}
+    .dev-row:last-child{border-bottom:none}
+    .dev-label{font-size:14px;color:var(--mu)}
+    .dev-val{font-family:'Kanit',sans-serif;font-size:15px;font-weight:500}
+    .status-badge{font-size:12px;padding:3px 10px;border-radius:99px;font-family:'Kanit',sans-serif;font-weight:500}
+    .status-badge.run{background:var(--gr-bg);color:var(--gr);border:1px solid rgba(22,163,74,0.3)}
+    .status-badge.stop{background:var(--sur2);color:var(--mu);border:1px solid var(--bd)}
+    .status-badge.offline{background:rgba(220,38,38,0.08);color:var(--rd);border:1px solid rgba(220,38,38,0.3)}
+    .dev-del{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;font-family:'Kanit',sans-serif}
+    .dev-card:hover .dev-del{opacity:1}
+    .dev-del:hover{background:rgba(220,38,38,0.1);color:var(--rd);border-color:rgba(220,38,38,0.4)}
+    .dev-dl{position:absolute;top:12px;right:46px;width:28px;height:28px;border-radius:50%;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;font-family:'Kanit',sans-serif}
+    .dev-card:hover .dev-dl{opacity:1}
+    .dev-dl:hover{background:rgba(22,163,74,0.1);color:var(--gr);border-color:rgba(22,163,74,0.4)}
+    .empty{text-align:center;padding:48px 16px;color:var(--mu);grid-column:1/-1}
+    .empty-icon{font-size:48px;margin-bottom:12px}
+
+    /* Dialog */
+    .dov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+    .dov.show{display:flex}
+    .dbox{background:var(--sur);border:1px solid var(--bd2);border-radius:18px;padding:28px 24px 24px;max-width:480px;width:100%;margin:auto}
+    .dtitle{font-size:20px;font-weight:600;margin-bottom:4px}
+    .dsub{font-size:14px;color:var(--mu);margin-bottom:20px;line-height:1.5}
+    .section-sep{font-size:12px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.08em;margin:18px 0 10px;padding-top:18px;border-top:1px solid var(--bd)}
+    .ig{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+    .ilabel{font-size:13px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.04em}
+    .ifield{width:100%;background:var(--sur2);border:1px solid var(--bd2);border-radius:var(--rs);padding:11px 14px;font-family:'Kanit',sans-serif;font-size:16px;color:var(--tx);outline:none}
+    .ifield:focus{border-color:rgba(22,163,74,0.5)}
+    .ihint{font-size:12px;color:var(--mu);line-height:1.4}
+    .irow2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .dbtns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+    .dcancel{font-family:'Kanit',sans-serif;font-size:15px;padding:10px 20px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer}
+    .dconfirm{font-family:'Kanit',sans-serif;font-size:15px;padding:10px 24px;border-radius:99px;border:none;background:var(--gr);color:#fff;cursor:pointer;font-weight:500}
+    .dconfirm:hover{opacity:0.88}
+    .derr{font-size:13px;color:var(--rd);margin-top:8px;min-height:18px}
+    .pass-wrap{position:relative}
+    .pass-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;color:var(--mu);background:none;border:none;padding:4px}
+
+    /* auth guard overlay */
+    #auth-guard{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+    #auth-guard .spin{width:36px;height:36px;border:3px solid var(--bd2);border-top-color:var(--gr);border-radius:50%;animation:spin 0.7s linear infinite}
+    #auth-guard p{font-size:15px;color:var(--mu)}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:480px){
+      .irow2{grid-template-columns:1fr}
+      .hright{gap:6px}
+      .dbtns{flex-direction:column-reverse}
+      .dconfirm,.dcancel{width:100%;text-align:center}
+    }
+  </style>
+</head>
+<body>
+
+<div id="auth-guard"><div class="spin"></div><p>กำลังตรวจสอบสิทธิ์…</p></div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🥚</div>
+    <div class="logo-text">ตู้ฟักไข่</div>
+  </div>
+  <div class="hright">
+    <div class="user-info">
+      <div class="user-name" id="user-name">--</div>
+      <div class="user-email" id="user-email">--</div>
+    </div>
+    <button class="btn-sm btn-add" onclick="openClaimDlg()">+ เพิ่มตู้</button>
+    <button class="btn-sm" onclick="logout()">ออกจากระบบ</button>
+  </div>
+</header>
+
+<!-- Dialog Claim ตู้ -->
+<div class="dov" id="claim-dlg">
+  <div class="dbox" style="max-width:400px;">
+    <div class="dtitle">🥚 เพิ่มตู้ฟักไข่</div>
+    <div class="dsub">พิมพ์รหัสตู้จากสติ๊กเกอร์หรือสแกน QR บนกล่อง</div>
+
+    <!-- Step 1: กรอก ID -->
+    <div id="claim-step1">
+      <div class="ig">
+        <div class="ilabel">รหัสตู้ (Device ID)</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="ifield" id="claim-id" placeholder="incubator_01" autocomplete="off" style="flex:1">
+          <button onclick="openScanner()" style="font-family:'Kanit',sans-serif;font-size:13px;padding:9px 14px;border-radius:10px;border:1px solid var(--bd2);background:var(--sur2);color:var(--tx);cursor:pointer;white-space:nowrap;flex-shrink:0" title="สแกน QR Code">📷 สแกน</button>
+        </div>
+      </div>
+      <div class="derr" id="claim-err"></div>
+      <div class="dbtns">
+        <button class="dcancel" onclick="closeClaimDlg()">ยกเลิก</button>
+        <button class="dconfirm" id="claim-search-btn" onclick="searchDevice()">ค้นหาตู้ →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: ยืนยัน -->
+    <div id="claim-step2" style="display:none;">
+      <div style="background:var(--gr-bg);border:1px solid rgba(22,163,74,0.25);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+        <div style="font-size:16px;font-weight:500;" id="claim-dev-name">--</div>
+        <div style="font-size:13px;color:var(--mu);margin-top:4px;" id="claim-dev-id">--</div>
+      </div>
+      <div class="ig">
+        <div class="ilabel">ตั้งชื่อตู้ (ไม่บังคับ)</div>
+        <input class="ifield" id="claim-name-override" placeholder="เช่น ตู้ห้องนอน">
+        <div class="ihint">ถ้าไม่กรอกจะใช้ชื่อเดิม</div>
+      </div>
+      <div class="derr" id="claim-err2"></div>
+      <div class="dbtns">
+        <button class="dcancel" onclick="claimBack()">← กลับ</button>
+        <button class="dconfirm" id="claim-confirm-btn" onclick="claimDevice()">เพิ่มตู้นี้ ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dialog สแกน QR -->
+<div class="dov" id="scanner-dlg">
+  <div class="dbox" style="max-width:400px">
+    <div class="dtitle">📷 สแกน QR Code</div>
+
+    <!-- Tab switch -->
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button id="tab-camera" onclick="switchScanTab('camera')" style="flex:1;font-family:'Kanit',sans-serif;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--gr);background:var(--gr);color:#fff;cursor:pointer">📷 กล้อง</button>
+      <button id="tab-upload" onclick="switchScanTab('upload')" style="flex:1;font-family:'Kanit',sans-serif;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer">🖼 อัปโหลดรูป</button>
+    </div>
+
+    <!-- Camera view -->
+    <div id="scan-camera-view">
+      <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:1;margin-bottom:12px">
+        <video id="scanner-video" autoplay playsinline style="width:100%;height:100%;object-fit:cover;display:block"></video>
+        <canvas id="scanner-canvas" style="display:none"></canvas>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+          <div style="width:60%;aspect-ratio:1;border:3px solid rgba(255,255,255,0.8);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.35)"></div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--mu);text-align:center;margin-bottom:8px">จ่อกล้องไปที่ QR Code บนกล่องตู้</div>
+    </div>
+
+    <!-- Upload view -->
+    <div id="scan-upload-view" style="display:none">
+      <label for="qr-file-input" style="display:block;border:2px dashed var(--bd2);border-radius:12px;padding:32px 16px;text-align:center;cursor:pointer;margin-bottom:12px;transition:border-color .15s" id="qr-drop-zone">
+        <div style="font-size:36px;margin-bottom:8px">🖼</div>
+        <div style="font-size:15px;font-weight:500;margin-bottom:4px">คลิกหรือลากรูปมาวางที่นี่</div>
+        <div style="font-size:13px;color:var(--mu)">รองรับ JPG, PNG, GIF</div>
+        <input type="file" id="qr-file-input" accept="image/*" style="display:none">
+      </label>
+      <canvas id="qr-decode-canvas" style="display:none"></canvas>
+    </div>
+
+    <div class="derr" id="scanner-err" style="text-align:center"></div>
+    <div class="dbtns" style="justify-content:center">
+      <button class="dcancel" onclick="closeScanner()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dialog เพิ่มตู้ (manual/advanced) -->
+<div class="dov" id="add-dlg">
+  <div class="dbox">
+    <div class="dtitle">🥚 เพิ่มตู้ฟักไข่</div>
+    <div class="dsub">กรอกข้อมูลของ ESP32 ที่ต้องการเชื่อมต่อ<br>ข้อมูลจะถูกเก็บในบัญชีของคุณ</div>
+
+    <!-- ข้อมูลพื้นฐาน -->
+    <div class="section-sep" style="margin-top:0;padding-top:0;border-top:none;">ข้อมูลตู้</div>
+    <div class="irow2">
+      <div class="ig">
+        <div class="ilabel">Device ID *</div>
+        <input class="ifield" id="f-id" placeholder="incubator_01">
+        <div class="ihint">ตัวอักษร ตัวเลข ขีดล่าง</div>
+      </div>
+      <div class="ig">
+        <div class="ilabel">ชื่อตู้ *</div>
+        <input class="ifield" id="f-name" placeholder="ตู้ที่ 1 — ไก่">
+      </div>
+    </div>
+
+    <!-- WiFi -->
+    <div class="section-sep">WiFi ของ ESP32</div>
+    <div class="ig">
+      <div class="ilabel">WiFi SSID *</div>
+      <input class="ifield" id="f-ssid" placeholder="ชื่อ WiFi">
+    </div>
+    <div class="ig">
+      <div class="ilabel">WiFi Password</div>
+      <div class="pass-wrap">
+        <input class="ifield" id="f-wpass" type="password" placeholder="รหัส WiFi">
+        <button class="pass-toggle" onclick="togglePass('f-wpass',this)">👁</button>
+      </div>
+      <div class="ihint">เก็บไว้อ้างอิงเมื่อตั้งค่า ESP32 ใหม่</div>
+    </div>
+
+    <!-- Firebase config -->
+    <div class="section-sep">Firebase ของตู้นี้</div>
+    <div class="dsub" style="margin-bottom:12px;font-size:13px;">
+      ดูได้ที่ Firebase Console → Project Settings → Your apps → Web app → Config
+    </div>
+    <div class="ig">
+      <div class="ilabel">Database URL *</div>
+      <input class="ifield" id="f-dburl" placeholder="https://xxx-default-rtdb.asia-southeast1.firebasedatabase.app">
+    </div>
+    <div class="irow2">
+      <div class="ig">
+        <div class="ilabel">API Key *</div>
+        <input class="ifield" id="f-apikey" placeholder="AIzaSy...">
+      </div>
+      <div class="ig">
+        <div class="ilabel">Project ID *</div>
+        <input class="ifield" id="f-projid" placeholder="my-project-xxxxx">
+      </div>
+    </div>
+    <div class="irow2">
+      <div class="ig">
+        <div class="ilabel">App ID *</div>
+        <input class="ifield" id="f-appid" placeholder="1:123:web:abc">
+      </div>
+      <div class="ig">
+        <div class="ilabel">Messaging Sender ID</div>
+        <input class="ifield" id="f-msid" placeholder="123456789">
+      </div>
+    </div>
+    <div class="ig">
+      <div class="ilabel">Auth Email (ESP32 login)</div>
+      <input class="ifield" id="f-femail" placeholder="xxx@gmail.com">
+    </div>
+    <div class="ig">
+      <div class="ilabel">Auth Password (ESP32 login)</div>
+      <div class="pass-wrap">
+        <input class="ifield" id="f-fpass" type="password" placeholder="รหัสผ่าน Firebase Auth">
+        <button class="pass-toggle" onclick="togglePass('f-fpass',this)">👁</button>
+      </div>
+    </div>
+
+    <div class="derr" id="add-err"></div>
+    <div class="dbtns">
+      <button class="dcancel" onclick="closeAddDlg()">ยกเลิก</button>
+      <button class="dconfirm" onclick="saveDevice()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dialog ยืนยันลบ -->
+<div class="dov" id="del-dlg">
+  <div class="dbox" style="max-width:360px;">
+    <div style="font-size:32px;margin-bottom:12px;">🗑️</div>
+    <div class="dtitle">ลบตู้นี้?</div>
+    <div class="dsub" id="del-name" style="margin-top:6px;"></div>
+    <div class="dbtns">
+      <button class="dcancel" onclick="closeDelDlg()">ยกเลิก</button>
+      <button class="dconfirm" style="background:var(--rd);" onclick="confirmDelete()">ลบ</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="section-title">ตู้ฟักไข่ของคุณ</div>
+  <div class="grid" id="grid">
+    <div style="background:var(--sur2);border-radius:var(--ra);height:140px;animation:sk 1.2s ease-in-out infinite"></div>
+    <div style="background:var(--sur2);border-radius:var(--ra);height:140px;animation:sk 1.2s ease-in-out infinite;animation-delay:0.2s"></div>
+  </div>
+</div>
+
+<style>@keyframes sk{0%,100%{opacity:1}50%{opacity:0.4}}</style>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
+
+<script type="module">
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref, get, set, update, remove, onValue }
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+// ── Firebase หลัก (เก็บ user data) ──
+const masterApp = initializeApp({
+  apiKey:"AIzaSyCnBjSbD4zZpc-t0QfK7i5PlfQfuSgdyRw",
+  authDomain:"eggproject-cf0bc.firebaseapp.com",
+  databaseURL:"https://eggproject-cf0bc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"eggproject-cf0bc",
+  storageBucket:"eggproject-cf0bc.firebasestorage.app",
+  messagingSenderId:"630146139668",
+  appId:"1:630146139668:web:58b60cbbeb16b6ad7c0901"
+});
+const auth   = getAuth(masterApp);
+const masterDb = getDatabase(masterApp);
+
+let currentUser = null;
+let deleteTarget = null;
+const liveUnsubs = {};  // cleanup realtime listeners
+
+// ── Auth guard ──
+onAuthStateChanged(auth, async user => {
+  if (!user) { location.href = 'login.html'; return; }
+  document.getElementById('auth-guard').style.display = 'none';
+  currentUser = user;
+  document.getElementById('user-name').textContent  = user.displayName || 'ผู้ใช้';
+  document.getElementById('user-email').textContent = user.email;
+
+  // โหลด profile + เช็ค role (auto-save จาก Firebase Auth ถ้ายังไม่มี)
+  const profileSnap = await get(ref(masterDb, `users/${user.uid}/profile`));
+  let p = profileSnap.val() || {};
+  const needsUpdate = !p.name || !p.email;
+  if (needsUpdate) {
+    const patch = {};
+    if (!p.name  && (user.displayName || user.email)) patch.name  = user.displayName || user.email.split('@')[0];
+    if (!p.email && user.email)                        patch.email = user.email;
+    if (!p.role)                                       patch.role  = 'user';
+    if (!p.createdAt)                                  patch.createdAt = Date.now();
+    await update(ref(masterDb, `users/${user.uid}/profile`), patch);
+    p = { ...p, ...patch };
+  }
+  document.getElementById('user-name').textContent = p.name || user.displayName || 'ผู้ใช้';
+  if (p.role === 'admin') {
+    const btn = document.createElement('button');
+    btn.className = 'btn-sm';
+    btn.style.cssText = 'border-color:rgba(220,38,38,0.4);color:var(--rd);background:rgba(220,38,38,0.06)';
+    btn.textContent = '⚙ Admin Panel';
+    btn.onclick = () => location.href = 'admin.html';
+    document.querySelector('.hright').prepend(btn);
+    document.querySelector('.section-title').textContent = 'ตู้ทั้งหมดในระบบ';
+    loadAllDevices();
+  } else {
+    loadDevices(user.uid);
+  }
+});
+
+// ── โหลดตู้ทั้งหมด ──
+function loadDevices(uid) {
+  onValue(ref(masterDb, `users/${uid}/devices`), snap => {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+
+    if (!snap.exists()) {
+      grid.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><div style="font-size:15px;">ยังไม่มีตู้ กด <strong>+ เพิ่มตู้</strong> เพื่อเริ่มต้น</div></div>`;
+      return;
+    }
+
+    Object.entries(snap.val()).forEach(([devId, cfg]) => {
+      const card = document.createElement('a');
+      card.className = 'dev-card';
+      card.href = `index.html?device=${devId}`;
+      card.innerHTML = `
+        <button class="dev-del" onclick="openDelDlg(event,'${devId}','${cfg.name||devId}')" title="ลบตู้">✕</button>
+        <div class="dev-top">
+          <div class="dev-icon">🥚</div>
+          <div>
+            <div class="dev-name">${cfg.name || devId}</div>
+            <div class="dev-id">${devId}</div>
+          </div>
+        </div>
+        <div class="dev-row">
+          <span class="dev-label">อุณหภูมิ</span>
+          <span class="dev-val" id="t-${devId}">--°C</span>
+        </div>
+        <div class="dev-row">
+          <span class="dev-label">ความชื้น</span>
+          <span class="dev-val" id="h-${devId}">--%</span>
+        </div>
+        <div class="dev-row">
+          <span class="dev-label">WiFi</span>
+          <span class="dev-val" style="font-size:13px;color:var(--mu);">${cfg.wifiSSID || '--'}</span>
+        </div>
+        <div class="dev-row" style="border-bottom:none;">
+          <span class="dev-label">สถานะ</span>
+          <span class="status-badge offline" id="s-${devId}">ไม่ได้เชื่อมต่อ</span>
+        </div>`;
+      grid.appendChild(card);
+
+      // ── subscribe live data จาก Firebase ของตู้นี้ ──
+      if (liveUnsubs[devId]) liveUnsubs[devId]();
+      try {
+        const devApp = getOrInitDevApp(devId, cfg);
+        if (devApp) {
+          const devDb = getDatabase(devApp);
+          liveUnsubs[devId] = onValue(ref(devDb, `incubators/${devId}/current`), s => {
+            const d = s.val();
+            const tEl = document.getElementById(`t-${devId}`);
+            const hEl = document.getElementById(`h-${devId}`);
+            const sEl = document.getElementById(`s-${devId}`);
+            if (tEl) tEl.textContent = d?.temp    != null ? parseFloat(d.temp).toFixed(1)+'°C' : '--°C';
+            if (hEl) hEl.textContent = d?.humidity != null ? parseFloat(d.humidity).toFixed(0)+'%' : '--%';
+            if (sEl && d) {
+              const run = d.systemState === 'RUN';
+              sEl.textContent  = run ? 'กำลังทำงาน' : 'หยุด';
+              sEl.className    = 'status-badge ' + (run ? 'run' : 'stop');
+            }
+          });
+        }
+      } catch(e) { console.warn('devApp init fail:', devId, e.message); }
+    });
+  });
+}
+
+// ── Admin: โหลดตู้ทั้งหมดในระบบ ──
+function loadAllDevices() {
+  onValue(ref(masterDb, 'devices'), snap => {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    if (!snap.exists()) {
+      grid.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><div style="font-size:15px;">ยังไม่มีตู้ลงทะเบียนในระบบ</div></div>`;
+      return;
+    }
+    Object.entries(snap.val()).forEach(([devId, cfg]) => {
+      const claimed = cfg.status === 'claimed';
+      const card = document.createElement('a');
+      card.className = 'dev-card';
+      card.href = `index.html?device=${devId}`;
+      card.innerHTML = `
+        <button class="dev-dl" onclick="downloadSecretsAdmin(event,'${devId}')" title="ดาวน์โหลด secrets.h">⬇</button>
+        <div class="dev-top">
+          <div class="dev-icon">🥚</div>
+          <div>
+            <div class="dev-name">${cfg.name || devId}</div>
+            <div class="dev-id">${devId}</div>
+          </div>
+        </div>
+        <div class="dev-row">
+          <span class="dev-label">อุณหภูมิ</span>
+          <span class="dev-val" id="t-${devId}">--°C</span>
+        </div>
+        <div class="dev-row">
+          <span class="dev-label">ความชื้น</span>
+          <span class="dev-val" id="h-${devId}">--%</span>
+        </div>
+        <div class="dev-row">
+          <span class="dev-label">เจ้าของ</span>
+          <span class="dev-val" style="font-size:13px;color:var(--mu);">${claimed ? 'มีเจ้าของแล้ว' : 'ยังไม่มีเจ้าของ'}</span>
+        </div>
+        <div class="dev-row" style="border-bottom:none;">
+          <span class="dev-label">สถานะ</span>
+          <span class="status-badge offline" id="s-${devId}">ไม่ได้เชื่อมต่อ</span>
+        </div>`;
+      grid.appendChild(card);
+
+      // subscribe live data
+      if (liveUnsubs[devId]) liveUnsubs[devId]();
+      try {
+        const devApp = getOrInitDevApp(devId, cfg);
+        if (devApp) {
+          const devDb = getDatabase(devApp);
+          liveUnsubs[devId] = onValue(ref(devDb, `incubators/${devId}/current`), s => {
+            const d = s.val();
+            const tEl = document.getElementById(`t-${devId}`);
+            const hEl = document.getElementById(`h-${devId}`);
+            const sEl = document.getElementById(`s-${devId}`);
+            if (tEl) tEl.textContent = d?.temp     != null ? parseFloat(d.temp).toFixed(1)+'°C' : '--°C';
+            if (hEl) hEl.textContent = d?.humidity != null ? parseFloat(d.humidity).toFixed(0)+'%' : '--%';
+            if (sEl && d) {
+              const run = d.systemState === 'RUN';
+              sEl.textContent = run ? 'กำลังทำงาน' : 'หยุด';
+              sEl.className   = 'status-badge ' + (run ? 'run' : 'stop');
+            }
+          });
+        }
+      } catch(e) { console.warn('devApp init fail:', devId, e.message); }
+    });
+  });
+}
+
+// ── Admin: downloadSecrets จาก /devices ──
+function downloadSecretsAdmin(e, devId) {
+  e.preventDefault(); e.stopPropagation();
+  get(ref(masterDb, `devices/${devId}`)).then(snap => {
+    const c = snap.val(); if (!c) return;
+    const content = `#pragma once
+// Auto-generated by ProjectEgg2026 Dashboard (Admin)
+// Device: ${c.name || devId}
+
+#define WIFI_SSID     "${c.wifiSSID || ''}"
+#define WIFI_PASSWORD "${c.wifiPassword || ''}"
+
+#define DEVICE_ID     "${devId}"
+#define DEVICE_NAME   "${c.name || devId}"
+
+#define API_KEY       "${c.firebaseApiKey || ''}"
+#define DATABASE_URL  "${c.firebaseDatabaseURL || ''}"
+#define PROJECT_ID    "${c.firebaseProjectId || ''}"
+#define USER_EMAIL    "${c.authEmail || ''}"
+#define USER_PASSWORD "${c.authPassword || ''}"
+
+#define LINE_TOKEN    "YOUR_LINE_TOKEN_HERE"
+#define OTA_PASSWORD  "YOUR_OTA_PASSWORD_HERE"
+`;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));
+    a.download = `secrets_${devId}.h`; a.click();
+    URL.revokeObjectURL(a.href);
+  });
+}
+window.downloadSecretsAdmin = downloadSecretsAdmin;
+
+// ── init Firebase app ของตู้ (reuse ถ้ามีแล้ว) ──
+function getOrInitDevApp(devId, cfg) {
+  if (!cfg.firebaseApiKey || !cfg.firebaseDatabaseURL) return null;
+  const name = 'dev_' + devId;
+  try { return getApp(name); } catch(_) {}
+  return initializeApp({
+    apiKey:            cfg.firebaseApiKey,
+    authDomain:        cfg.firebaseProjectId + '.firebaseapp.com',
+    databaseURL:       cfg.firebaseDatabaseURL,
+    projectId:         cfg.firebaseProjectId,
+    storageBucket:     cfg.firebaseProjectId + '.firebasestorage.app',
+    messagingSenderId: cfg.firebaseMsgId || '',
+    appId:             cfg.firebaseAppId,
+  }, name);
+}
+
+// ── Claim Device ──
+let claimFoundCfg = null;
+let claimFoundId  = null;
+
+function openClaimDlg() {
+  document.getElementById('claim-id').value = '';
+  document.getElementById('claim-name-override').value = '';
+  document.getElementById('claim-err').textContent  = '';
+  document.getElementById('claim-err2').textContent = '';
+  document.getElementById('claim-step1').style.display = '';
+  document.getElementById('claim-step2').style.display = 'none';
+  claimFoundCfg = null; claimFoundId = null;
+  const searchBtn = document.getElementById('claim-search-btn');
+  if (searchBtn) { searchBtn.disabled = false; searchBtn.textContent = 'ค้นหาตู้ →'; }
+  const confirmBtn = document.getElementById('claim-confirm-btn');
+  if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'เพิ่มตู้นี้ ✓'; }
+  document.getElementById('claim-dlg').classList.add('show');
+}
+function closeClaimDlg() {
+  document.getElementById('claim-dlg').classList.remove('show');
+}
+function claimBack() {
+  document.getElementById('claim-step1').style.display = '';
+  document.getElementById('claim-step2').style.display = 'none';
+}
+window.openClaimDlg  = openClaimDlg;
+window.closeClaimDlg = closeClaimDlg;
+window.claimBack     = claimBack;
+
+async function searchDevice() {
+  const devId = document.getElementById('claim-id').value.trim().replace(/\s+/g,'_');
+  const err   = document.getElementById('claim-err');
+  if (!devId) { err.textContent = 'กรุณากรอกรหัสตู้'; return; }
+
+  const btn = document.getElementById('claim-search-btn');
+  btn.disabled = true; btn.textContent = 'กำลังค้นหา…'; err.textContent = '';
+
+  try {
+    // ตรวจว่าตู้นี้อยู่ใน registry แล้วหรือยัง
+    const snap = await get(ref(masterDb, `devices/${devId}`));
+    if (!snap.exists()) {
+      err.textContent = 'ไม่พบตู้รหัสนี้ในระบบ — กรุณาตรวจสอบรหัสอีกครั้ง';
+      btn.disabled = false; btn.textContent = 'ค้นหาตู้ →';
+      return;
+    }
+    const cfg = snap.val();
+    if (cfg.ownerUid && cfg.ownerUid !== currentUser.uid) {
+      err.textContent = 'ตู้นี้ถูกลงทะเบียนโดยบัญชีอื่นแล้ว';
+      btn.disabled = false; btn.textContent = 'ค้นหาตู้ →';
+      return;
+    }
+    // แสดง step 2
+    claimFoundCfg = cfg;
+    claimFoundId  = devId;
+    document.getElementById('claim-dev-name').textContent = cfg.name || devId;
+    document.getElementById('claim-dev-id').textContent   = devId;
+    document.getElementById('claim-step1').style.display = 'none';
+    document.getElementById('claim-step2').style.display = '';
+  } catch(e) {
+    err.textContent = 'เกิดข้อผิดพลาด: ' + e.message;
+  }
+  btn.disabled = false; btn.textContent = 'ค้นหาตู้ →';
+}
+window.searchDevice = searchDevice;
+
+async function claimDevice() {
+  if (!claimFoundCfg || !claimFoundId || !currentUser) return;
+  const nameOverride = document.getElementById('claim-name-override').value.trim();
+  const err = document.getElementById('claim-err2');
+  const btn = document.getElementById('claim-confirm-btn');
+  btn.disabled = true; btn.textContent = 'กำลังเพิ่ม…'; err.textContent = '';
+
+  try {
+    const finalName = nameOverride || claimFoundCfg.name || claimFoundId;
+    // บันทึกตู้ใน users/{uid}/devices
+    await set(ref(masterDb, `users/${currentUser.uid}/devices/${claimFoundId}`), {
+      name:                  finalName,
+      wifiSSID:              claimFoundCfg.wifiSSID              || '',
+      wifiPassword:          claimFoundCfg.wifiPassword          || '',
+      firebaseDatabaseURL:   claimFoundCfg.firebaseDatabaseURL   || '',
+      firebaseApiKey:        claimFoundCfg.firebaseApiKey        || '',
+      firebaseProjectId:     claimFoundCfg.firebaseProjectId     || '',
+      firebaseAppId:         claimFoundCfg.firebaseAppId         || '',
+      firebaseMsgId:         claimFoundCfg.firebaseMsgId         || '',
+      authEmail:             claimFoundCfg.authEmail             || '',
+      authPassword:          claimFoundCfg.authPassword          || '',
+      addedAt:               Date.now(),
+    });
+    // อัปเดต status ใน /devices registry
+    await set(ref(masterDb, `devices/${claimFoundId}/ownerUid`), currentUser.uid);
+    await set(ref(masterDb, `devices/${claimFoundId}/status`),   'claimed');
+    closeClaimDlg();
+  } catch(e) {
+    err.textContent = 'เกิดข้อผิดพลาด: ' + e.message;
+    btn.disabled = false; btn.textContent = 'เพิ่มตู้นี้ ✓';
+  }
+}
+window.claimDevice = claimDevice;
+
+// ── QR Scanner ──
+let scannerStream = null;
+let scannerRaf    = null;
+
+function switchScanTab(tab) {
+  const isCamera = tab === 'camera';
+  document.getElementById('scan-camera-view').style.display = isCamera ? '' : 'none';
+  document.getElementById('scan-upload-view').style.display = isCamera ? 'none' : '';
+  document.getElementById('tab-camera').style.cssText = isCamera
+    ? 'flex:1;font-family:Kanit,sans-serif;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--gr);background:var(--gr);color:#fff;cursor:pointer'
+    : 'flex:1;font-family:Kanit,sans-serif;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer';
+  document.getElementById('tab-upload').style.cssText = isCamera
+    ? 'flex:1;font-family:Kanit,sans-serif;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer'
+    : 'flex:1;font-family:Kanit,sans-serif;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--gr);background:var(--gr);color:#fff;cursor:pointer';
+  document.getElementById('scanner-err').textContent = '';
+  document.getElementById('qr-file-input').value = '';
+  if (isCamera) {
+    startCamera();
+  } else {
+    stopCamera();
+  }
+}
+window.switchScanTab = switchScanTab;
+
+async function startCamera() {
+  document.getElementById('scanner-err').textContent = '';
+  try {
+    scannerStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const video = document.getElementById('scanner-video');
+    video.srcObject = scannerStream;
+    await video.play();
+    tickScan();
+  } catch(e) {
+    document.getElementById('scanner-err').textContent = 'ไม่สามารถเข้าถึงกล้องได้ — ลองอัปโหลดรูปแทน';
+    switchScanTab('upload');
+  }
+}
+
+function stopCamera() {
+  if (scannerRaf) { cancelAnimationFrame(scannerRaf); scannerRaf = null; }
+  if (scannerStream) { scannerStream.getTracks().forEach(t => t.stop()); scannerStream = null; }
+  const video = document.getElementById('scanner-video');
+  video.srcObject = null;
+}
+
+async function openScanner() {
+  document.getElementById('scanner-err').textContent = '';
+  document.getElementById('qr-file-input').value = '';
+  document.getElementById('scanner-dlg').classList.add('show');
+  switchScanTab('camera');
+}
+
+function tickScan() {
+  const video  = document.getElementById('scanner-video');
+  const canvas = document.getElementById('scanner-canvas');
+  if (!scannerStream || video.readyState !== video.HAVE_ENOUGH_DATA) {
+    scannerRaf = requestAnimationFrame(tickScan); return;
+  }
+  canvas.width  = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(video, 0, 0);
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imgData.data, canvas.width, canvas.height, { inversionAttempts: 'dontInvert' });
+  if (code && code.data) {
+    closeScanner();
+    document.getElementById('claim-id').value = code.data.trim();
+    searchDevice();
+    return;
+  }
+  scannerRaf = requestAnimationFrame(tickScan);
+}
+
+async function decodeQrFromFile(file) {
+  if (!file) return;
+  const err = document.getElementById('scanner-err');
+  err.style.color = 'var(--mu)';
+  err.textContent = 'กำลังอ่าน QR…';
+
+  // โหลดรูปผ่าน Image element
+  const url = URL.createObjectURL(file);
+  const img = await new Promise((res, rej) => {
+    const i = new Image();
+    i.onload = () => res(i);
+    i.onerror = rej;
+    i.src = url;
+  }).catch(() => null);
+  URL.revokeObjectURL(url);
+
+  if (!img) {
+    err.style.color = 'var(--rd)';
+    err.textContent = 'ไม่สามารถโหลดรูปภาพได้';
+    return;
+  }
+
+  const canvas = document.getElementById('qr-decode-canvas');
+  const ctx    = canvas.getContext('2d', { willReadFrequently: true });
+  const W = img.naturalWidth, H = img.naturalHeight;
+
+  // ลองหลายขนาด: ต้นฉบับ → 600px → 300px → 1200px
+  const scales = [1, 600/Math.max(W,H), 300/Math.max(W,H), 1200/Math.max(W,H)];
+  for (const s of scales) {
+    const w = Math.round(W*s), h = Math.round(H*s);
+    canvas.width = w; canvas.height = h;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    const d = ctx.getImageData(0, 0, w, h);
+    for (const m of ['attemptBoth', 'dontInvert', 'invertFirst']) {
+      const code = jsQR(d.data, w, h, { inversionAttempts: m });
+      if (code && code.data) { onQrFound(code.data); return; }
+    }
+  }
+
+  err.style.color = 'var(--rd)';
+  err.textContent = `ไม่พบ QR Code (รูป ${W}×${H}px) — ลองดาวน์โหลด PNG ใหม่จาก Admin แล้วอัปโหลด`;
+  document.getElementById('qr-file-input').value = '';
+}
+
+function onQrFound(text) {
+  closeScanner();
+  document.getElementById('claim-id').value = text.trim();
+  searchDevice();
+}
+// bind file input + drag-drop inside module (ไม่ใช้ onchange attribute)
+document.getElementById('qr-file-input').addEventListener('change', e => {
+  if (e.target.files[0]) decodeQrFromFile(e.target.files[0]);
+});
+const dropZone = document.getElementById('qr-drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--gr)'; });
+dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'var(--bd2)'; });
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.style.borderColor = 'var(--bd2)';
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) decodeQrFromFile(file);
+});
+
+function closeScanner() {
+  stopCamera();
+  document.getElementById('scanner-dlg').classList.remove('show');
+}
+window.openScanner  = openScanner;
+window.closeScanner = closeScanner;
+
+// ── Dialog เพิ่มตู้ (manual) ──
+function openAddDlg() {
+  ['f-id','f-name','f-ssid','f-wpass','f-dburl','f-apikey','f-projid','f-appid','f-msid','f-femail','f-fpass']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('add-err').textContent = '';
+  const dlg = document.getElementById('add-dlg');
+  dlg.classList.add('show');
+}
+function closeAddDlg() { document.getElementById('add-dlg').classList.remove('show'); }
+window.openAddDlg = openAddDlg;
+window.closeAddDlg = closeAddDlg;
+
+async function saveDevice() {
+  const devId  = document.getElementById('f-id').value.trim().replace(/\s+/g,'_');
+  const name   = document.getElementById('f-name').value.trim();
+  const ssid   = document.getElementById('f-ssid').value.trim();
+  const wpass  = document.getElementById('f-wpass').value;
+  const dburl  = document.getElementById('f-dburl').value.trim();
+  const apikey = document.getElementById('f-apikey').value.trim();
+  const projid = document.getElementById('f-projid').value.trim();
+  const appid  = document.getElementById('f-appid').value.trim();
+  const msid   = document.getElementById('f-msid').value.trim();
+  const femail = document.getElementById('f-femail').value.trim();
+  const fpass  = document.getElementById('f-fpass').value;
+  const err    = document.getElementById('add-err');
+
+  if (!devId)  { err.textContent = 'กรุณากรอก Device ID'; return; }
+  if (!name)   { err.textContent = 'กรุณากรอกชื่อตู้'; return; }
+  if (!ssid)   { err.textContent = 'กรุณากรอก WiFi SSID'; return; }
+  if (!dburl)  { err.textContent = 'กรุณากรอก Database URL'; return; }
+  if (!apikey) { err.textContent = 'กรุณากรอก API Key'; return; }
+  if (!projid) { err.textContent = 'กรุณากรอก Project ID'; return; }
+  if (!appid)  { err.textContent = 'กรุณากรอก App ID'; return; }
+
+  err.textContent = '';
+  const data = {
+    name, wifiSSID: ssid, wifiPassword: wpass,
+    firebaseDatabaseURL: dburl, firebaseApiKey: apikey,
+    firebaseProjectId: projid, firebaseAppId: appid,
+    firebaseMsgId: msid,
+    firebaseAuthEmail: femail, firebaseAuthPassword: fpass,
+    addedAt: Date.now()
+  };
+
+  await set(ref(masterDb, `users/${currentUser.uid}/devices/${devId}`), data);
+  closeAddDlg();
+}
+window.saveDevice = saveDevice;
+
+// ── Dialog ลบตู้ ──
+function openDelDlg(e, devId, devName) {
+  e.preventDefault(); e.stopPropagation();
+  deleteTarget = devId;
+  document.getElementById('del-name').textContent = `"${devName}" จะถูกลบออกจากบัญชีของคุณ`;
+  document.getElementById('del-dlg').classList.add('show');
+}
+function closeDelDlg() { document.getElementById('del-dlg').classList.remove('show'); deleteTarget=null; }
+async function confirmDelete() {
+  if (!deleteTarget || !currentUser) return;
+  if (liveUnsubs[deleteTarget]) { liveUnsubs[deleteTarget](); delete liveUnsubs[deleteTarget]; }
+  await remove(ref(masterDb, `users/${currentUser.uid}/devices/${deleteTarget}`));
+  closeDelDlg();
+}
+window.openDelDlg   = openDelDlg;
+window.closeDelDlg  = closeDelDlg;
+window.confirmDelete = confirmDelete;
+
+// ── Download secrets.h ──
+function downloadSecrets(e, devId) {
+  e.preventDefault(); e.stopPropagation();
+  if (!currentUser) return;
+  get(ref(masterDb, `users/${currentUser.uid}/devices/${devId}`)).then(snap => {
+    const c = snap.val();
+    if (!c) return;
+    const content = `#pragma once
+// Auto-generated by ProjectEgg2026 Dashboard
+// Device: ${c.name || devId}  |  Generated: ${new Date().toLocaleString('th-TH')}
+
+// ── WiFi ──
+#define WIFI_SSID     "${c.wifiSsid || ''}"
+#define WIFI_PASSWORD "${c.wifiPassword || ''}"
+
+// ── Device Identity ──
+#define DEVICE_ID     "${devId}"
+#define DEVICE_NAME   "${c.name || devId}"
+
+// ── Firebase (per-device project) ──
+#define FIREBASE_API_KEY        "${c.firebaseApiKey || ''}"
+#define FIREBASE_DATABASE_URL   "${c.firebaseDatabaseURL || ''}"
+#define FIREBASE_PROJECT_ID     "${c.firebaseProjectId || ''}"
+#define FIREBASE_APP_ID         "${c.firebaseAppId || ''}"
+#define FIREBASE_SENDER_ID      "${c.firebaseMessagingSenderId || ''}"
+#define FIREBASE_AUTH_EMAIL     "${c.authEmail || ''}"
+#define FIREBASE_AUTH_PASSWORD  "${c.authPassword || ''}"
+
+// ── LINE Notify ── (กรอกเอง)
+#define LINE_TOKEN    "YOUR_LINE_TOKEN_HERE"
+
+// ── OTA ── (กรอกเอง)
+#define OTA_PASSWORD  "YOUR_OTA_PASSWORD_HERE"
+`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `secrets_${devId}.h`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+}
+window.downloadSecrets = downloadSecrets;
+
+// ── Toggle password visibility ──
+function togglePass(fieldId, btn) {
+  const f = document.getElementById(fieldId);
+  f.type = f.type === 'password' ? 'text' : 'password';
+  btn.textContent = f.type === 'password' ? '👁' : '🔒';
+}
+window.togglePass = togglePass;
+
+// ── Logout ──
+async function logout() {
+  Object.values(liveUnsubs).forEach(u => u());
+  await signOut(auth);
+  location.href = 'login.html';
+}
+window.logout = logout;
+
+// close dialog on backdrop click
+document.getElementById('add-dlg').addEventListener('click', e => { if(e.target===document.getElementById('add-dlg')) closeAddDlg(); });
+document.getElementById('del-dlg').addEventListener('click', e => { if(e.target===document.getElementById('del-dlg')) closeDelDlg(); });
+</script>
+</body>
+</html>

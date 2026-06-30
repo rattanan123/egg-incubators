@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เข้าสู่ระบบ — ตู้ฟักไข่</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#f5f6f8;--sur:#fff;--sur2:#f0f2f5;--bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.15);--tx:#1a1a1a;--mu:#6b7280;--gr:#16a34a;--rd:#dc2626;--rs:10px}
+    body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+    .card{background:var(--sur);border:1px solid var(--bd);border-radius:20px;padding:36px 32px;max-width:400px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
+    .logo{text-align:center;margin-bottom:28px}
+    .logo-icon{font-size:48px;margin-bottom:8px}
+    .logo-title{font-size:24px;font-weight:600}
+    .logo-sub{font-size:15px;color:var(--mu);margin-top:4px}
+    .tabs{display:flex;gap:0;margin-bottom:24px;border:1px solid var(--bd2);border-radius:99px;padding:3px;background:var(--sur2)}
+    .tab{flex:1;text-align:center;padding:9px;border-radius:99px;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.15s;color:var(--mu);border:none;background:transparent;font-family:'Kanit',sans-serif}
+    .tab.active{background:var(--sur);color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+    .form{display:none}.form.active{display:block}
+    .ig{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+    .label{font-size:13px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.05em}
+    .field{width:100%;background:var(--sur2);border:1px solid var(--bd2);border-radius:var(--rs);padding:12px 14px;font-family:'Kanit',sans-serif;font-size:18px;color:var(--tx);outline:none;transition:border-color 0.15s}
+    .field:focus{border-color:rgba(22,163,74,0.5);background:#fff}
+    .btn{width:100%;font-family:'Kanit',sans-serif;font-size:18px;font-weight:500;padding:14px;border-radius:99px;cursor:pointer;background:var(--gr);color:#fff;border:none;margin-top:4px;transition:opacity 0.2s}
+    .btn:hover:not(:disabled){opacity:0.88}
+    .btn:disabled{opacity:0.4;cursor:not-allowed}
+    .err{font-size:14px;color:var(--rd);margin-top:10px;text-align:center;min-height:20px;line-height:1.4}
+    .hint{font-size:13px;color:var(--mu);margin-top:6px;line-height:1.4}
+    .divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--mu);font-size:13px}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--bd)}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">🥚</div>
+    <div class="logo-title">ตู้ฟักไข่อัจฉริยะ</div>
+    <div class="logo-sub">ProjectEgg — Smart Incubator</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('login')">เข้าสู่ระบบ</button>
+    <button class="tab" onclick="switchTab('register')">สมัครสมาชิก</button>
+  </div>
+
+  <!-- Login Form -->
+  <div class="form active" id="form-login">
+    <div class="ig">
+      <div class="label">อีเมล</div>
+      <input class="field" type="email" id="l-email" placeholder="email@example.com" autocomplete="email">
+    </div>
+    <div class="ig">
+      <div class="label">รหัสผ่าน</div>
+      <input class="field" type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn" id="l-btn" onclick="login()">เข้าสู่ระบบ</button>
+    <div class="err" id="l-err"></div>
+  </div>
+
+  <!-- Register Form -->
+  <div class="form" id="form-register">
+    <div class="ig">
+      <div class="label">ชื่อ-นามสกุล</div>
+      <input class="field" type="text" id="r-name" placeholder="เช่น สมชาย ใจดี" autocomplete="name">
+    </div>
+    <div class="ig">
+      <div class="label">อีเมล</div>
+      <input class="field" type="email" id="r-email" placeholder="email@example.com" autocomplete="email">
+    </div>
+    <div class="ig">
+      <div class="label">รหัสผ่าน</div>
+      <input class="field" type="password" id="r-pass" placeholder="อย่างน้อย 6 ตัวอักษร" autocomplete="new-password">
+    </div>
+    <div class="ig">
+      <div class="label">ยืนยันรหัสผ่าน</div>
+      <input class="field" type="password" id="r-pass2" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <div class="hint">หลังสมัครแล้วต้องรอ Admin อนุมัติก่อนจึงจะเพิ่มตู้ได้<br>หรือ Admin สามารถสร้างบัญชีให้ได้โดยตรง</div>
+    <button class="btn" id="r-btn" onclick="register()" style="margin-top:12px;">สมัครสมาชิก</button>
+    <div class="err" id="r-err"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+         updateProfile, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref, set, get }
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyCnBjSbD4zZpc-t0QfK7i5PlfQfuSgdyRw",
+  authDomain:"eggproject-cf0bc.firebaseapp.com",
+  databaseURL:"https://eggproject-cf0bc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"eggproject-cf0bc",
+  storageBucket:"eggproject-cf0bc.firebasestorage.app",
+  messagingSenderId:"630146139668",
+  appId:"1:630146139668:web:58b60cbbeb16b6ad7c0901"
+});
+const auth = getAuth(app);
+const db   = getDatabase(app);
+
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    const snap = await get(ref(db, `users/${user.uid}/profile`));
+    const role = snap.val()?.role;
+    location.href = role === 'admin' ? 'admin.html' : 'dashboard.html';
+  }
+});
+
+const ERR_MAP = {
+  'auth/invalid-credential':  'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+  'auth/user-not-found':      'ไม่พบบัญชีนี้',
+  'auth/wrong-password':      'รหัสผ่านไม่ถูกต้อง',
+  'auth/too-many-requests':   'พยายามเข้าสู่ระบบบ่อยเกินไป รอสักครู่',
+  'auth/email-already-in-use':'อีเมลนี้ถูกใช้แล้ว',
+  'auth/weak-password':       'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
+  'auth/invalid-email':       'รูปแบบอีเมลไม่ถูกต้อง',
+};
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0)===(tab==='login')));
+  document.getElementById('form-login').classList.toggle('active', tab==='login');
+  document.getElementById('form-register').classList.toggle('active', tab==='register');
+}
+window.switchTab = switchTab;
+
+async function login() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+  const btn   = document.getElementById('l-btn');
+  const err   = document.getElementById('l-err');
+  if (!email || !pass) { err.textContent = 'กรุณากรอกอีเมลและรหัสผ่าน'; return; }
+  btn.disabled = true; btn.textContent = 'กำลังเข้าสู่ระบบ…'; err.textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    err.textContent = ERR_MAP[e.code] || ('เกิดข้อผิดพลาด: ' + e.code);
+    btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
+  }
+}
+window.login = login;
+
+async function register() {
+  const name  = document.getElementById('r-name').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const pass  = document.getElementById('r-pass').value;
+  const pass2 = document.getElementById('r-pass2').value;
+  const btn   = document.getElementById('r-btn');
+  const err   = document.getElementById('r-err');
+  err.textContent = '';
+  if (!name)  { err.textContent = 'กรุณากรอกชื่อ'; return; }
+  if (!email) { err.textContent = 'กรุณากรอกอีเมล'; return; }
+  if (!pass)  { err.textContent = 'กรุณากรอกรหัสผ่าน'; return; }
+  if (pass !== pass2) { err.textContent = 'รหัสผ่านไม่ตรงกัน'; return; }
+  btn.disabled = true; btn.textContent = 'กำลังสมัคร…';
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(cred.user, { displayName: name });
+    // บันทึกข้อมูลผู้ใช้ใน RTDB
+    await set(ref(db, `users/${cred.user.uid}/profile`), {
+      name, email,
+      createdAt: Date.now(),
+      role: 'user'
+    });
+    // redirect ไป dashboard (onAuthStateChanged จัดการ)
+  } catch(e) {
+    err.textContent = ERR_MAP[e.code] || ('เกิดข้อผิดพลาด: ' + e.code);
+    btn.disabled = false; btn.textContent = 'สมัครสมาชิก';
+  }
+}
+window.register = register;
+
+document.getElementById('l-pass').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+document.getElementById('r-pass2').addEventListener('keydown', e => { if(e.key==='Enter') register(); });
+</script>
+</body>
+</html>

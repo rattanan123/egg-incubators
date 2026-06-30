@@ -1,0 +1,14 @@
+{
+  "name": "Egg Incubator",
+  "short_name": "Egg",
+  "start_url": "/egg-incubator/login.html",
+  "scope": "/egg-incubator/",
+  "display": "standalone",
+  "background_color": "#f5f6f8",
+  "theme_color": "#16a34a",
+  "description": "ระบบควบคุมตู้ฟักไข่อัจฉริยะ",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

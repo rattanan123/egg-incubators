@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>Egg Incubator</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f5f6f8;--sur:#ffffff;--sur2:#f0f2f5;
+      --bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.15);
+      --tx:#1a1a1a;--mu:#6b7280;
+      --gr:#16a34a;--gr-bg:rgba(22,163,74,0.08);
+      --rd:#dc2626;--rd-bg:rgba(220,38,38,0.08);
+      --am:#d97706;--ra:14px;--rs:8px;
+    }
+    [data-theme="dark"]{
+      --bg:#0e0f11;--sur:#161719;--sur2:#1e2023;
+      --bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.12);
+      --tx:#f0f0ef;--mu:#6b6e74;
+      --gr:#4ade80;--gr-bg:rgba(74,222,128,0.08);
+      --rd:#f87171;--rd-bg:rgba(248,113,113,0.08);
+      --am:#fbbf24;
+    }
+    .theme-btn{display:flex;align-items:center;gap:6px;font-family:'Kanit',sans-serif;font-size:16px;padding:6px 14px;border-radius:99px;cursor:pointer;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);transition:all 0.2s}
+    .theme-btn:hover{background:var(--sur);color:var(--tx)}
+    html{font-size:20px}
+    body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:16px 14px 48px;-webkit-text-size-adjust:100%}
+
+    header{display:flex;align-items:center;justify-content:space-between;max-width:960px;margin:0 auto 20px;padding-bottom:16px;border-bottom:1px solid var(--bd);gap:10px}
+    .header-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo-icon{width:40px;height:40px;border-radius:9px;background:var(--sur2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .logo-text{font-size:22px;font-weight:500}
+    .online-pill{display:flex;align-items:center;gap:6px;font-size:16px;color:var(--mu);background:var(--sur);border:1px solid var(--bd);border-radius:99px;padding:6px 14px}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--gr);animation:pulse 2s ease-in-out infinite}
+    .dot.warn{background:var(--am)}.dot.err{background:var(--rd)}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+    .wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+    .banner{display:none;border-radius:var(--ra);padding:14px 18px;font-size:18px;line-height:1.5}
+    .banner.show{display:block!important}
+    .b-red{background:var(--rd-bg);border:1px solid rgba(220,38,38,0.3);color:var(--rd)}
+    .b-amber{background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.3);color:var(--am)}
+    .b-green{background:var(--gr-bg);border:1px solid rgba(22,163,74,0.3);color:var(--gr)}
+
+    .stage-card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:16px 18px;display:none}
+    .stage-card.show{display:block}
+    .stage-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap}
+    .stage-name{font-size:18px;font-weight:500}
+    .stage-day{font-family:'Kanit',sans-serif;font-size:16px;color:var(--mu)}
+    .stage-lock{font-size:14px;padding:4px 12px;border-radius:99px;background:var(--am);color:#fff;font-weight:500}
+    .progress-bar{width:100%;height:8px;background:var(--sur2);border-radius:99px;overflow:hidden}
+    .progress-fill{height:100%;background:var(--gr);border-radius:99px;transition:width 0.5s}
+    .candling-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .cd-chip{font-family:'Kanit',sans-serif;font-size:13px;padding:3px 10px;border-radius:99px;background:var(--sur2);border:1px solid var(--bd2);color:var(--mu)}
+    .cd-chip.done{text-decoration:line-through;opacity:0.5}
+    .cd-chip.today{background:rgba(217,119,6,0.12);border-color:rgba(217,119,6,0.4);color:var(--am);font-weight:500}
+
+    .metrics-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .mc{background:var(--sur2);border:1.5px solid var(--bd);border-radius:var(--rs);padding:16px 18px 20px;position:relative;overflow:hidden;transition:border-color 0.2s}
+    .mc.ok{border-color:rgba(22,163,74,0.5)}
+    .mc.warn{border-color:rgba(220,38,38,0.5)}
+    [data-theme="dark"] .mc.ok{border-color:rgba(74,222,128,0.5)}
+    [data-theme="dark"] .mc.warn{border-color:rgba(248,113,113,0.5)}
+    .mc-label{font-size:16px;letter-spacing:0.08em;color:var(--mu);text-transform:uppercase;margin-bottom:10px;font-weight:500}
+    .mc-val{font-family:'Kanit',sans-serif;font-size:80px;font-weight:400;line-height:1;letter-spacing:-0.03em}
+    .mc-val.ok{color:var(--gr)}.mc-val.warn{color:var(--rd)}
+    .mc-unit{font-family:'Kanit',sans-serif;font-size:36px;font-weight:400;color:var(--mu);line-height:1}
+    .mc-range{position:absolute;bottom:14px;right:14px;font-family:'Kanit',sans-serif;font-size:13px;color:var(--mu);text-align:right;line-height:1.6}
+
+    .sys-card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:18px 16px}
+    .sys-card.running{border-color:rgba(22,163,74,0.4)}.sys-card.stopped{border-color:rgba(220,38,38,0.3)}
+    .sys-top{display:flex;align-items:center;margin-bottom:18px}
+    .sys-status{display:flex;align-items:center;gap:10px}
+    .sys-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .sys-dot.run{background:var(--gr);box-shadow:0 0 6px rgba(22,163,74,0.4);animation:pulse 2s ease-in-out infinite}
+    .sys-dot.stop{background:var(--rd)}
+    .sys-label{font-size:20px;font-weight:500}
+    .sys-sub{font-size:16px;color:var(--mu);font-family:'Kanit',sans-serif;margin-top:2px}
+
+    .profile-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+    .profile-label{font-size:16px;letter-spacing:0.05em;color:var(--mu);text-transform:uppercase;font-weight:500;white-space:nowrap}
+    .profile-select{flex:1;min-width:140px;background:var(--sur2);border:1px solid var(--bd2);border-radius:var(--rs);padding:10px 14px;font-family:'Kanit',sans-serif;font-size:18px;color:var(--tx);outline:none;cursor:pointer}
+    .profile-select:focus{border-color:var(--bd2)}
+    .stage-btns{display:none;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+    .stage-btns.show{display:flex}
+    .stage-btn{flex:1;min-width:100px;padding:11px 10px;border-radius:var(--rs);border:1px solid var(--bd2);background:var(--sur2);cursor:pointer;text-align:center;transition:all 0.15s;user-select:none}
+    .stage-btn:hover:not(:disabled){background:var(--sur);border-color:var(--bd2)}
+    .stage-btn.sel{background:var(--gr-bg);border-color:rgba(22,163,74,0.5)}
+    .stage-btn.sel .sbtn-days{color:var(--gr)}
+    .stage-btn.sel .sbtn-name{color:var(--gr)}
+    .stage-btn.lock-btn.sel{background:rgba(217,119,6,0.08);border-color:rgba(217,119,6,0.4)}
+    .stage-btn.lock-btn.sel .sbtn-days,.stage-btn.lock-btn.sel .sbtn-name{color:var(--am)}
+    .stage-btn.cur-stage{box-shadow:0 0 0 2px var(--gr)}
+    .stage-btn.cur-stage.lock-btn{box-shadow:0 0 0 2px var(--am)}
+    .sbtn-name{font-size:15px;font-weight:500;margin-bottom:3px}
+    .sbtn-days{font-family:'Kanit',sans-serif;font-size:12px;color:var(--mu)}
+    .stage-detail{background:var(--sur2);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 14px;margin-bottom:14px;display:none}
+    .stage-detail.show{display:block}
+    .stage-detail .svals{gap:10px}
+
+    .irow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    .ig{display:flex;flex-direction:column;gap:6px}
+    .ilabel{font-size:16px;letter-spacing:0.05em;color:var(--mu);text-transform:uppercase;font-weight:500}
+    .iwrap{position:relative}
+    .ifield{width:100%;background:var(--sur2);border:1px solid var(--bd2);border-radius:var(--rs);padding:13px 44px 13px 14px;font-family:'Kanit',sans-serif;font-size:26px;color:var(--tx);outline:none;transition:border-color 0.15s;-webkit-appearance:none}
+    .ifield:focus{border-color:var(--bd2)}
+    .ifield.err{border-color:rgba(220,38,38,0.6);background:rgba(220,38,38,0.04)}
+    .ifield.ok{border-color:rgba(22,163,74,0.5)}
+    .ifield:disabled{opacity:0.4;cursor:not-allowed}
+    .iunit{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:17px;color:var(--mu);font-family:'Kanit',sans-serif;pointer-events:none}
+    .ihint{font-size:14px;color:var(--mu);line-height:1.4}
+    .ihint.err{color:var(--rd)}
+
+    .sys-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+    .btn-go{font-family:'Kanit',sans-serif;font-size:20px;font-weight:500;padding:14px 28px;border-radius:99px;cursor:pointer;transition:all 0.2s;background:rgba(22,163,74,0.08);color:var(--gr);border:1px solid rgba(22,163,74,0.35);min-width:140px;text-align:center}
+    .btn-go:hover:not(:disabled){background:rgba(22,163,74,0.15)}
+    .btn-go:disabled{opacity:0.35;cursor:not-allowed}
+    .btn-stop{font-family:'Kanit',sans-serif;font-size:20px;font-weight:500;padding:14px 28px;border-radius:99px;cursor:pointer;transition:all 0.2s;background:rgba(220,38,38,0.08);color:var(--rd);border:1px solid rgba(220,38,38,0.35);min-width:140px;text-align:center}
+    .btn-stop:hover{background:rgba(220,38,38,0.15)}
+
+    .card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:18px 16px}
+    .card-title{font-size:15px;letter-spacing:0.08em;color:var(--mu);text-transform:uppercase;margin-bottom:16px;font-weight:500}
+    .rlist{list-style:none;display:flex;flex-direction:column;gap:2px}
+    .rrow{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:var(--rs)}
+    .rrow:hover{background:var(--sur2)}
+    .rname{font-size:18px}
+    .badge{font-family:'Kanit',sans-serif;font-size:15px;font-weight:500;padding:5px 13px;border-radius:99px;background:var(--sur2);color:var(--mu);border:1px solid var(--bd)}
+    .badge.lock{background:rgba(217,119,6,0.12);color:var(--am);border:1px solid rgba(217,119,6,0.4)}
+    .badge.on{background:rgba(0,0,0,0.06);color:#1a1a1a;border-color:rgba(0,0,0,0.12)}
+    .badge.off{background:var(--sur2);color:var(--mu);border-color:var(--bd)}
+    [data-theme="dark"] .badge.on{background:rgba(255,255,255,0.08);color:#e8eaf0;border-color:rgba(255,255,255,0.15)}
+    .dbadge.on{background:rgba(0,0,0,0.06);color:#1a1a1a}
+    .dbadge.off{background:var(--sur2);color:var(--mu)}
+    [data-theme="dark"] .dbadge.on{background:rgba(255,255,255,0.08);color:#e8eaf0}
+    .svals{display:flex;flex-direction:column;gap:14px}
+    .srow{display:flex;justify-content:space-between;align-items:center}
+    .skey{font-size:18px;color:var(--mu)}
+    .sval{font-family:'Kanit',sans-serif;font-size:20px}
+
+    .cwrap{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:18px 16px}
+    .cheader{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+    .cheader-left{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .clegend{display:flex;gap:16px}
+    .li{display:flex;align-items:center;gap:6px;font-size:16px;color:var(--mu);font-family:'Kanit',sans-serif}
+    .ld{width:9px;height:9px;border-radius:50%}
+    .range-tabs{display:flex;gap:4px}
+    .rtab{font-family:'Kanit',sans-serif;font-size:14px;padding:5px 12px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer;transition:all 0.15s}
+    .rtab.active{background:var(--gr-bg);color:var(--gr);border-color:rgba(22,163,74,0.4)}
+    .rtab:hover:not(.active){background:var(--sur)}
+
+    .lwrap{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:18px 16px;overflow-x:auto}
+    .lheader{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
+    .lhl{display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex:1;min-width:0}
+    .lhbtns{display:flex;gap:8px;flex-shrink:0}
+    .btn-clr{font-family:'Kanit',sans-serif;font-size:16px;padding:7px 18px;border-radius:99px;border:1px solid rgba(220,38,38,0.35);background:rgba(220,38,38,0.06);color:var(--rd);cursor:pointer;white-space:nowrap}
+    .btn-clr:hover{background:rgba(220,38,38,0.12)}
+    .btn-csv{font-family:'Kanit',sans-serif;font-size:16px;padding:7px 18px;border-radius:99px;border:1px solid rgba(22,163,74,0.35);background:rgba(22,163,74,0.06);color:var(--gr);cursor:pointer;white-space:nowrap}
+    .btn-csv:hover{background:rgba(22,163,74,0.12)}
+    table{width:100%;border-collapse:collapse;min-width:460px;table-layout:fixed}
+    thead th{font-size:14px;letter-spacing:0.06em;color:var(--mu);text-transform:uppercase;text-align:left;padding:0 10px 12px;border-bottom:1px solid var(--bd);white-space:nowrap}
+    tbody tr:hover{background:var(--sur2)}
+    tbody td{font-size:17px;padding:12px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
+    tbody tr:last-child td{border-bottom:none}
+    .tm{font-family:'Kanit',sans-serif}.tmu{color:var(--mu)}
+    .dbadge{display:inline-flex;align-items:center;gap:5px;font-family:'Kanit',sans-serif;font-size:15px;padding:4px 11px;border-radius:99px;background:var(--sur2);color:var(--mu)}
+    .dbadge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+
+    /* auth guard */
+    #auth-guard{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+    #auth-guard .spin{width:36px;height:36px;border:3px solid var(--bd2);border-top-color:var(--gr);border-radius:50%;animation:spin 0.7s linear infinite}
+    #auth-guard p{font-size:15px;color:var(--mu);font-family:'Kanit',sans-serif}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .flex-baseline{display:flex;align-items:baseline;gap:6px}
+    .flex-between{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .sep{border-top:1px solid var(--bd);margin:14px 0}
+    .cd-section{display:none;padding-top:14px}
+    .cd-section.show{display:block}
+
+    .dov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:100;align-items:center;justify-content:center;padding:16px}
+    .dov.show{display:flex}
+    .dbox{background:var(--sur);border:1px solid var(--bd2);border-radius:18px;padding:28px 24px 24px;max-width:380px;width:100%}
+    .dicon{font-size:36px;margin-bottom:14px}
+    .dtitle{font-size:22px;font-weight:500;margin-bottom:8px}
+    .ddesc{font-size:18px;color:var(--mu);line-height:1.6;margin-bottom:20px}
+    .dbtns{display:flex;gap:10px;justify-content:flex-end}
+    .dcancel{font-family:'Kanit',sans-serif;font-size:16px;padding:10px 20px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer}
+    .dconfirm{font-family:'Kanit',sans-serif;font-size:16px;padding:10px 20px;border-radius:99px;border:1px solid rgba(220,38,38,0.4);background:rgba(220,38,38,0.08);color:var(--rd);cursor:pointer}
+    .dconfirm:hover{background:rgba(220,38,38,0.15)}
+    .dconfirm-gr{font-family:'Kanit',sans-serif;font-size:16px;padding:10px 20px;border-radius:99px;border:1px solid rgba(22,163,74,0.4);background:rgba(22,163,74,0.08);color:var(--gr);cursor:pointer}
+    .dconfirm-gr:hover{background:rgba(22,163,74,0.15)}
+    .dinput{width:100%;background:var(--sur2);border:1px solid var(--bd2);border-radius:var(--rs);padding:12px 14px;font-family:'Kanit',sans-serif;font-size:24px;color:var(--tx);outline:none;margin-bottom:16px}
+
+    th.sortable{cursor:pointer;user-select:none}
+    th.sortable:hover{color:var(--tx)}
+    th.sortable::after{content:' ⇅';font-size:10px;opacity:0.35}
+    th.sortable.asc::after{content:' ▲';opacity:1;color:var(--gr)}
+    th.sortable.desc::after{content:' ▼';opacity:1;color:var(--gr)}
+    .run-rate{font-family:'Kanit',sans-serif;font-size:18px;font-weight:500}
+    .run-rate.high{color:var(--gr)}.run-rate.mid{color:var(--am)}.run-rate.low{color:var(--rd)}
+
+    @media(max-width:768px){
+      .mc-val{font-size:65px}
+      .mc-unit{font-size:30px}
+      .irow{grid-template-columns:1fr}
+    }
+    @media(max-width:480px){
+      body{padding:12px 10px 48px}.wrap{gap:12px}
+      .logo-text{font-size:18px}
+      .online-pill{font-size:14px;padding:5px 10px}
+      .theme-btn{font-size:14px;padding:5px 10px}
+      .sys-label{font-size:18px}.ifield{font-size:22px}.ilabel{font-size:13px}
+      .btn-go,.btn-stop{font-size:18px;padding:13px 0;width:100%;min-width:unset}
+      .sys-btns{flex-direction:column}
+      .mc{padding:14px 12px}.mc-val{font-size:52px}.mc-label{font-size:13px}.mc-unit{font-size:24px}
+      .metrics-row{gap:10px}
+      .rname{font-size:17px}.badge{font-size:14px}
+      thead th{font-size:12px;padding:0 6px 10px;letter-spacing:0}
+      tbody td{font-size:14px;padding:9px 6px}
+      .card-title{font-size:13px}
+      .lheader{flex-direction:row;align-items:center}
+      .range-tabs{flex-wrap:wrap}
+      .stage-btns{flex-direction:column}
+      .stage-btn{min-width:unset}
+      #egg-stop-row{flex-direction:column;align-items:stretch}
+      #egg-stop-row .btn-stop{width:100%;text-align:center}
+      #cdtxt,#cd-days-left{font-size:22px!important}
+      .skey{font-size:16px}.sval{font-size:18px}
+    }
+    @media(max-width:360px){
+      .mc-val{font-size:40px}.mc-unit{font-size:18px}
+      .ifield{font-size:18px}
+      .metrics-row{grid-template-columns:1fr}
+      .logo-text{font-size:16px}
+      thead th{font-size:11px;padding:0 5px 8px}
+      tbody td{font-size:13px;padding:8px 5px}
+    }
+  </style>
+</head>
+<body>
+
+<div id="auth-guard"><div class="spin"></div><p>กำลังตรวจสอบสิทธิ์…</p></div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🥚</div>
+    <div>
+      <div class="logo-text">ตู้ฟักไข่</div>
+      <div style="font-size:13px;color:var(--mu);font-family:'Kanit',sans-serif;" id="device-label"></div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="online-pill"><div class="dot" id="odot"></div><span id="otxt">connecting…</span></div>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙 Dark</button>
+  </div>
+</header>
+
+<div class="dov" id="dlg">
+  <div class="dbox">
+    <div class="dicon">🗑️</div>
+    <div class="dtitle">ล้าง Log รายชั่วโมง?</div>
+    <div class="ddesc">ข้อมูลทั้งหมดจะถูกลบออกจาก Firebase ไม่สามารถกู้คืนได้</div>
+    <div class="dbtns">
+      <button class="dcancel" onclick="closeDlg()">ยกเลิก</button>
+      <button class="dconfirm" onclick="confirmClear()">ลบทั้งหมด</button>
+    </div>
+  </div>
+</div>
+
+<div class="dov" id="hatch-dlg">
+  <div class="dbox">
+    <div class="dicon">🐣</div>
+    <div class="dtitle">บันทึกผลการฟัก</div>
+    <div class="ddesc">ไข่ทั้งหมด <strong id="hatch-egg-total">?</strong> ฟอง — ฟักออกกี่ฟอง?</div>
+    <input class="dinput" type="number" id="hatch-count-input" placeholder="0" min="0">
+    <div class="dbtns">
+      <button class="dcancel" onclick="closeHatchDlg()">ข้ามไปก่อน</button>
+      <button class="dconfirm-gr" onclick="submitHatch()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="banner b-red" id="sensor-banner">
+    🚨 เซ็นเซอร์อุณหภูมิขัดข้อง — ESP32 ปิด Relay ทั้งหมดเพื่อความปลอดภัย
+  </div>
+
+  <div class="stage-card show" id="stage-card">
+    <div id="stage-info" style="display:none;">
+      <div class="stage-row">
+        <div>
+          <div class="stage-name" id="stage-name">--</div>
+          <div class="stage-day" id="stage-day-txt">วันที่ -- จาก -- วัน</div>
+        </div>
+        <div id="lockdown-badge" class="stage-lock" style="display:none">🔒 ระยะเกิด</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <div id="stage-countdown" class="cd-section">
+        <div class="sep"></div>
+        <div class="flex-between">
+          <div style="flex:1;min-width:160px;">
+            <div style="font-size:13px;color:var(--mu);margin-bottom:4px;font-weight:500;">เวลาที่เหลือ</div>
+            <div class="tm" style="font-size:28px;font-weight:700;color:var(--gr);line-height:1.1;" id="cdtxt">--</div>
+            <div style="font-size:13px;color:var(--mu);margin-top:4px;" id="cdend">--</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:13px;color:var(--mu);margin-bottom:4px;font-weight:500;">อีกกี่วัน</div>
+            <div class="tm" style="font-size:28px;font-weight:700;line-height:1.1;color:var(--tx);" id="cd-days-left">--</div>
+          </div>
+        </div>
+      </div>
+      <div class="candling-row" id="candling-row" style="margin-top:12px;"></div>
+      <div class="sep"></div>
+    </div>
+
+    <div class="card-title">สภาพภายในตู้ตอนนี้</div>
+    <div class="metrics-row">
+      <div class="mc" id="ct">
+        <div class="mc-label">อุณหภูมิ</div>
+        <div class="flex-baseline">
+          <div class="mc-val" id="temp">--</div>
+          <div class="mc-unit">°C</div>
+        </div>
+      </div>
+      <div class="mc" id="ch">
+        <div class="mc-label">ความชื้น</div>
+        <div class="flex-baseline">
+          <div class="mc-val" id="hum">--</div>
+          <div class="mc-unit">%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sys-card" id="syscard">
+    <div class="sys-top">
+      <div class="sys-status">
+        <div class="sys-dot stop" id="sdot"></div>
+        <div>
+          <div class="sys-label" id="slabel">ระบบพร้อมทำงาน</div>
+          <div class="sys-sub" id="ssub">กรอกค่าอุณหภูมิและความชื้นเพื่อเริ่ม</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-row">
+      <div class="profile-label">โปรไฟล์ไข่</div>
+      <select class="profile-select" id="profile-sel" onchange="onProfileChange()">
+        <option value="chicken">ไก่ (21 วัน)</option>
+        <option value="custom">กำหนดเอง</option>
+      </select>
+    </div>
+    <div class="stage-btns" id="stage-btns"></div>
+    <div class="stage-detail" id="stage-detail">
+      <div class="svals" style="gap:10px;">
+        <div class="srow"><span class="skey" style="font-size:17px;">อุณหภูมิ</span><span class="sval tm" id="sd-temp" style="font-size:18px;">--</span></div>
+        <div class="srow"><span class="skey" style="font-size:17px;">ความชื้น</span><span class="sval tm" id="sd-hum"  style="font-size:18px;">--</span></div>
+        <div class="srow"><span class="skey" style="font-size:17px;">ค้างเซอร์โว</span><span class="sval tm" id="sd-servo" style="font-size:18px;">--</span></div>
+        <div class="srow"><span class="skey" style="font-size:17px;">พลิกไข่</span><span id="sd-turning" style="font-size:17px;">--</span></div>
+      </div>
+    </div>
+
+    <div id="manual-inputs">
+      <div class="irow">
+        <div class="ig">
+          <div class="ilabel">อุณหภูมิต่ำสุด (เปิดฮีตเตอร์)</div>
+          <div class="iwrap"><input class="ifield" type="number" id="tmin" placeholder="36.5" min="30" max="42" step="0.1" oninput="validate()"><span class="iunit">°C</span></div>
+          <div class="ihint" id="htmin">ฮีตเตอร์เปิดเมื่อต่ำกว่านี้</div>
+        </div>
+        <div class="ig">
+          <div class="ilabel">อุณหภูมิสูงสุด (ปิดฮีตเตอร์)</div>
+          <div class="iwrap"><input class="ifield" type="number" id="tmax" placeholder="38.5" min="30" max="42" step="0.1" oninput="validate()"><span class="iunit">°C</span></div>
+          <div class="ihint" id="htmax">ฮีตเตอร์ปิด + พัดลมเสริมเปิดเมื่อสูงกว่านี้</div>
+        </div>
+      </div>
+      <div class="irow">
+        <div class="ig">
+          <div class="ilabel">ความชื้นต่ำสุด (เปิดหมอก)</div>
+          <div class="iwrap"><input class="ifield" type="number" id="hmin" placeholder="53" min="30" max="90" step="1" oninput="validate()"><span class="iunit">%</span></div>
+          <div class="ihint" id="hhmin">หมอกเปิดเมื่อต่ำกว่านี้</div>
+        </div>
+        <div class="ig">
+          <div class="ilabel">ความชื้นสูงสุด (ปิดหมอก)</div>
+          <div class="iwrap"><input class="ifield" type="number" id="hmax" placeholder="60" min="30" max="90" step="1" oninput="validate()"><span class="iunit">%</span></div>
+          <div class="ihint" id="hhmax">หมอกปิดเมื่อสูงกว่านี้</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="banner b-amber" id="vbanner" style="display:none;margin-bottom:12px;">
+      ⚠️ กรุณากรอกค่าให้ครบทุกช่องก่อนเริ่มระบบ
+    </div>
+
+    <div id="duration-inputs">
+      <div class="ilabel" style="margin-bottom:6px;">ระยะเวลาฟักไข่</div>
+      <div class="irow" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:8px;">
+        <div class="ig">
+          <div class="ilabel" style="font-size:13px;">วัน (0–60)</div>
+          <div class="iwrap"><input class="ifield" type="number" id="dur-days" placeholder="18" min="0" max="60" step="1" oninput="validate()"><span class="iunit">วัน</span></div>
+        </div>
+        <div class="ig">
+          <div class="ilabel" style="font-size:13px;">ชั่วโมง (0–23)</div>
+          <div class="iwrap"><input class="ifield" type="number" id="dur-hrs" placeholder="0" min="0" max="23" step="1" oninput="validate()"><span class="iunit">ชม.</span></div>
+        </div>
+        <div class="ig">
+          <div class="ilabel" style="font-size:13px;">นาที (0–59)</div>
+          <div class="iwrap"><input class="ifield" type="number" id="dur-min" placeholder="0" min="0" max="59" step="1" oninput="validate()"><span class="iunit">น.</span></div>
+        </div>
+      </div>
+      <div class="irow" style="margin-bottom:8px;grid-template-columns:1fr;">
+        <div class="ig">
+          <div class="ilabel">เวลาค้างเซอร์โวมอเตอร์</div>
+          <div class="iwrap"><input class="ifield" type="number" id="servo-hold" placeholder="1" min="0.1" max="24" step="0.5" oninput="validate()"><span class="iunit">ชม.</span></div>
+          <div class="ihint" id="hservo">90°→ค้าง→135°→ค้าง→90°→ค้าง→45°→ค้าง→90°→ค้าง→วน</div>
+        </div>
+      </div>
+    </div>
+    <div id="egg-stop-row" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+      <div class="ig" style="flex:1;">
+        <div class="ilabel">จำนวนไข่ที่ใส่</div>
+        <div class="iwrap"><input class="ifield" type="number" id="egg-count" placeholder="30" min="1" max="500" step="1"><span class="iunit">ฟอง</span></div>
+        <div class="ihint">ใส่เพื่อคำนวณอัตราการฟักหลังครบรอบ</div>
+      </div>
+      <button class="btn-stop" id="bstop" onclick="stopSys()" style="display:none;flex-shrink:0;">⏹ หยุดทำงาน</button>
+    </div>
+
+    <div class="sys-btns">
+      <button class="btn-go" id="bstart" onclick="startSys()" disabled>▶ เริ่มทำงาน</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">สถานะอุปกรณ์ &amp; เซอร์โวมอเตอร์</div>
+    <ul class="rlist">
+      <li class="rrow"><span class="rname">ฮีตเตอร์</span><span class="badge off" id="r5">ปิด</span></li>
+      <li class="rrow"><span class="rname">หมอก</span><span class="badge off" id="r1">ปิด</span></li>
+      <li class="rrow"><span class="rname">พัดลมหมอก</span><span class="badge off" id="r2">ปิด</span></li>
+      <li class="rrow"><span class="rname">พัดลมดูด</span><span class="badge off" id="r3">ปิด</span></li>
+      <li class="rrow"><span class="rname">พัดลมระบาย</span><span class="badge off" id="r4">ปิด</span></li>
+      <li class="rrow" style="border-top:1px solid var(--bd);margin-top:6px;padding-top:12px;">
+        <span class="rname">สถานะเซอร์โวมอเตอร์</span><span class="badge off" id="sstatus">--</span>
+      </li>
+      <li class="rrow"><span class="rname">มุมเซอร์โวมอเตอร์</span><span class="badge off" id="spos">--°</span></li>
+      <li class="rrow" id="turning-row" style="display:none">
+        <span class="rname">การพลิก</span>
+        <span class="badge lock" id="turning-badge">🔒 หยุดพลิก</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card" id="line-card">
+    <div class="card-title" style="margin-bottom:12px;">🔔 LINE Notify</div>
+    <div class="ig" style="gap:8px;">
+      <div class="ilabel">LINE Notify Token</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="iwrap" style="flex:1;">
+          <input class="ifield" type="password" id="line-tok"
+            placeholder="วาง Token ที่นี่"
+            style="font-size:16px;padding:10px 14px;padding-right:14px;">
+        </div>
+        <button class="btn-go" id="line-save-btn" onclick="saveLineToken()" style="padding:10px 20px;font-size:16px;white-space:nowrap;">บันทึก</button>
+      </div>
+      <div class="ihint">สร้าง Token ได้ที่ <a href="https://notify-bot.line.me/" target="_blank" style="color:var(--gr)">notify-bot.line.me</a> · แจ้งเตือนเมื่อ เริ่ม / หยุด / ค่าผิดปกติ</div>
+      <div id="line-status" style="font-size:13px;color:var(--mu);margin-top:2px;"></div>
+    </div>
+  </div>
+
+  <div class="cwrap">
+    <div class="cheader">
+      <div class="cheader-left">
+        <div class="card-title" style="margin:0;" id="chart-title">กราฟย้อนหลัง 24 ชั่วโมง</div>
+        <div class="clegend">
+          <div class="li"><div class="ld" style="background:#16a34a;"></div>°C</div>
+          <div class="li"><div class="ld" style="background:#3b82f6;"></div>% ความชื้น</div>
+        </div>
+      </div>
+      <div class="range-tabs">
+        <button class="rtab" onclick="setRange('1h')">1ชม.</button>
+        <button class="rtab active" onclick="setRange('24h')">24ชม.</button>
+        <button class="rtab" onclick="setRange('7d')">7วัน</button>
+        <button class="rtab" onclick="setRange('all')">ทั้งรอบ</button>
+      </div>
+    </div>
+    <canvas id="chart" height="110"></canvas>
+    <div style="font-size:14px;color:var(--mu);margin-top:8px;font-family:'Kanit',sans-serif;" id="cnote">กำลังโหลด...</div>
+  </div>
+
+  <div class="lwrap">
+    <div class="lheader">
+      <div class="lhl">
+        <div class="card-title" style="margin:0;">บันทึกการเปิด/ปิดระบบ</div>
+        <div style="font-size:14px;color:var(--mu);font-family:'Kanit',sans-serif;" id="slog-ts">--</div>
+      </div>
+      <button class="btn-clr" onclick="clearSysLog()">ล้าง</button>
+    </div>
+    <table>
+      <thead><tr>
+        <th style="width:90px;">วันที่/เวลา</th>
+        <th style="width:80px;">การกระทำ</th>
+        <th style="width:75px;">T min</th>
+        <th style="width:75px;">T max</th>
+        <th style="width:65px;">H min</th>
+        <th style="width:65px;">H max</th>
+      </tr></thead>
+      <tbody id="slog-body"></tbody>
+    </table>
+  </div>
+
+  <div class="lwrap">
+    <div class="lheader">
+      <div class="lhl">
+        <div class="card-title" style="margin:0;">บันทึกรายชั่วโมง</div>
+        <div style="font-size:14px;color:var(--mu);font-family:'Kanit',sans-serif;" id="hlog-ts">--</div>
+      </div>
+      <div class="lhbtns">
+        <button class="btn-csv" onclick="exportCSV()">⬇ CSV</button>
+        <button class="btn-clr" onclick="openDlg()">ล้าง Log</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+        <th class="sortable" style="width:90px;" onclick="sortLog('time')">วันที่/เวลา</th>
+        <th class="sortable" style="width:55px;" onclick="sortLog('temp')">°C</th>
+        <th class="sortable" style="width:55px;" onclick="sortLog('hum')">%RH</th>
+        <th style="width:60px;">ฮีตเตอร์</th><th style="width:60px;">หมอก</th>
+        <th style="width:65px;">พัดลมหมอก</th><th style="width:65px;">พัดลมดูด</th>
+        <th style="width:70px;">พัดลมระบาย</th>
+        <th style="width:55px;">เซอร์โว</th><th style="width:90px;">สถานะ</th>
+      </tr></thead>
+      <tbody id="hlog-body"></tbody>
+    </table>
+  </div>
+
+  <div class="lwrap">
+    <div class="lheader">
+      <div class="lhl">
+        <div class="card-title" style="margin:0;">ประวัติการฟัก</div>
+        <div style="font-size:14px;color:var(--mu);font-family:'Kanit',sans-serif;" id="runs-ts">--</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+        <th style="width:90px;">วันที่เริ่ม</th>
+        <th style="width:80px;">โปรไฟล์</th>
+        <th style="width:65px;">ไข่</th>
+        <th style="width:65px;">ฟักได้</th>
+        <th style="width:70px;">อัตรา</th>
+        <th style="width:70px;">สถานะ</th>
+      </tr></thead>
+      <tbody id="runs-body"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref, onValue, get, remove, update, set, query, limitToLast, orderByKey, startAt }
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+const urlParams = new URLSearchParams(location.search);
+const DEVICE_ID = urlParams.get('device') || 'incubator_01';
+const fbp = sub => `incubators/${DEVICE_ID}/${sub}`;
+
+const devLabel = document.getElementById('device-label');
+if (devLabel) devLabel.textContent = DEVICE_ID;
+
+// ── Firebase หลัก (เก็บ config ของตู้) ──
+const masterApp = initializeApp({
+  apiKey:"AIzaSyCnBjSbD4zZpc-t0QfK7i5PlfQfuSgdyRw",
+  authDomain:"eggproject-cf0bc.firebaseapp.com",
+  databaseURL:"https://eggproject-cf0bc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"eggproject-cf0bc",
+  storageBucket:"eggproject-cf0bc.firebasestorage.app",
+  messagingSenderId:"630146139668",
+  appId:"1:630146139668:web:58b60cbbeb16b6ad7c0901"
+});
+const masterAuth = getAuth(masterApp);
+const masterDb   = getDatabase(masterApp);
+
+// ── รอ auth แล้วโหลด device config ──
+let db;  // จะ set ทีหลังหลังโหลด config
+await new Promise(resolve => {
+  onAuthStateChanged(masterAuth, async user => {
+    if (!user) { location.href = 'login.html'; return; }
+    document.getElementById('auth-guard').style.display = 'none';
+
+    // อ่าน device config ของตู้นี้
+    const cfgSnap = await get(ref(masterDb, `users/${user.uid}/devices/${DEVICE_ID}`));
+    const cfg = cfgSnap.val();
+
+    if (cfg?.firebaseApiKey && cfg?.firebaseDatabaseURL) {
+      // ต่อ Firebase ของตู้นั้น
+      const devName = 'dev_' + DEVICE_ID;
+      let devApp;
+      try { devApp = getApp(devName); } catch(_) {
+        devApp = initializeApp({
+          apiKey:            cfg.firebaseApiKey,
+          authDomain:        cfg.firebaseProjectId + '.firebaseapp.com',
+          databaseURL:       cfg.firebaseDatabaseURL,
+          projectId:         cfg.firebaseProjectId,
+          storageBucket:     cfg.firebaseProjectId + '.firebasestorage.app',
+          messagingSenderId: cfg.firebaseMsgId || '',
+          appId:             cfg.firebaseAppId,
+        }, devName);
+      }
+      db = getDatabase(devApp);
+      if (devLabel) devLabel.textContent = cfg.name || DEVICE_ID;
+    } else {
+      // fallback: ใช้ Firebase หลัก (เผื่อ config เก่า)
+      db = masterDb;
+    }
+    resolve();
+  });
+});
+
+const PROFILES = {
+  chicken: {
+    name:"ไก่", totalDays:21,
+    stages:{
+      "0":{name:"ระยะฟัก (ต้น)",  dayStart:1,  dayEnd:10, tempMin:36.5,tempMax:37.5,humMin:55,humMax:56,servoHoldHours:1,  turning:true},
+      "1":{name:"ระยะฟัก (ปลาย)", dayStart:11, dayEnd:18, tempMin:36.5,tempMax:37.5,humMin:55,humMax:56,servoHoldHours:2,  turning:true},
+      "2":{name:"ระยะเกิด",        dayStart:19, dayEnd:21, tempMin:36.8,tempMax:37.0,humMin:64,humMax:65,servoHoldHours:2,  turning:false}
+    },
+    candlingDays:[10,18]
+  },
+};
+
+const _initDark=localStorage.getItem('theme')==='dark';
+const _gr=_initDark?'#4ade80':'#16a34a', _bl=_initDark?'#60a5fa':'#3b82f6';
+const _gridC=_initDark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.06)';
+const _ttBg=_initDark?'#1e2023':'#ffffff', _ttBody=_initDark?'#f0f0ef':'#1a1a1a', _ttTitle=_initDark?'#6b6e74':'#6b7280';
+const hChart = new Chart(document.getElementById('chart').getContext('2d'), {
+  type:'line',
+  data:{ labels:[], datasets:[
+    { data:[], borderColor:_gr, backgroundColor:_initDark?'rgba(74,222,128,0.06)':'rgba(22,163,74,0.06)', borderWidth:2, pointRadius:3, pointBackgroundColor:_gr, tension:0.3, fill:true, yAxisID:'yT' },
+    { data:[], borderColor:_bl, backgroundColor:_initDark?'rgba(96,165,250,0.06)':'rgba(59,130,246,0.06)',  borderWidth:2, pointRadius:3, pointBackgroundColor:_bl, tension:0.3, fill:true, yAxisID:'yH' }
+  ]},
+  options:{
+    responsive:true, interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false}, tooltip:{backgroundColor:_ttBg,borderColor:'rgba(128,128,128,0.15)',borderWidth:1,titleColor:_ttTitle,bodyColor:_ttBody,padding:10}},
+    scales:{
+      x:{ticks:{color:'#6b6e74',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:8},grid:{color:_gridC}},
+      yT:{position:'left',  min:30,max:45,ticks:{color:_gr,font:{size:10},callback:v=>v+'°'},grid:{color:_gridC}},
+      yH:{position:'right', min:40,max:80,ticks:{color:_bl,font:{size:10},callback:v=>v+'%'},grid:{display:false}}
+    }
+  }
+});
+
+const $  = id => document.getElementById(id);
+const ts = () => new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+function fmtMs(ms) {
+  const d=new Date(ms);
+  return {
+    date:d.toLocaleDateString("th-TH",{day:"2-digit",month:"2-digit",year:"2-digit"}),
+    time:d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})
+  };
+}
+function setBadge(id,val) {
+  const el=$(id); if(!el)return;
+  el.textContent=val==="ON"?"ON":"OFF";
+  el.className="badge "+(val==="ON"?"on":"off");
+}
+function setMetric(cid,vid,raw) {
+  const el=$(vid),card=$(cid); if(!el)return;
+  const n=parseFloat(raw);
+  el.textContent=isNaN(n)?"--":n.toFixed(1);
+  if(isNaN(n)){el.className="mc-val";card.className="mc";return;}
+  let lo,hi;
+  if(currentProfileKey==="custom"){
+    lo=cid==="ct"?parseFloat($('tmin').value)||35:parseFloat($('hmin').value)||50;
+    hi=cid==="ct"?parseFloat($('tmax').value)||39:parseFloat($('hmax').value)||65;
+  } else if(cid==="ct"){
+    lo=isLockdownStage?36.8:36; hi=isLockdownStage?37:38;
+  } else {
+    lo=isLockdownStage?64:50;
+    hi=isLockdownStage?65:60;
+  }
+  const w=n>hi||n<lo;
+  el.className="mc-val "+(w?"warn":"ok");
+  card.className="mc "+(w?"warn":"ok");
+}
+
+let lastUp=0;
+setInterval(()=>{
+  if(!lastUp)return;
+  const e=Date.now()-lastUp;
+  if(e>120000){$('odot').className='dot err';$('otxt').textContent='offline';}
+  else if(e>30000){$('odot').className='dot warn';$('otxt').textContent='ไม่ตอบสนอง';}
+},10000);
+
+let curState="STOP";
+let stopGuardUntil=0;
+let currentProfileKey=$('profile-sel').value;
+let currentRunStartTime=0;
+let currentStartStageIdx=0;
+let currentEggCount=0;
+let currentRunEndMs=0;
+let isLockdownStage=false;
+let lastAutoStageIdx=-1;
+let allHourlyLogs={};
+
+let lineToken = localStorage.getItem('lineToken') || '';
+let curHumMax = 999, curHumMin = 0, curTempMax = 999, curTempMin = 0;
+let lastLineAlert = {hum: 0, temp: 0};
+const LINE_COOLDOWN = 30 * 60 * 1000;
+
+async function sendLine(msg) {
+  const tok = lineToken;
+  if (!tok) return;
+  try {
+    const res = await fetch(
+      'https://corsproxy.io/?' + encodeURIComponent('https://notify-api.line.me/api/notify'),
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + tok,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'message=' + encodeURIComponent('\n' + msg)
+      }
+    );
+    const ok = res.status === 200;
+    const el = $('line-status');
+    if (el) {
+      el.textContent = ok ? '✓ ส่งสำเร็จ ' + new Date().toLocaleTimeString('th-TH') : '✗ ส่งไม่สำเร็จ (status ' + res.status + ')';
+      el.style.color = ok ? 'var(--gr)' : 'var(--rd)';
+    }
+  } catch(e) {
+    const el = $('line-status');
+    if (el) { el.textContent = '✗ เชื่อมต่อล้มเหลว'; el.style.color = 'var(--rd)'; }
+  }
+}
+
+async function saveLineToken() {
+  const tok = ($('line-tok').value || '').trim();
+  lineToken = tok;
+  localStorage.setItem('lineToken', tok);
+  const btn = $('line-save-btn');
+  const orig = btn.textContent;
+  btn.textContent = '✓ บันทึกแล้ว';
+  setTimeout(() => { btn.textContent = orig; }, 2000);
+  if (tok) sendLine('🥚 ProjectEgg เชื่อมต่อสำเร็จ! ระบบแจ้งเตือนพร้อมใช้งาน');
+}
+window.saveLineToken = saveLineToken;
+
+function inputs() {
+  return {
+    tMin:$('tmin'), tMax:$('tmax'), hMin:$('hmin'), hMax:$('hmax'),
+    durDays:$('dur-days'), durHrs:$('dur-hrs'), durMin:$('dur-min'),
+    servoHold:$('servo-hold')
+  };
+}
+
+let selectedStageIdx=0;
+
+function onProfileChange() {
+  currentProfileKey=$('profile-sel').value;
+  const isCustom=currentProfileKey==="custom";
+  const btnWrap=$('stage-btns');
+  $('manual-inputs').style.display=isCustom?'':'none';
+  $('duration-inputs').style.display=isCustom?'':'none';
+  if(isCustom){
+    btnWrap.classList.remove('show');
+    $('stage-detail').classList.remove('show');
+  } else {
+    const p=PROFILES[currentProfileKey];
+    $('dur-days').value=p.totalDays;
+    $('dur-hrs').value='';
+    $('dur-min').value='';
+    btnWrap.innerHTML='';
+    Object.entries(p.stages).forEach(([idx,s])=>{
+      const isLock=!s.turning;
+      const btn=document.createElement('button');
+      btn.className='stage-btn'+(isLock?' lock-btn':'')+(parseInt(idx)===0?' sel':'');
+      btn.innerHTML=`<div class="sbtn-name">${s.name}</div><div class="sbtn-days">วัน ${s.dayStart}–${s.dayEnd}</div>`;
+      btn.onclick=()=>selectStage(parseInt(idx));
+      btnWrap.appendChild(btn);
+    });
+    btnWrap.classList.add('show');
+    selectedStageIdx=0;
+    fillStageInputs(0);
+    showStageDetail(0);
+  }
+  validate();
+}
+
+function selectStage(idx){
+  selectedStageIdx=idx;
+  const p=PROFILES[currentProfileKey]; if(!p)return;
+  document.querySelectorAll('.stage-btn').forEach((b,i)=>b.classList.toggle('sel',i===idx));
+  fillStageInputs(idx);
+  showStageDetail(idx);
+}
+
+function fillStageInputs(idx){
+  const p=PROFILES[currentProfileKey]; if(!p)return;
+  const s=Object.values(p.stages)[idx]; if(!s)return;
+  $('tmin').value=s.tempMin;
+  $('tmax').value=s.tempMax;
+  $('hmin').value=s.humMin;
+  $('hmax').value=s.humMax;
+  $('servo-hold').value=s.servoHoldHours;
+  const remainingDays=p.totalDays-s.dayStart+1;
+  $('dur-days').value=remainingDays;
+  $('dur-hrs').value='';
+  $('dur-min').value='';
+  validate();
+}
+
+function showStageDetail(idx){
+  const p=PROFILES[currentProfileKey]; if(!p)return;
+  const s=Object.values(p.stages)[idx]; if(!s)return;
+  $('sd-temp').textContent=`${s.tempMin} – ${s.tempMax} °C`;
+  $('sd-hum').textContent=`${s.humMin} – ${s.humMax} %`;
+  $('sd-servo').textContent=s.turning?(s.servoHoldHours+' ชม.'):'–';
+  const t=$('sd-turning');
+  if(s.turning){t.textContent='✅ พลิกทุก '+s.servoHoldHours+' ชม.';t.style.color='var(--gr)';}
+  else{t.textContent='🔒 หยุดพลิก (ระยะเกิด)';t.style.color='var(--am)';}
+  $('stage-detail').classList.add('show');
+}
+
+function vf(el,hid,v,mn,mx,label) {
+  const h=$(hid);
+  if(!el.value){el.className='ifield';h.className='ihint';h.textContent=label;return false;}
+  if(isNaN(v)||v<mn||v>mx){el.className='ifield err';h.className='ihint err';h.textContent=`ค่าต้องอยู่ระหว่าง ${mn}–${mx}`;return false;}
+  el.className='ifield ok';h.className='ihint';h.textContent='✓';return true;
+}
+
+function validate() {
+  const f=inputs();
+  const isCustom=currentProfileKey==="custom";
+
+  let ok1=true,ok2=true,ok3=true,ok4=true;
+  if(isCustom){
+    const tMin=parseFloat(f.tMin.value),tMax=parseFloat(f.tMax.value);
+    const hMin=parseFloat(f.hMin.value),hMax=parseFloat(f.hMax.value);
+    ok1=vf(f.tMin,'htmin',tMin,30,42,'ฮีตเตอร์เปิดเมื่อต่ำกว่านี้');
+    ok2=vf(f.tMax,'htmax',tMax,30,42,'ฮีตเตอร์ปิดเมื่อสูงกว่านี้');
+    ok3=vf(f.hMin,'hhmin',hMin,30,90,'หมอกเปิดเมื่อต่ำกว่านี้');
+    ok4=vf(f.hMax,'hhmax',hMax,30,90,'หมอกปิดเมื่อสูงกว่านี้');
+    if(ok1&&ok2&&tMin>=tMax){f.tMax.className='ifield err';$('htmax').className='ihint err';$('htmax').textContent='ต้องมากกว่าอุณหภูมิต่ำสุด';ok2=false;}
+    if(ok3&&ok4&&hMin>=hMax){f.hMax.className='ifield err';$('hhmax').className='ihint err';$('hhmax').textContent='ต้องมากกว่าความชื้นต่ำสุด';ok4=false;}
+  }
+
+  const hasAnyDur=f.durDays.value||f.durHrs.value||f.durMin.value;
+  let ok5=false;
+  if(hasAnyDur){
+    const d=parseInt(f.durDays.value)||0,h=parseInt(f.durHrs.value)||0,m=parseInt(f.durMin.value)||0;
+    const validD=d>=0&&d<=60,validH=h>=0&&h<=23,validM=m>=0&&m<=59;
+    const totalOk=(d*86400000+h*3600000+m*60000)>0;
+    f.durDays.className='ifield '+(validD?'ok':'err');
+    f.durHrs.className ='ifield '+(validH?'ok':'err');
+    f.durMin.className ='ifield '+(validM?'ok':'err');
+    ok5=validD&&validH&&validM&&totalOk;
+    if(!totalOk&&validD&&validH&&validM) f.durDays.className=f.durHrs.className=f.durMin.className='ifield err';
+  } else {
+    f.durDays.className=f.durHrs.className=f.durMin.className='ifield';
+  }
+
+  const servoH=parseFloat(f.servoHold.value);
+  let ok6=vf(f.servoHold,'hservo',servoH,0.1,24,'ระยะเวลาค้างของ เซอร์โวมอเตอร์ ต่อตำแหน่ง');
+
+  const all=ok1&&ok2&&ok3&&ok4&&ok5&&ok6;
+  $('bstart').disabled=!all;
+  const any=f.tMin.value||f.tMax.value||f.hMin.value||f.hMax.value||hasAnyDur||f.servoHold.value;
+  $('vbanner').classList.toggle('show',!all&&!!any&&curState!=="RUN");
+  return all;
+}
+
+function setAllDisabled(f,dis) {
+  [f.tMin,f.tMax,f.hMin,f.hMax,f.durDays,f.durHrs,f.durMin,f.servoHold,$('profile-sel'),$('egg-count')].forEach(el=>el&&(el.disabled=dis));
+}
+
+function updateUI(state) {
+  curState=state;
+  const f=inputs();
+  if(state==="RUN"){
+    $('sdot').className='sys-dot run';$('slabel').textContent='ระบบทำงาน';$('syscard').className='sys-card running';
+    const tMin=f.tMin.value,tMax=f.tMax.value,hMin=f.hMin.value,hMax=f.hMax.value;
+    $('ssub').textContent=currentProfileKey!=="custom"
+      ?`โปรไฟล์: ${PROFILES[currentProfileKey]?.name||currentProfileKey}`
+      :(tMin&&tMax&&hMin&&hMax)?`T: ${parseFloat(tMin).toFixed(1)}–${parseFloat(tMax).toFixed(1)}°C  H: ${parseFloat(hMin).toFixed(0)}–${parseFloat(hMax).toFixed(0)}%`:'RUN';
+    $('bstart').style.display='none';$('bstop').style.display='';
+    setAllDisabled(f,true);
+  } else {
+    $('sdot').className='sys-dot stop';$('slabel').textContent='ระบบหยุด';$('syscard').className='sys-card stopped';
+    $('ssub').textContent='กรอกค่าเพื่อเริ่มทำงานใหม่';
+    $('bstart').style.display='';$('bstop').style.display='none';$('bstart').disabled=true;
+    setAllDisabled(f,false);
+    $('stage-info').style.display='none';
+    const hasSome=f.tMin.value||f.tMax.value||f.hMin.value||f.hMax.value||f.durDays.value||f.durHrs.value||f.durMin.value||f.servoHold.value;
+    if(hasSome) validate(); else $('vbanner').classList.remove('show');
+  }
+}
+
+let endMs=0,cdTimer=null;
+function startCD(et){
+  endMs=et; currentRunEndMs=et;
+  if(cdTimer)clearInterval(cdTimer);
+  cdTimer=setInterval(tickCD,1000); tickCD();
+  $('stage-countdown').classList.add('show');
+}
+function tickCD(){
+  const diff=endMs-Date.now();
+  if(diff<=0){
+    $('cdtxt').textContent='หมดเวลา';$('cdtxt').style.color='var(--rd)';
+    $('cd-days-left').textContent='0 วัน';clearInterval(cdTimer);return;
+  }
+  const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000);
+  const m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+  $('cdtxt').textContent=`${d}วัน ${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  $('cdtxt').style.color=d<1?'var(--am)':'var(--gr)';
+  const daysLeft=Math.ceil(diff/86400000);
+  $('cd-days-left').textContent=daysLeft>0?`อีก ${daysLeft} วัน`:'< 1 วัน';
+  $('cd-days-left').style.color=daysLeft<=1?'var(--am)':'var(--tx)';
+  const ed=new Date(endMs);
+  $('cdend').textContent='ครบ '+ed.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'2-digit'})+' '+ed.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+}
+function stopCD(){
+  if(cdTimer)clearInterval(cdTimer);
+  $('cdtxt').textContent='--';$('cdtxt').style.color='var(--gr)';
+  $('cdend').textContent='--';$('cd-days-left').textContent='--';
+  endMs=0; $('stage-countdown').classList.remove('show');
+}
+
+function updateStageCard(startTimeMs, profile, startStageIdx=0) {
+  if(!profile||profile==="custom"||!startTimeMs){$('stage-info').style.display='none';return;}
+  const p=PROFILES[profile]; if(!p)return;
+  const stageList=Object.values(p.stages);
+  const startDayOffset=(stageList[startStageIdx]?.dayStart??1)-1;
+  const currentDay=Math.floor((Date.now()-startTimeMs)/86400000)+1+startDayOffset;
+  const pct=Math.min((currentDay/p.totalDays)*100,100);
+  $('stage-info').style.display='';
+  $('progress-fill').style.width=pct.toFixed(1)+'%';
+  $('stage-day-txt').textContent=`วันที่ ${currentDay} จาก ${p.totalDays} วัน`;
+
+  let stageName='--';
+  let isLockdown=false;
+  for(const s of Object.values(p.stages)){
+    if(currentDay>=s.dayStart&&currentDay<=s.dayEnd){ stageName=s.name; isLockdown=!s.turning; break; }
+  }
+  $('stage-name').textContent=stageName;
+  $('lockdown-badge').style.display=isLockdown?'':'none';
+  isLockdownStage=isLockdown;
+
+  const stageEntries=Object.values(p.stages);
+  let curIdx=0;
+  let curStage=null;
+  stageEntries.forEach((s,i)=>{if(currentDay>=s.dayStart&&currentDay<=s.dayEnd){curIdx=i;curStage=s;}});
+  document.querySelectorAll('.stage-btn').forEach((b,i)=>{
+    b.classList.toggle('cur-stage',i===curIdx);
+  });
+  if(curStage&&curIdx!==lastAutoStageIdx){
+    lastAutoStageIdx=curIdx;
+    update(ref(db, fbp('control')),{
+      tempMin:curStage.tempMin,   tempMax:curStage.tempMax,
+      humMin:curStage.humMin,     humMax:curStage.humMax,
+      servoHoldHours:curStage.servoHoldHours,
+      turning:curStage.turning !== false
+    }).catch(()=>{});
+  }
+
+  const row=$('candling-row');
+  row.innerHTML='';
+  (p.candlingDays||[]).forEach(d=>{
+    const chip=document.createElement('span');
+    chip.className='cd-chip'+(d<currentDay?' done':d===currentDay?' today':'');
+    chip.textContent=`ส่องไข่วันที่ ${d}`;
+    row.appendChild(chip);
+  });
+}
+
+async function startSys() {
+  if(!validate()){$('vbanner').classList.add('show');return;}
+  const f=inputs();
+  const isCustom=currentProfileKey==="custom";
+
+  let tMin,tMax,hMin,hMax;
+  if(isCustom){
+    tMin=parseFloat(f.tMin.value); tMax=parseFloat(f.tMax.value);
+    hMin=parseFloat(f.hMin.value); hMax=parseFloat(f.hMax.value);
+  } else {
+    const selStage=Object.values(PROFILES[currentProfileKey].stages)[selectedStageIdx];
+    tMin=selStage.tempMin; tMax=selStage.tempMax;
+    hMin=selStage.humMin;  hMax=selStage.humMax;
+  }
+  const durD=parseInt(f.durDays.value)||0,durH=parseInt(f.durHrs.value)||0,durM=parseInt(f.durMin.value)||0;
+  const servoH=parseFloat(f.servoHold.value);
+  const durationMs=durD*86400000+durH*3600000+durM*60000;
+  const st=Date.now(), et=st+durationMs;
+  const eggCount=parseInt($('egg-count').value)||0;
+  currentRunStartTime=st; currentStartStageIdx=selectedStageIdx; currentEggCount=eggCount;
+
+  if(!isCustom){
+    const p=PROFILES[currentProfileKey];
+    await set(ref(db, fbp('profiles/'+currentProfileKey)),{
+      stages:p.stages, totalDays:p.totalDays,
+      candlingDays:p.candlingDays, name:p.name
+    });
+  }
+
+  const stageList = Object.values(isCustom ? {} : PROFILES[currentProfileKey].stages);
+  const startDayOffset = (stageList[selectedStageIdx]?.dayStart ?? 1) - 1;
+  const selTurning = isCustom ? true : (stageList[selectedStageIdx]?.turning !== false);
+
+  await update(ref(db, fbp('control')),{
+    system:"RUN", tempMin:tMin, tempMax:tMax, humMin:hMin, humMax:hMax,
+    durationMs, startTime:st, endTime:et, servoHoldHours:servoH,
+    activeProfile:currentProfileKey, startStageIdx:selectedStageIdx, eggCount,
+    startDayOffset, turning:selTurning
+  });
+  updateUI("RUN"); startCD(et);
+
+  await set(ref(db, fbp('systemLogs/'+st)),{
+    action:"START",timestamp:st,tempMin:tMin,tempMax:tMax,humMin:hMin,humMax:hMax,
+    durationMs,servoHoldHours:servoH,profile:currentProfileKey
+  });
+
+  const runsSnap = await get(query(ref(db, fbp('runs')),limitToLast(20)));
+  if(runsSnap.exists()){
+    const updates={};
+    runsSnap.forEach(child=>{
+      if(child.val().status==="running" && child.key!=String(st))
+        updates[fbp('runs/'+child.key+'/status')]="stopped";
+    });
+    if(Object.keys(updates).length) await update(ref(db),updates);
+  }
+
+  await set(ref(db, fbp('runs/'+st)),{
+    startTime:st, endTime:et, profile:currentProfileKey,
+    eggCount, status:"running",
+    tempMin:tMin, tempMax:tMax, humMin:hMin, humMax:hMax
+  });
+
+  const stageName = currentProfileKey==="custom" ? "กำหนดเอง"
+    : Object.values(PROFILES[currentProfileKey].stages)[selectedStageIdx]?.name || currentProfileKey;
+  sendLine(`🥚 เริ่มฟักไข่แล้ว!\nช่วง: ${stageName}\nอุณหภูมิ: ${tMin}–${tMax}°C\nความชื้น: ${hMin}–${hMax}%\nไข่: ${eggCount} ฟอง`);
+}
+
+async function stopSys() {
+  if(!confirm("หยุดระบบทั้งหมด?\nRelay ทุกตัวจะปิด และ เซอร์โวมอเตอร์ จะหยุด"))return;
+  stopGuardUntil=Date.now()+15000; lastAutoStageIdx=-1;
+  await update(ref(db, fbp('control')),{system:"STOP"});
+  updateUI("STOP"); stopCD();
+  await set(ref(db, fbp('systemLogs/'+Date.now())),{action:"STOP",timestamp:Date.now()});
+  if(currentRunStartTime>0)
+    await update(ref(db, fbp('runs/'+currentRunStartTime)),{status:"stopped",endTime:Date.now()});
+
+  sendLine(`⏹ หยุดระบบตู้ฟักไข่แล้ว\nเวลา: ${new Date().toLocaleString('th-TH')}`);
+}
+
+function openDlg(){$('dlg').classList.add('show')}
+function closeDlg(){$('dlg').classList.remove('show')}
+$('dlg').addEventListener('click',e=>{if(e.target===$('dlg'))closeDlg();});
+
+async function confirmClear(){
+  closeDlg();
+  await remove(ref(db, fbp('logs')));
+  $('hlog-body').innerHTML='';$('hlog-ts').textContent='ล้างแล้ว';
+  hChart.data.labels=[];hChart.data.datasets[0].data=[];hChart.data.datasets[1].data=[];
+  hChart.update();$('cnote').textContent='ยังไม่มีข้อมูล';
+}
+async function clearSysLog(){
+  if(!confirm("ล้างบันทึกการเปิด/ปิดระบบทั้งหมด?"))return;
+  await remove(ref(db, fbp('systemLogs')));
+  $('slog-body').innerHTML='';$('slog-ts').textContent='ล้างแล้ว';
+}
+
+function showHatchDlg(){
+  $('hatch-egg-total').textContent=currentEggCount||'?';
+  $('hatch-count-input').value='';
+  $('hatch-dlg').classList.add('show');
+}
+function closeHatchDlg(){$('hatch-dlg').classList.remove('show');}
+async function submitHatch(){
+  const hatchCount=parseInt($('hatch-count-input').value)||0;
+  closeHatchDlg();
+  if(!currentRunStartTime)return;
+  const badCount=Math.max(0,(currentEggCount||0)-hatchCount);
+  const hatchRate=currentEggCount?((hatchCount/currentEggCount)*100).toFixed(1):'0';
+  await update(ref(db, fbp('runs/'+currentRunStartTime)),{
+    status:"completed", hatchCount, badCount,
+    hatchRate:parseFloat(hatchRate), completedAt:Date.now()
+  });
+}
+
+function exportCSV(){
+  const entries=Object.entries(allHourlyLogs).sort((a,b)=>parseInt(a[0])-parseInt(b[0]));
+  if(!entries.length){alert("ยังไม่มีข้อมูล log");return;}
+  const header="timestamp,datetime,temp,humidity,heater,fog,fanMain,fan3,fan4,servoPosition,servoStatus\n";
+  const rows=entries.map(([id,v])=>{
+    const ms=parseInt(v.timestamp)||parseInt(id);
+    const dt=new Date(ms).toLocaleString("th-TH");
+    return `${ms},"${dt}",${v.temp??''},${v.humidity??''},${v.heater??''},${v.fog??''},${v.fanMain??''},${v.fan3??''},${v.fan4??''},${v.servoPosition??''},${v.servoStatus??''}`;
+  }).join('\n');
+  const blob=new Blob(['﻿'+header+rows],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='egg_log_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+let logSortKey='time', logSortDir='desc';
+
+function sortLog(key){
+  const ths=document.querySelectorAll('#hlog-body').item(0)?.closest('table').querySelectorAll('th.sortable');
+  if(logSortKey===key) logSortDir=logSortDir==='asc'?'desc':'asc';
+  else{logSortKey=key;logSortDir=key==='time'?'desc':'desc';}
+  ths.forEach(th=>{
+    th.classList.remove('asc','desc');
+    const map={'time':'วันที่/เวลา','temp':'°C','hum':'%RH'};
+    if(th.textContent.trim().replace(/[▲▼⇅]/g,'').trim()===map[key]) th.classList.add(logSortDir);
+  });
+  renderHLog();
+}
+
+function renderHLog(){
+  const b=$('hlog-body'); b.innerHTML='';
+  if(!allHourlyLogs||!Object.keys(allHourlyLogs).length) return;
+  let entries=Object.entries(allHourlyLogs).map(([id,v])=>({
+    id, ms:parseInt(v.timestamp)||parseInt(id), ...v
+  }));
+  entries.sort((a,b2)=>{
+    let va,vb;
+    if(logSortKey==='temp'){va=parseFloat(a.temp)||0;vb=parseFloat(b2.temp)||0;}
+    else if(logSortKey==='hum'){va=parseFloat(a.humidity)||0;vb=parseFloat(b2.humidity)||0;}
+    else{va=a.ms;vb=b2.ms;}
+    return logSortDir==='asc'?va-vb:vb-va;
+  });
+  entries.slice(0,20).forEach(v=>{
+    const r=v.ms>1577836800000?fmtMs(v.ms):{date:"--",time:"--"};
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="tm" style="line-height:1.5;"><span>${r.time}</span><br><span style="color:var(--mu);font-size:13px;">${r.date}</span></td>
+      <td class="tm">${v.temp!=null?parseFloat(v.temp).toFixed(2):"--"}</td>
+      <td class="tm">${v.humidity!=null?parseFloat(v.humidity).toFixed(2):"--"}</td>
+      <td><span class="dbadge ${v.heater==="ON"?"on":"off"}">${v.heater??"--"}</span></td>
+      <td><span class="dbadge ${v.fog==="ON"?"on":"off"}">${v.fog??"--"}</span></td>
+      <td><span class="dbadge ${v.fanMain==="ON"?"on":"off"}">${v.fanMain??"--"}</span></td>
+      <td><span class="dbadge ${v.fan3==="ON"?"on":"off"}">${v.fan3??"--"}</span></td>
+      <td><span class="dbadge ${v.fan4==="ON"?"on":"off"}">${v.fan4??"--"}</span></td>
+      <td class="tm">${v.servoPosition!=null?v.servoPosition+"°":"--"}</td>
+      <td class="tmu" style="font-size:14px;">${v.servoStatus??"--"}</td>`;
+    b.appendChild(tr);
+  });
+  $('hlog-ts').textContent='อัปเดต '+ts();
+}
+
+window.validate=validate;window.startSys=startSys;window.stopSys=stopSys;
+window.openDlg=openDlg;window.closeDlg=closeDlg;window.confirmClear=confirmClear;
+window.clearSysLog=clearSysLog;window.closeHatchDlg=closeHatchDlg;window.submitHatch=submitHatch;
+window.exportCSV=exportCSV;window.onProfileChange=onProfileChange;
+window.selectStage=selectStage;window.sortLog=sortLog;
+
+let chartRange='24h';
+let unsubChart=null;
+function setRange(r){
+  chartRange=r;
+  document.querySelectorAll('.rtab').forEach(b=>{
+    b.classList.toggle('active', b.textContent===({'1h':'1ชม.','24h':'24ชม.','7d':'7วัน','all':'ทั้งรอบ'}[r]));
+  });
+  const titles={'1h':'กราฟย้อนหลัง 1 ชั่วโมง','24h':'กราฟย้อนหลัง 24 ชั่วโมง','7d':'กราฟย้อนหลัง 7 วัน','all':'กราฟทั้งรอบ'};
+  $('chart-title').textContent=titles[r];
+  if(unsubChart){unsubChart();unsubChart=null;}
+  subscribeChart(r);
+}
+window.setRange=setRange;
+
+function subscribeChart(r){
+  if(r==='1h'){
+    unsubChart=onValue(query(ref(db, fbp('logs1m')),limitToLast(60)),snap=>{
+      renderChart(snap.val(),60*60*1000);
+    });
+  } else {
+    const limit=r==='7d'?168:r==='all'?500:48;
+    unsubChart=onValue(query(ref(db, fbp('logs')),limitToLast(limit)),snap=>{
+      const cut=r==='24h'?Date.now()-86400000:r==='7d'?Date.now()-7*86400000:0;
+      renderChart(snap.val(),cut>0?cut:0);
+    });
+  }
+}
+
+function renderChart(logs,cutMs){
+  if(!logs){$('cnote').textContent='ยังไม่มีข้อมูล';return;}
+  const entries=Object.entries(logs).sort((a,b)=>parseInt(a[0])-parseInt(b[0]));
+  const ce=cutMs>0?entries.filter(([id,v])=>{const ms=parseInt(v.timestamp)||parseInt(id);return ms>=cutMs;}):entries;
+  hChart.data.labels=ce.map(([id,v])=>{
+    const ms=parseInt(v.timestamp)||parseInt(id);
+    return chartRange==='1h'
+      ?new Date(ms).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})
+      :new Date(ms).toLocaleDateString("th-TH",{day:"2-digit",month:"2-digit"})+' '+new Date(ms).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+  });
+  hChart.data.datasets[0].data=ce.map(([,v])=>parseFloat(v.temp)||null);
+  hChart.data.datasets[1].data=ce.map(([,v])=>parseFloat(v.humidity)||null);
+  hChart.update('none');
+  $('cnote').textContent=ce.length?`${ce.length} จุดข้อมูล · อัปเดต ${ts()}`:'ไม่มีข้อมูลในช่วงนี้';
+}
+
+function applyTheme(dark){
+  if(dark){document.documentElement.setAttribute('data-theme','dark');$('theme-btn').textContent='☀️ Light';}
+  else{document.documentElement.removeAttribute('data-theme');$('theme-btn').textContent='🌙 Dark';}
+  const gr=dark?'#4ade80':'#16a34a',bl=dark?'#60a5fa':'#3b82f6',gridC=dark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.06)';
+  hChart.data.datasets[0].borderColor=gr;
+  hChart.data.datasets[0].backgroundColor=dark?'rgba(74,222,128,0.06)':'rgba(22,163,74,0.06)';
+  hChart.data.datasets[0].pointBackgroundColor=gr;
+  hChart.data.datasets[1].borderColor=bl;
+  hChart.data.datasets[1].backgroundColor=dark?'rgba(96,165,250,0.06)':'rgba(59,130,246,0.06)';
+  hChart.data.datasets[1].pointBackgroundColor=bl;
+  hChart.options.scales.yT.ticks.color=gr;hChart.options.scales.yH.ticks.color=bl;
+  hChart.options.scales.x.grid.color=gridC;hChart.options.scales.yT.grid.color=gridC;
+  const ttBg=dark?'#1e2023':'#ffffff', ttBody=dark?'#f0f0ef':'#1a1a1a', ttTitle=dark?'#6b6e74':'#6b7280';
+  hChart.options.plugins.tooltip.backgroundColor=ttBg;
+  hChart.options.plugins.tooltip.titleColor=ttTitle;
+  hChart.options.plugins.tooltip.bodyColor=ttBody;
+  hChart.update('none');
+}
+function toggleTheme(){
+  const isDark=!document.documentElement.hasAttribute('data-theme');
+  localStorage.setItem('theme',isDark?'dark':'light');
+  applyTheme(isDark);
+}
+window.toggleTheme=toggleTheme;
+applyTheme(localStorage.getItem('theme')==='dark');
+
+if (lineToken && $('line-tok')) $('line-tok').value = lineToken;
+
+onProfileChange();
+get(ref(db, fbp('control'))).then(snap=>{
+  const c=snap.val();
+  if(c){
+    const f=inputs();
+    if(c.tempMin)f.tMin.value=c.tempMin; if(c.tempMax)f.tMax.value=c.tempMax;
+    if(c.humMin) f.hMin.value=c.humMin;  if(c.humMax) f.hMax.value=c.humMax;
+    if(c.tempMin) curTempMin=c.tempMin; if(c.tempMax) curTempMax=c.tempMax;
+    if(c.humMin)  curHumMin=c.humMin;   if(c.humMax)  curHumMax=c.humMax;
+    const ms=c.durationMs||((c.durationDays||0)*86400000);
+    if(ms>0){
+      f.durDays.value=Math.floor(ms/86400000)||'';
+      f.durHrs.value =Math.floor((ms%86400000)/3600000)||'';
+      f.durMin.value =Math.floor((ms%3600000)/60000)||'';
+    }
+    if(c.servoHoldHours) f.servoHold.value=c.servoHoldHours;
+    if(c.activeProfile&&c.activeProfile!=="custom"&&PROFILES[c.activeProfile]){
+      $('profile-sel').value=c.activeProfile;
+      currentProfileKey=c.activeProfile;
+      onProfileChange();
+    }
+    validate();
+    if(c.system==="RUN"&&c.endTime) startCD(c.endTime);
+    if(c.startTime) currentRunStartTime=c.startTime;
+    if(c.startStageIdx!=null){
+      currentStartStageIdx=parseInt(c.startStageIdx)||0;
+      if(c.system==="RUN"&&currentStartStageIdx>0&&currentProfileKey!=="custom")
+        selectStage(currentStartStageIdx);
+    }
+    if(c.eggCount) { $('egg-count').value=c.eggCount; currentEggCount=c.eggCount; }
+  }
+  setupListeners();
+}).catch(()=>setupListeners());
+
+function setupListeners(){
+
+onValue(ref(db, fbp('control')),snap=>{
+  const c=snap.val(); if(!c)return;
+  if(c.tempMin) curTempMin=c.tempMin; if(c.tempMax) curTempMax=c.tempMax;
+  if(c.humMin)  curHumMin=c.humMin;   if(c.humMax)  curHumMax=c.humMax;
+});
+
+onValue(ref(db, fbp('current')),snap=>{
+  const d=snap.val(); if(!d)return;
+  lastUp=Date.now();
+  $('odot').className='dot';$('otxt').textContent='online';
+
+  const ns=d.systemState??"STOP";
+  if(ns==="STOP") stopGuardUntil=0;
+  const blocked=ns==="RUN"&&Date.now()<stopGuardUntil;
+  if(ns!==curState&&!blocked){
+    validate(); updateUI(ns);
+    if(ns==="RUN"&&d.endTime) startCD(d.endTime);
+    else if(ns==="STOP"){
+      stopCD();
+      if(curState==="RUN"&&currentRunEndMs>0&&Date.now()>=currentRunEndMs-3600000&&currentEggCount>0){
+        setTimeout(showHatchDlg,2000);
+      }
+    }
+  } else if(ns==="RUN"&&d.endTime&&d.endTime!==endMs&&!blocked) startCD(d.endTime);
+
+  if(ns==="RUN"&&currentRunStartTime>0) updateStageCard(currentRunStartTime,currentProfileKey,currentStartStageIdx);
+
+  setMetric("ct","temp",d.temp);
+  setMetric("ch","hum",d.humidity);
+
+  if(lineToken && ns==="RUN") {
+    const now=Date.now();
+    const h=parseFloat(d.humidity), t=parseFloat(d.temp);
+    if(!isNaN(h) && h > curHumMax+3 && now-lastLineAlert.hum > LINE_COOLDOWN) {
+      lastLineAlert.hum=now;
+      sendLine(`💧 ความชื้นสูงเกิน!\nความชื้น: ${h.toFixed(1)}% (เป้า ≤${curHumMax}%)\nตรวจสอบระบบหมอก`);
+    }
+    if(!isNaN(h) && h < curHumMin-3 && now-lastLineAlert.hum > LINE_COOLDOWN) {
+      lastLineAlert.hum=now;
+      sendLine(`💧 ความชื้นต่ำเกิน!\nความชื้น: ${h.toFixed(1)}% (เป้า ≥${curHumMin}%)\nตรวจสอบน้ำในระบบหมอก`);
+    }
+    if(!isNaN(t) && t > curTempMax+1 && now-lastLineAlert.temp > LINE_COOLDOWN) {
+      lastLineAlert.temp=now;
+      sendLine(`🌡️ อุณหภูมิสูงเกิน!\nอุณหภูมิ: ${t.toFixed(1)}°C (เป้า ≤${curTempMax}°C)\nตรวจสอบฮีตเตอร์/พัดลม`);
+    }
+    if(!isNaN(t) && t < curTempMin-1 && now-lastLineAlert.temp > LINE_COOLDOWN) {
+      lastLineAlert.temp=now;
+      sendLine(`🌡️ อุณหภูมิต่ำเกิน!\nอุณหภูมิ: ${t.toFixed(1)}°C (เป้า ≥${curTempMin}°C)\nตรวจสอบฮีตเตอร์`);
+    }
+  }
+
+  setBadge("r1",d.relay?.fog);setBadge("r2",d.relay?.fanMain);
+  setBadge("r3",d.relay?.fan3);setBadge("r4",d.relay?.fan4);setBadge("r5",d.relay?.heater);
+  $('sstatus').textContent=d.servo?.status??"--"; $('sstatus').className='badge';
+  $('spos').textContent=(d.servo?.position??'--')+'°'; $('spos').className='badge';
+
+  const turning=d.servo?.turning!==false;
+  $('turning-row').style.display=turning?'none':'flex';
+
+  $('sensor-banner').classList.toggle('show',d.sensorFailed===true);
+});
+
+onValue(query(ref(db, fbp('systemLogs')),limitToLast(30)),snap=>{
+  const b=$('slog-body'); b.innerHTML='';
+  const logs=snap.val();
+  if(!logs){$('slog-ts').textContent='ยังไม่มีบันทึก';return;}
+  $('slog-ts').textContent='อัปเดต '+ts();
+  Object.entries(logs).sort((a,b)=>parseInt(b[0])-parseInt(a[0])).forEach(([id,v])=>{
+    const ms=parseInt(v.timestamp)||parseInt(id);
+    const{date,time}=fmtMs(ms);
+    const is=v.action==="START";
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="tm" style="line-height:1.5;"><span>${time}</span><br><span style="color:var(--mu);font-size:13px;">${date}</span></td>
+      <td><span class="dbadge ${is?'on':'off'}">${is?'START':'STOP'}</span></td>
+      <td class="tm">${is?(v.tempMin?.toFixed(1)??"--"):"--"}</td>
+      <td class="tm">${is?(v.tempMax?.toFixed(1)??"--"):"--"}</td>
+      <td class="tm">${is?(v.humMin?.toFixed(0)??"--"):"--"}</td>
+      <td class="tm">${is?(v.humMax?.toFixed(0)??"--"):"--"}</td>`;
+    b.appendChild(tr);
+  });
+});
+
+onValue(query(ref(db, fbp('logs')),limitToLast(48)),snap=>{
+  const logs=snap.val();
+  if(!logs){$('hlog-ts').textContent='ยังไม่มีข้อมูล';return;}
+  allHourlyLogs=logs;
+  renderHLog();
+});
+
+onValue(query(ref(db, fbp('runs')),limitToLast(10)),snap=>{
+  const b=$('runs-body'); b.innerHTML='';
+  const runs=snap.val();
+  if(!runs){$('runs-ts').textContent='ยังไม่มีประวัติ';return;}
+  $('runs-ts').textContent='อัปเดต '+ts();
+  Object.entries(runs).sort((a,b)=>parseInt(b[0])-parseInt(a[0])).forEach(([id,v])=>{
+    const ms=parseInt(v.startTime)||parseInt(id);
+    const{date,time}=fmtMs(ms);
+    const profileName=v.profile&&PROFILES[v.profile]?PROFILES[v.profile].name:v.profile||'กำหนดเอง';
+    const rate=v.hatchRate!=null?parseFloat(v.hatchRate):null;
+    const rateCls=rate==null?'':rate>=80?'high':rate>=50?'mid':'low';
+    const statusBadge=v.status==="completed"?'<span class="dbadge on">สำเร็จ</span>':v.status==="running"?'<span class="dbadge" style="background:rgba(217,119,6,0.1);color:var(--am)">กำลังทำงาน</span>':'<span class="dbadge off">หยุด</span>';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="tm" style="line-height:1.5;"><span>${time}</span><br><span style="color:var(--mu);font-size:13px;">${date}</span></td>
+      <td style="font-size:16px;">${profileName}</td>
+      <td class="tm">${v.eggCount||'--'}</td>
+      <td class="tm">${v.hatchCount!=null?v.hatchCount:'--'}</td>
+      <td><span class="run-rate ${rateCls}">${rate!=null?rate+'%':'--'}</span></td>
+      <td>${statusBadge}</td>`;
+    b.appendChild(tr);
+  });
+});
+
+} // end setupListeners
+
+subscribeChart('24h');
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./service-worker.js')
+    .then(()=>console.log('[SW] registered'))
+    .catch(e=>console.log('[SW] error:',e));
+}
+
+</script>
+</body>
+</html>
