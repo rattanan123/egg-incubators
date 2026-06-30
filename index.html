@@ -68,14 +68,17 @@
     .cd-chip.today{background:rgba(217,119,6,0.12);border-color:rgba(217,119,6,0.4);color:var(--am);font-weight:500}
 
     .metrics-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .water-card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:18px 20px;display:flex;flex-direction:column;gap:14px}
-    .water-section{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .water-label{font-size:15px;font-weight:500;color:var(--mu)}
-    .water-pct{font-family:'Kanit',sans-serif;font-size:22px;font-weight:600}
-    .water-bar-wrap{width:100%;height:8px;background:var(--sur2);border-radius:99px;overflow:hidden}
+    .water-card{background:var(--sur2);border:1px solid var(--bd);border-radius:var(--rs);padding:14px 16px;display:flex;flex-direction:column;gap:10px;margin-top:16px}
+    .water-card-title{font-size:13px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px}
+    .water-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .water-label{font-size:15px;font-weight:500;color:var(--tx)}
+    .water-pct{font-family:'Kanit',sans-serif;font-size:18px;font-weight:600}
+    .water-bar-wrap{width:100%;height:6px;background:var(--bd2);border-radius:99px;overflow:hidden}
     .water-bar{height:100%;border-radius:99px;transition:width 0.6s,background 0.4s;background:var(--gr)}
     .water-bar.low{background:var(--rd)}
-    .water-divider{border:none;border-top:1px solid var(--bd);margin:0}
+    .water-tanks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .water-tank{background:var(--sur);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 12px}
+    .water-tank-label{font-size:13px;color:var(--mu);margin-bottom:6px}
     .mc{background:var(--sur2);border:1.5px solid var(--bd);border-radius:var(--rs);padding:16px 18px 20px;position:relative;overflow:hidden;transition:border-color 0.2s}
     .mc.ok{border-color:rgba(22,163,74,0.5)}
     .mc.warn{border-color:rgba(220,38,38,0.5)}
@@ -231,6 +234,8 @@
       .online-pill{display:none}
       .theme-btn{font-size:13px;padding:5px 8px}
       .back-link{font-size:13px;padding:5px 10px}
+      .water-tanks{grid-template-columns:1fr}
+      .water-card{margin-top:12px;padding:12px 14px}
       .sys-label{font-size:18px}.ifield{font-size:22px}.ilabel{font-size:13px}
       .btn-go,.btn-stop{font-size:18px;padding:13px 0;width:100%;min-width:unset}
       .sys-btns{flex-direction:column}
@@ -385,17 +390,19 @@
     </div>
 
     <div class="water-card" id="water-card">
-      <div class="water-section">
-        <div class="water-label">ถังพ่นหมอก</div>
-        <div id="fog-badge" style="font-family:'Kanit',sans-serif;font-size:13px;padding:3px 12px;border-radius:99px;background:var(--sur2);color:var(--mu);border:1px solid var(--bd2)">--</div>
-      </div>
-      <hr class="water-divider">
-      <div class="water-section" style="margin-bottom:6px">
-        <div class="water-label">ถังสำรองน้ำ</div>
-        <div class="water-pct" id="water-pct">--%</div>
-      </div>
-      <div class="water-bar-wrap">
-        <div class="water-bar" id="water-bar" style="width:0%"></div>
+      <div class="water-card-title">ระบบน้ำ</div>
+      <div class="water-tanks">
+        <div class="water-tank">
+          <div class="water-tank-label">ถังพ่นหมอก</div>
+          <div id="fog-badge" style="font-family:'Kanit',sans-serif;font-size:14px;padding:4px 12px;border-radius:99px;background:var(--sur2);color:var(--mu);border:1px solid var(--bd2);display:inline-block">--</div>
+        </div>
+        <div class="water-tank">
+          <div class="water-tank-label">ถังสำรองน้ำ</div>
+          <div class="water-pct" id="water-pct" style="margin-bottom:6px">--%</div>
+          <div class="water-bar-wrap">
+            <div class="water-bar" id="water-bar" style="width:0%"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1300,7 +1307,6 @@ function toggleTheme(){
 }
 window.toggleTheme=toggleTheme;
 
-window.togglePumpManual=togglePumpManual;
 applyTheme(localStorage.getItem('theme')==='dark');
 
 if (lineToken && $('line-tok')) $('line-tok').value = lineToken;
