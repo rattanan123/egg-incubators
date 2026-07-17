@@ -40,6 +40,16 @@ Servo myServo;
 #define SERVO_PIN 13
 #define WDT_TIMEOUT 30
 
+// ===== Water Tank =====
+#define TRIG_PIN          32
+#define ECHO_PIN          34      // input-only pin
+#define PUMP_PIN          19
+#define TANK_HEIGHT_CM    20      // ความสูงถังสำรอง (cm) — ปรับตามถังจริง
+
+// Fog tank — float switch (INPUT_PULLUP: LOW=น้ำพอ, HIGH=น้ำน้อย)
+#define FOG_FLOAT_PIN     36
+#define RESERVE_MIN_PCT   20.0f   // แจ้งเตือน LINE เมื่อถังสำรอง < 20%
+
 // Task 1.2: helper — คืน path ใต้ /incubators/{DEVICE_ID}/
 String fbPath(const String& sub) {
   return String("/incubators/") + DEVICE_ID + "/" + sub;
@@ -96,6 +106,25 @@ int shtErrorCount = 0;
 const int SHT_MAX_ERROR = 5;
 bool sensorFailed = false, wasRunning = false;
 
+// ===== Water =====
+float waterLevelPct  = -1;   // ถังสำรอง (HC-SR04)
+bool  fogTankLow     = false; // ถังหมอก (float switch)
+bool  pumpOn         = false;
+bool  pumpManual     = false; // true = web override, false = auto
+bool  waterAlerted   = false;
+bool  fogTankAlerted = false;
+unsigned long waterTimer = 0;
+const unsigned long WATER_INTERVAL = 5000UL;
+unsigned long pumpOnStart      = 0;
+const unsigned long PUMP_MAX_MS = 5UL * 60000UL; // แจ้งเตือนถ้าปั๊มทำงาน > 5 นาที
+bool  pumpOverrunAlerted = false;
+
+// ===== WiFi watchdog =====
+unsigned long wifiLostMs = 0;
+
+// ===== Startup alert =====
+static String pendingRebootAlert = "";
+
 // ===== LINE =====
 unsigned long lineAlertTimer = 0;
 const unsigned long LINE_COOLDOWN = 600000UL;
@@ -130,6 +159,17 @@ void lineTask(void* param) {
   vTaskDelete(NULL);
 }
 
+String relayStatusStr() {
+  String s = "\n📟 สถานะ Relay\n";
+  s += "ฮีตเตอร์  : " + String(heaterOn  ? "เปิด" : "ปิด") + "\n";
+  s += "หมอก      : " + String(fogOn      ? "เปิด" : "ปิด") + "\n";
+  s += "พัดลมหมอก : " + String(fanMainOn  ? "เปิด" : "ปิด") + "\n";
+  s += "พัดลมดูด  : " + String(fan3On     ? "เปิด" : "ปิด") + "\n";
+  s += "พัดลมระบาย: " + String(fan4On     ? "เปิด" : "ปิด") + "\n";
+  s += "ปั๊มน้ำ   : " + String(pumpOn     ? "เปิด" : "ปิด") + "\n";
+  return s;
+}
+
 void sendLineAlert(String message) {
   if (WiFi.status() != WL_CONNECTED) return;
   unsigned long now = millis();
@@ -140,6 +180,7 @@ void sendLineAlert(String message) {
     char buf[20]; strftime(buf, sizeof(buf), "%d/%m/%y %H:%M", &ti); timeStr = String(buf);
   }
   String full = "แจ้งเตือนตู้ฟักไข่\n-----------------\n" + message +
+                relayStatusStr() +
                 "-----------------\nเวลา: " + timeStr;
   full.replace("\\", "\\\\"); full.replace("\"", "\\\""); full.replace("\n", "\\n");
   String* copy = new String(full);
@@ -336,6 +377,8 @@ void readControlFromFirebase() {
   }
 
   if (json.get(r, "turning") && r.success) turningEnabled = r.boolValue;
+  if (json.get(r, "pumpManual") && r.success) pumpManual = r.boolValue;
+  if (pumpManual && json.get(r, "pumpOn") && r.success) setPump(r.boolValue);
 
   String newProfile = "";
   if (json.get(r, "activeProfile") && r.success) newProfile = r.stringValue;
@@ -399,6 +442,10 @@ void sendCurrentData() {
   json.set("servo/turning",  turningEnabled);
   json.set("online",         true);
   json.set("sensorFailed",   sensorFailed);
+  json.set("waterLevel",     waterLevelPct);
+  json.set("fogTankLow",     fogTankLow);
+  json.set("pumpOn",         pumpOn);
+  json.set("pumpManual",     pumpManual);
   json.set("deviceId",       DEVICE_ID);
   json.set("deviceName",     DEVICE_NAME);
   Firebase.RTDB.setJSON(&fbdo, fbPath("current").c_str(), &json);
@@ -446,6 +493,32 @@ void sendMinuteLog() {
   Firebase.RTDB.setJSON(&fbdoLog, (fbPath("logs1m/") + String(ts)).c_str(), &json);
 }
 
+// ===== Water Tank =====
+float measureWaterLevel() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  long dur = pulseIn(ECHO_PIN, HIGH, 30000);
+  if (dur == 0) return -1;
+  float distCm = dur * 0.034f / 2.0f;
+  float pct = (1.0f - (distCm / (float)TANK_HEIGHT_CM)) * 100.0f;
+  return constrain(pct, 0.0f, 100.0f);
+}
+
+void setPump(bool on) {
+  pumpOn = on;
+  digitalWrite(PUMP_PIN, on ? HIGH : LOW);
+}
+
+void autoPump() {
+  if (pumpManual) return;
+  bool reserveOk = (waterLevelPct < 0 || waterLevelPct > 0);
+  if (!pumpOn && fogTankLow && reserveOk)  setPump(true);
+  if (pumpOn  && (!fogTankLow || !reserveOk)) setPump(false);
+}
+
 // ===== SETUP =====
 void setup() {
   Serial.begin(115200);
@@ -458,6 +531,9 @@ void setup() {
 
   pinMode(RELAY1,OUTPUT); pinMode(RELAY2,OUTPUT); pinMode(RELAY3,OUTPUT);
   pinMode(RELAY4,OUTPUT); pinMode(RELAY5,OUTPUT);
+  pinMode(TRIG_PIN,OUTPUT); pinMode(ECHO_PIN,INPUT);
+  pinMode(FOG_FLOAT_PIN,INPUT_PULLUP);
+  pinMode(PUMP_PIN,OUTPUT); digitalWrite(PUMP_PIN,LOW);
   allRelaysOff();
 
   myServo.setPeriodHertz(50);
@@ -505,6 +581,22 @@ void setup() {
   logHrTimer  = millis() - LOG_HR_INTERVAL;
   logMinTimer = millis() - LOG_MIN_INTERVAL;
   Serial.printf("=== SYSTEM START === device:%s\n", DEVICE_ID);
+
+  // แจ้งเตือนเมื่อ reboot พร้อมสาเหตุ
+  esp_reset_reason_t reason = esp_reset_reason();
+  String reasonStr;
+  switch (reason) {
+    case ESP_RST_POWERON:  reasonStr = "เปิดเครื่อง"; break;
+    case ESP_RST_SW:       reasonStr = "Restart โดยซอฟต์แวร์"; break;
+    case ESP_RST_PANIC:    reasonStr = "⚠️ Crash (Panic)"; break;
+    case ESP_RST_INT_WDT:  reasonStr = "⚠️ Watchdog (interrupt)"; break;
+    case ESP_RST_TASK_WDT: reasonStr = "⚠️ Watchdog (task)"; break;
+    case ESP_RST_WDT:      reasonStr = "⚠️ Watchdog"; break;
+    case ESP_RST_BROWNOUT: reasonStr = "⚠️ ไฟตก (Brownout)"; break;
+    default:               reasonStr = "ไม่ทราบสาเหตุ (" + String(reason) + ")"; break;
+  }
+  // เก็บไว้ส่งใน loop() หลังระบบพร้อม
+  pendingRebootAlert = "🔄 ESP32 รีสตาร์ท\nสาเหตุ: " + reasonStr + "\n";
 }
 
 // ===== LOOP =====
@@ -514,10 +606,25 @@ void loop() {
   unsigned long now = millis();
 
   if (WiFi.status() != WL_CONNECTED) {
+    if (wifiLostMs == 0) wifiLostMs = now;
     Serial.println("[WiFi] reconnecting...");
     WiFi.reconnect();
     delay(5000);
     return;
+  }
+  // WiFi กลับมา — แจ้งถ้าหายนานพอ
+  if (wifiLostMs > 0) {
+    unsigned long lostSec = (now - wifiLostMs) / 1000;
+    if (lostSec >= 60) {
+      sendLineAlert("✅ WiFi กลับมาแล้ว\nหายไป " + String(lostSec / 60) + " นาที " + String(lostSec % 60) + " วินาที\n");
+    }
+    wifiLostMs = 0;
+  }
+
+  // ส่ง reboot alert ครั้งแรกหลัง WiFi พร้อม
+  if (pendingRebootAlert != "") {
+    sendLineForce(pendingRebootAlert);
+    pendingRebootAlert = "";
   }
 
   if (now - controlTimer >= CONTROL_INTERVAL) {
@@ -613,6 +720,47 @@ void loop() {
   if (now - logHrTimer >= LOG_HR_INTERVAL && latestTemp > 0 && !sensorFailed) {
     logHrTimer = now;
     sendHourlyLog();
+  }
+
+  if (now - waterTimer >= WATER_INTERVAL) {
+    waterTimer = now;
+
+    // ถังสำรอง (HC-SR04)
+    float reserve = measureWaterLevel();
+    if (reserve >= 0) {
+      waterLevelPct = reserve;
+      if (reserve < RESERVE_MIN_PCT && !waterAlerted) {
+        waterAlerted = true;
+        sendLineAlert("💧 ถังสำรองน้ำน้อย: " + String((int)reserve) + "%\nกรุณาเติมน้ำด่วน!\n");
+      }
+      if (reserve >= RESERVE_MIN_PCT + 10.0f) waterAlerted = false;
+    }
+
+    // ถังหมอก (float switch)
+    fogTankLow = (digitalRead(FOG_FLOAT_PIN) == HIGH); // HIGH = น้ำน้อย
+    if (fogTankLow && !fogTankAlerted) {
+      fogTankAlerted = true;
+      sendLineAlert("🪣 ถังพ่นหมอกน้ำน้อย!\nกรุณาเติมน้ำในถังพ่นหมอก\n");
+    }
+    if (!fogTankLow) fogTankAlerted = false;
+
+    // auto pump
+    autoPump();
+
+    // pump overrun — ปั๊มทำงานนานเกินไป
+    if (pumpOn) {
+      if (pumpOnStart == 0) pumpOnStart = now;
+      if (!pumpOverrunAlerted && (now - pumpOnStart) >= PUMP_MAX_MS) {
+        pumpOverrunAlerted = true;
+        sendLineAlert("⚠️ ปั๊มน้ำทำงานนานผิดปกติ (>" + String(PUMP_MAX_MS/60000) + " นาที)\nอาจเกิดจากถังสำรองหมดหรือปั๊มค้าง\n");
+      }
+    } else {
+      pumpOnStart = 0;
+      pumpOverrunAlerted = false;
+    }
+
+    Serial.printf("[WATER] reserve:%.0f%% fog:%s pump:%s manual:%s\n",
+      waterLevelPct, fogTankLow?"LOW":"OK", pumpOn?"ON":"OFF", pumpManual?"Y":"N");
   }
 
   if (now - logMinTimer >= LOG_MIN_INTERVAL && latestTemp > 0 && !sensorFailed) {
