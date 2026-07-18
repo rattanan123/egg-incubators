@@ -738,7 +738,7 @@ void loop() {
     }
 
     // ถังหมอก (float switch)
-    fogTankLow = (digitalRead(FOG_FLOAT_PIN) == HIGH); // HIGH = น้ำน้อย
+    fogTankLow = (digitalRead(FOG_FLOAT_PIN) == LOW);  // LOW = น้ำน้อย (NC float switch)
     if (fogTankLow && !fogTankAlerted) {
       fogTankAlerted = true;
       sendLineAlert("🪣 ถังพ่นหมอกน้ำน้อย!\nกรุณาเติมน้ำในถังพ่นหมอก\n");
