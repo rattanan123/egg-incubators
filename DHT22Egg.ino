@@ -207,6 +207,7 @@ void allRelaysOff() {
   relayWrite(RELAY1, false); relayWrite(RELAY2, false);
   relayWrite(RELAY3, false); relayWrite(RELAY4, false);
   ssrWrite(RELAY5, false);
+  relayWrite(PUMP_PIN, false);
   fogOn = fanMainOn = fan3On = fan4On = heaterOn = false;
 }
 
@@ -509,7 +510,7 @@ float measureWaterLevel() {
 
 void setPump(bool on) {
   pumpOn = on;
-  digitalWrite(PUMP_PIN, on ? HIGH : LOW);
+  digitalWrite(PUMP_PIN, on ? LOW : HIGH);  // Active LOW relay
 }
 
 void autoPump() {
@@ -533,7 +534,7 @@ void setup() {
   pinMode(RELAY4,OUTPUT); pinMode(RELAY5,OUTPUT);
   pinMode(TRIG_PIN,OUTPUT); pinMode(ECHO_PIN,INPUT);
   pinMode(FOG_FLOAT_PIN,INPUT_PULLUP);
-  pinMode(PUMP_PIN,OUTPUT); digitalWrite(PUMP_PIN,LOW);
+  pinMode(PUMP_PIN,OUTPUT); digitalWrite(PUMP_PIN,HIGH);  // HIGH = relay OFF for Active LOW
   allRelaysOff();
 
   myServo.setPeriodHertz(50);
@@ -759,8 +760,8 @@ void loop() {
       pumpOverrunAlerted = false;
     }
 
-    Serial.printf("[WATER] reserve:%.0f%% fog:%s pump:%s manual:%s\n",
-      waterLevelPct, fogTankLow?"LOW":"OK", pumpOn?"ON":"OFF", pumpManual?"Y":"N");
+    Serial.printf("[WATER] reserve:%.0f%% sensor:%s(pin:%d) pump:%s manual:%s\n",
+      waterLevelPct, fogTankLow?"LOW":"OK", digitalRead(FOG_FLOAT_PIN), pumpOn?"ON":"OFF", pumpManual?"Y":"N");
   }
 
   if (now - logMinTimer >= LOG_MIN_INTERVAL && latestTemp > 0 && !sensorFailed) {
