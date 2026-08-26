@@ -407,6 +407,23 @@
     </div>
   </div>
 
+  <!-- Camera Section -->
+  <div class="water-card" id="camera-card" style="display:none">
+    <div class="water-card-title">กล้อง</div>
+    <div class="water-tanks">
+      <div class="water-tank">
+        <div class="water-tank-label">ภายในตู้</div>
+        <img id="cam-inside" src="" style="width:100%;border-radius:6px;background:var(--sur2);min-height:120px;object-fit:cover" onerror="this.style.opacity=0.3">
+        <div style="margin-top:6px;font-size:13px;color:var(--mu)">ไข่: <span id="egg-count" style="font-weight:600;color:var(--tx)">--</span> ฟอง &nbsp; ลูกไก่: <span id="hatch-count" style="font-weight:600;color:var(--gr)">--</span> ตัว</div>
+      </div>
+      <div class="water-tank">
+        <div class="water-tank-label">ภายนอกตู้</div>
+        <img id="cam-outside" src="" style="width:100%;border-radius:6px;background:var(--sur2);min-height:120px;object-fit:cover" onerror="this.style.opacity=0.3">
+        <div id="cam-alert" style="margin-top:6px;font-size:13px;display:none;padding:4px 10px;border-radius:6px;background:var(--rd-bg);color:var(--rd);font-weight:500"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="sys-card" id="syscard">
     <div class="sys-top">
       <div class="sys-status">
@@ -1483,6 +1500,28 @@ onValue(query(ref(db, fbp('runs')),limitToLast(10)),snap=>{
       <td>${statusBadge}</td>`;
     b.appendChild(tr);
   });
+});
+
+// ===== Camera =====
+onValue(ref(db, fbp('camera/inside')), snap => {
+  const d = snap.val(); if(!d) return;
+  document.getElementById('camera-card').style.display = '';
+  document.getElementById('egg-count').textContent   = d.eggCount   ?? '--';
+  document.getElementById('hatch-count').textContent = d.hatchCount ?? '--';
+  if(d.snapshot) document.getElementById('cam-inside').src = 'data:image/jpeg;base64,' + d.snapshot;
+});
+
+onValue(ref(db, fbp('camera/outside')), snap => {
+  const d = snap.val(); if(!d) return;
+  document.getElementById('camera-card').style.display = '';
+  const alertEl = document.getElementById('cam-alert');
+  if(d.alert && d.detected) {
+    alertEl.style.display = '';
+    alertEl.textContent   = '⚠️ พบ: ' + d.detected;
+    if(d.snapshot) document.getElementById('cam-outside').src = 'data:image/jpeg;base64,' + d.snapshot;
+  } else {
+    alertEl.style.display = 'none';
+  }
 });
 
 } // end setupListeners
