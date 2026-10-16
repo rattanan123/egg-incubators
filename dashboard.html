@@ -667,7 +667,11 @@ window.toggleMask        = toggleMask;
 
 // ── init Firebase app ของตู้ (reuse ถ้ามีแล้ว) ──
 function getOrInitDevApp(devId, cfg) {
-  if (!cfg.firebaseApiKey || !cfg.firebaseDatabaseURL) return null;
+  // ตู้ที่อยู่ Firebase โปรเจกต์เดียวกับหลัก (หรือไม่มี config) → ใช้ masterApp ที่ login แล้ว
+  // ถ้าสร้าง app แยกจะไม่มี auth session → rules ปฏิเสธ → การ์ดค้าง "ออฟไลน์"
+  const normUrl = u => (u || '').trim().replace(/\/+$/, '').toLowerCase();
+  if (!cfg.firebaseDatabaseURL || normUrl(cfg.firebaseDatabaseURL) === normUrl(masterApp.options.databaseURL)) return masterApp;
+  if (!cfg.firebaseApiKey) return null;
   const name = 'dev_' + devId;
   try { return getApp(name); } catch(_) {}
   return initializeApp({

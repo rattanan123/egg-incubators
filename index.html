@@ -122,7 +122,7 @@
     .stage-detail .svals{gap:10px}
 
     .irow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
-    .ig{display:flex;flex-direction:column;gap:6px}
+    .ig{display:flex;flex-direction:column;gap:6px;min-width:0}
     .ilabel{font-size:16px;letter-spacing:0.05em;color:var(--mu);text-transform:uppercase;font-weight:500}
     .iwrap{position:relative}
     .ifield{width:100%;background:var(--sur2);border:1px solid var(--bd2);border-radius:var(--rs);padding:13px 44px 13px 14px;font-family:'Kanit',sans-serif;font-size:26px;color:var(--tx);outline:none;transition:border-color 0.15s;-webkit-appearance:none}
@@ -131,7 +131,7 @@
     .ifield.ok{border-color:rgba(22,163,74,0.5)}
     .ifield:disabled{opacity:0.4;cursor:not-allowed}
     .iunit{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:17px;color:var(--mu);font-family:'Kanit',sans-serif;pointer-events:none}
-    .ihint{font-size:14px;color:var(--mu);line-height:1.4}
+    .ihint{font-size:14px;color:var(--mu);line-height:1.4;overflow-wrap:anywhere}
     .ihint.err{color:var(--rd)}
 
     .sys-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
@@ -645,11 +645,16 @@ await new Promise(resolve => {
     if (!user) { location.href = 'login.html'; return; }
     document.getElementById('auth-guard').style.display = 'none';
 
-    // อ่าน device config ของตู้นี้
-    const cfgSnap = await get(ref(masterDb, `users/${user.uid}/devices/${DEVICE_ID}`));
-    const cfg = cfgSnap.val();
+    // อ่าน device config ของตู้นี้ — admin ไม่มีตู้ใน users/{uid}/devices จึง fallback ไปอ่าน devices/{id}
+    // เพื่อให้ admin กับ user เลือก database เดียวกันเสมอ
+    let cfg = (await get(ref(masterDb, `users/${user.uid}/devices/${DEVICE_ID}`))).val();
+    if (!cfg) cfg = (await get(ref(masterDb, `devices/${DEVICE_ID}`)).catch(() => null))?.val() || null;
 
-    if (cfg?.firebaseApiKey && cfg?.firebaseDatabaseURL) {
+    // ตู้ที่ใช้ Firebase โปรเจกต์เดียวกับหลัก ต้องใช้ masterDb (มี auth) — app แยกจะไม่มี session → permission denied
+    const normUrl = u => (u || '').trim().replace(/\/+$/, '').toLowerCase();
+    const isSameDb = !cfg?.firebaseDatabaseURL || normUrl(cfg.firebaseDatabaseURL) === normUrl(masterApp.options.databaseURL);
+
+    if (!isSameDb && cfg?.firebaseApiKey) {
       // ต่อ Firebase ของตู้นั้น
       const devName = 'dev_' + DEVICE_ID;
       let devApp;
@@ -667,8 +672,8 @@ await new Promise(resolve => {
       db = getDatabase(devApp);
       if (devLabel) devLabel.textContent = cfg.name || DEVICE_ID;
     } else {
-      // fallback: ใช้ Firebase หลัก (เผื่อ config เก่า)
       db = masterDb;
+      if (devLabel && cfg?.name) devLabel.textContent = cfg.name;
     }
     resolve();
   });
