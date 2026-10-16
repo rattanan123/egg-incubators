@@ -744,7 +744,10 @@ async function searchDevice() {
     document.getElementById('claim-step1').style.display = 'none';
     document.getElementById('claim-step2').style.display = '';
   } catch(e) {
-    err.textContent = 'เกิดข้อผิดพลาด: ' + e.message;
+    // rules ไม่ให้อ่านตู้ที่มีเจ้าของคนอื่น → permission denied
+    err.textContent = /permission/i.test(e.code || e.message)
+      ? 'ตู้นี้ถูกลงทะเบียนโดยบัญชีอื่นแล้ว'
+      : 'เกิดข้อผิดพลาด: ' + e.message;
   }
   btn.disabled = false; btn.textContent = 'ค้นหาตู้ →';
 }
@@ -759,8 +762,12 @@ async function claimDevice() {
 
   try {
     const finalName = nameOverride || claimFoundCfg.name || claimFoundId;
-    // บันทึกตู้ใน users/{uid}/devices
-    await set(ref(masterDb, `users/${currentUser.uid}/devices/${claimFoundId}`), {
+    // เขียนพร้อมกันครั้งเดียว (atomic) — rules ยอมให้เพิ่มตู้ใน users/{uid}/devices ได้เฉพาะเมื่อ ownerUid เป็นของเราแล้ว
+    // ถ้าล้มกลางทาง จะไม่เหลือสถานะครึ่งๆ (ตู้ถูกจองแต่ไม่ขึ้นใน dashboard)
+    await update(ref(masterDb), {
+      [`devices/${claimFoundId}/ownerUid`]: currentUser.uid,
+      [`devices/${claimFoundId}/status`]:   'claimed',
+      [`users/${currentUser.uid}/devices/${claimFoundId}`]: {
       name:                  finalName,
       wifiSSID:              claimFoundCfg.wifiSSID              || '',
       wifiPassword:          claimFoundCfg.wifiPassword          || '',
@@ -772,10 +779,8 @@ async function claimDevice() {
       authEmail:             claimFoundCfg.authEmail             || '',
       authPassword:          claimFoundCfg.authPassword          || '',
       addedAt:               Date.now(),
+      },
     });
-    // อัปเดต status ใน /devices registry
-    await set(ref(masterDb, `devices/${claimFoundId}/ownerUid`), currentUser.uid);
-    await set(ref(masterDb, `devices/${claimFoundId}/status`),   'claimed');
     closeClaimDlg();
   } catch(e) {
     err.textContent = 'เกิดข้อผิดพลาด: ' + e.message;
@@ -902,10 +907,17 @@ function closeDelDlg() { document.getElementById('del-dlg').classList.remove('sh
 async function confirmDelete() {
   if (!deleteTarget || !currentUser) return;
   if (liveUnsubs[deleteTarget]) { liveUnsubs[deleteTarget](); delete liveUnsubs[deleteTarget]; }
-  await Promise.all([
-    remove(ref(masterDb, `users/${currentUser.uid}/devices/${deleteTarget}`)),
-    update(ref(masterDb, `devices/${deleteTarget}`), { status: 'unclaimed', ownerUid: null })
-  ]);
+  try {
+    // atomic: ลบออกจากบัญชี + ปล่อยตู้คืน registry พร้อมกัน
+    await update(ref(masterDb), {
+      [`users/${currentUser.uid}/devices/${deleteTarget}`]: null,
+      [`devices/${deleteTarget}/ownerUid`]: null,
+      [`devices/${deleteTarget}/status`]:   'unclaimed',
+    });
+  } catch(e) {
+    // ตู้ที่ไม่มีใน registry (เพิ่มแบบเก่า) — ลบแค่ฝั่งบัญชีตัวเอง
+    await remove(ref(masterDb, `users/${currentUser.uid}/devices/${deleteTarget}`)).catch(() => {});
+  }
   closeDelDlg();
 }
 window.openDelDlg   = openDelDlg;

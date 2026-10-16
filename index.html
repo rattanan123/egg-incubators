@@ -765,49 +765,9 @@ let isLockdownStage=false;
 let lastAutoStageIdx=-1;
 let allHourlyLogs={};
 
-let lineToken = localStorage.getItem('lineToken') || '';
+// LINE แจ้งเตือนส่งจาก ESP32 (Messaging API) — LINE Notify เดิมปิดบริการแล้ว 31 มี.ค. 2025
+try{localStorage.removeItem('lineToken')}catch(_){}
 let curHumMax = 999, curHumMin = 0, curTempMax = 999, curTempMin = 0;
-let lastLineAlert = {hum: 0, temp: 0};
-const LINE_COOLDOWN = 30 * 60 * 1000;
-
-async function sendLine(msg) {
-  const tok = lineToken;
-  if (!tok) return;
-  try {
-    const res = await fetch(
-      'https://corsproxy.io/?' + encodeURIComponent('https://notify-api.line.me/api/notify'),
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + tok,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: 'message=' + encodeURIComponent('\n' + msg)
-      }
-    );
-    const ok = res.status === 200;
-    const el = $('line-status');
-    if (el) {
-      el.textContent = ok ? '✓ ส่งสำเร็จ ' + new Date().toLocaleTimeString('th-TH') : '✗ ส่งไม่สำเร็จ (status ' + res.status + ')';
-      el.style.color = ok ? 'var(--gr)' : 'var(--rd)';
-    }
-  } catch(e) {
-    const el = $('line-status');
-    if (el) { el.textContent = '✗ เชื่อมต่อล้มเหลว'; el.style.color = 'var(--rd)'; }
-  }
-}
-
-async function saveLineToken() {
-  const tok = ($('line-tok').value || '').trim();
-  lineToken = tok;
-  localStorage.setItem('lineToken', tok);
-  const btn = $('line-save-btn');
-  const orig = btn.textContent;
-  btn.textContent = '✓ บันทึกแล้ว';
-  setTimeout(() => { btn.textContent = orig; }, 2000);
-  if (tok) sendLine('🥚 ProjectEgg เชื่อมต่อสำเร็จ! ระบบแจ้งเตือนพร้อมใช้งาน');
-}
-window.saveLineToken = saveLineToken;
 
 function inputs() {
   return {
@@ -1098,9 +1058,6 @@ async function startSys() {
     tempMin:tMin, tempMax:tMax, humMin:hMin, humMax:hMax
   });
 
-  const stageName = currentProfileKey==="custom" ? "กำหนดเอง"
-    : Object.values(PROFILES[currentProfileKey].stages)[selectedStageIdx]?.name || currentProfileKey;
-  sendLine(`🥚 เริ่มฟักไข่แล้ว!\nช่วง: ${stageName}\nอุณหภูมิ: ${tMin}–${tMax}°C\nความชื้น: ${hMin}–${hMax}%\nไข่: ${eggCount} ฟอง`);
 }
 
 async function stopSys() {
@@ -1111,8 +1068,6 @@ async function stopSys() {
   await set(ref(db, fbp('systemLogs/'+Date.now())),{action:"STOP",timestamp:Date.now()});
   if(currentRunStartTime>0)
     await update(ref(db, fbp('runs/'+currentRunStartTime)),{status:"stopped",endTime:Date.now()});
-
-  sendLine(`⏹ หยุดระบบตู้ฟักไข่แล้ว\nเวลา: ${new Date().toLocaleString('th-TH')}`);
 }
 
 function openDlg(){$('dlg').classList.add('show')}
@@ -1331,7 +1286,6 @@ window.toggleTheme=toggleTheme;
 
 applyTheme(localStorage.getItem('theme')==='dark');
 
-if (lineToken && $('line-tok')) $('line-tok').value = lineToken;
 
 onProfileChange();
 get(ref(db, fbp('control'))).then(snap=>{
@@ -1398,27 +1352,6 @@ onValue(ref(db, fbp('current')),snap=>{
 
   setMetric("ct","temp",d.temp);
   setMetric("ch","hum",d.humidity);
-
-  if(lineToken && ns==="RUN") {
-    const now=Date.now();
-    const h=parseFloat(d.humidity), t=parseFloat(d.temp);
-    if(!isNaN(h) && h > curHumMax+3 && now-lastLineAlert.hum > LINE_COOLDOWN) {
-      lastLineAlert.hum=now;
-      sendLine(`💧 ความชื้นสูงเกิน!\nความชื้น: ${h.toFixed(1)}% (เป้า ≤${curHumMax}%)\nตรวจสอบระบบหมอก`);
-    }
-    if(!isNaN(h) && h < curHumMin-3 && now-lastLineAlert.hum > LINE_COOLDOWN) {
-      lastLineAlert.hum=now;
-      sendLine(`💧 ความชื้นต่ำเกิน!\nความชื้น: ${h.toFixed(1)}% (เป้า ≥${curHumMin}%)\nตรวจสอบน้ำในระบบหมอก`);
-    }
-    if(!isNaN(t) && t > curTempMax+1 && now-lastLineAlert.temp > LINE_COOLDOWN) {
-      lastLineAlert.temp=now;
-      sendLine(`🌡️ อุณหภูมิสูงเกิน!\nอุณหภูมิ: ${t.toFixed(1)}°C (เป้า ≤${curTempMax}°C)\nตรวจสอบฮีตเตอร์/พัดลม`);
-    }
-    if(!isNaN(t) && t < curTempMin-1 && now-lastLineAlert.temp > LINE_COOLDOWN) {
-      lastLineAlert.temp=now;
-      sendLine(`🌡️ อุณหภูมิต่ำเกิน!\nอุณหภูมิ: ${t.toFixed(1)}°C (เป้า ≥${curTempMin}°C)\nตรวจสอบฮีตเตอร์`);
-    }
-  }
 
   // ถังสำรอง (HC-SR04)
   const wPct = d.waterLevel;
