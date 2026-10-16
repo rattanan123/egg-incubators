@@ -18,6 +18,8 @@
 #include <WiFiManager.h>
 #include <ArduinoOTA.h>
 #include <esp_task_wdt.h>
+#include <soc/soc.h>
+#include <soc/rtc_cntl_reg.h>
 #include "addons/TokenHelper.h"
 #include "addons/RTDBHelper.h"
 #include "secrets.h"
@@ -126,8 +128,13 @@ unsigned long wifiLostMs = 0;
 static String pendingRebootAlert = "";
 
 // ===== LINE =====
-unsigned long lineAlertTimer = 0;
-const unsigned long LINE_COOLDOWN = 600000UL;
+const unsigned long LINE_COOLDOWN = 600000UL;   // cooldown ต่อ "ประเภท" แจ้งเตือน
+#define LINE_KEY_SLOTS   12
+#define LINE_PENDING_MAX 3500          // LINE รับข้อความได้ ~5000 ตัวอักษร
+static String        lineKeys[LINE_KEY_SLOTS];
+static unsigned long lineKeyTs[LINE_KEY_SLOTS] = {0};
+static String        linePending = "";
+static SemaphoreHandle_t lineMutex = nullptr;
 volatile bool lineSending = false;
 unsigned long lineSendingStartMs = 0;
 
@@ -154,6 +161,13 @@ void lineTask(void* param) {
   int code = http.POST(body);
   Serial.println(code == 200 ? "[LINE] OK" : "[LINE] err:" + String(code));
   http.end(); client.stop();
+  // เน็ตหลุดกลางทาง (code <= 0) → คืนเข้าคิวส่งใหม่รอบหน้า; 4xx (token ผิด) ทิ้ง ไม่วนส่งซ้ำ
+  if (code <= 0 && lineMutex) {
+    xSemaphoreTake(lineMutex, portMAX_DELAY);
+    if (msg->length() + linePending.length() + 4 <= LINE_PENDING_MAX)
+      linePending = *msg + (linePending.length() ? String("\\n\\n") + linePending : String(""));
+    xSemaphoreGive(lineMutex);
+  }
   delete msg;
   lineSending = false;
   vTaskDelete(NULL);
@@ -170,29 +184,77 @@ String relayStatusStr() {
   return s;
 }
 
-void sendLineAlert(String message) {
-  if (WiFi.status() != WL_CONNECTED) return;
+// ── LINE queue ──
+// เดิม: cooldown 10 นาทีใช้ร่วมกันทุกเรื่อง + WiFi หลุดก็ทิ้งข้อความ → แจ้งเตือนที่ตั้ง flag ไปแล้ว
+//       (ถังน้ำน้อย, วันส่องไข่, เหลือ 1 วัน ฯลฯ) หายถาวร
+// ใหม่: cooldown แยกตามประเภท (บรรทัดแรกก่อน ':') + ข้อความเข้าคิว แล้ว lineFlushTask ทยอยส่งเมื่อ WiFi พร้อม
+
+static String lineKeyOf(const String& m) {
+  int nl = m.indexOf('\n');
+  String first = nl < 0 ? m : m.substring(0, nl);
+  int c = first.indexOf(':');
+  return c > 0 ? first.substring(0, c) : first;
+}
+
+// true = ส่งได้ (และจองเวลา cooldown ของประเภทนี้แล้ว)
+static bool lineCooldownOk(const String& key, bool force) {
   unsigned long now = millis();
-  if (now - lineAlertTimer < LINE_COOLDOWN) return;
-  lineAlertTimer = now;
+  int slot = -1, oldest = 0;
+  for (int i = 0; i < LINE_KEY_SLOTS; i++) {
+    if (lineKeys[i] == key) { slot = i; break; }
+    if (lineKeyTs[i] < lineKeyTs[oldest]) oldest = i;
+  }
+  if (slot >= 0 && !force && now - lineKeyTs[slot] < LINE_COOLDOWN) return false;
+  if (slot < 0) { slot = oldest; lineKeys[slot] = key; }
+  lineKeyTs[slot] = now;
+  return true;
+}
+
+// ทยอยส่งคิว — ทีละก้อน, รอ WiFi, ไม่ส่งซ้อนกัน (TLS 2 อันพร้อมกัน heap ไม่พอ)
+void lineFlushTask(void*) {
+  for (;;) {
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    if (lineSending || WiFi.status() != WL_CONNECTED) continue;
+    String* batch = nullptr;
+    xSemaphoreTake(lineMutex, portMAX_DELAY);
+    if (linePending.length()) { batch = new String(linePending); linePending = ""; }
+    xSemaphoreGive(lineMutex);
+    if (!batch) continue;
+    lineSending = true;
+    lineSendingStartMs = millis();
+    if (xTaskCreatePinnedToCore(lineTask, "lineTask", 16384, batch, 1, NULL, 0) != pdPASS) {
+      delete batch; lineSending = false;   // heap ไม่พอ — ข้อความรอบนี้ทิ้ง ดีกว่าค้าง
+      Serial.println("[LINE] task create failed");
+    }
+  }
+}
+
+static void queueLine(String message, bool force) {
+  if (!lineMutex) {   // สร้างครั้งแรกที่ใช้ (sendLineAlert ถูกเรียกจาก loop task เท่านั้น)
+    lineMutex = xSemaphoreCreateMutex();
+    xTaskCreatePinnedToCore(lineFlushTask, "lineFlush", 3072, NULL, 1, NULL, 0);
+  }
+  if (!lineCooldownOk(lineKeyOf(message), force)) return;
   struct tm ti; String timeStr = "--";
-  if (getLocalTime(&ti)) {
+  if (getLocalTime(&ti, 50)) {
     char buf[20]; strftime(buf, sizeof(buf), "%d/%m/%y %H:%M", &ti); timeStr = String(buf);
   }
   String full = "แจ้งเตือนตู้ฟักไข่\n-----------------\n" + message +
                 relayStatusStr() +
                 "-----------------\nเวลา: " + timeStr;
   full.replace("\\", "\\\\"); full.replace("\"", "\\\""); full.replace("\n", "\\n");
-  String* copy = new String(full);
-  lineSending = true;
-  lineSendingStartMs = millis();
-  xTaskCreatePinnedToCore(lineTask, "lineTask", 16384, copy, 1, NULL, 0);
+  xSemaphoreTake(lineMutex, portMAX_DELAY);
+  if (linePending.length() + full.length() + 4 <= LINE_PENDING_MAX) {
+    if (linePending.length()) linePending += "\\n\\n";
+    linePending += full;
+  } else {
+    Serial.println("[LINE] queue full — drop");
+  }
+  xSemaphoreGive(lineMutex);
 }
 
-void sendLineForce(String message) {
-  lineAlertTimer = 0;
-  sendLineAlert(message);
-}
+void sendLineAlert(String message) { queueLine(message, false); }
+void sendLineForce(String message) { queueLine(message, true); }
 
 // ===== Servo Task =====
 void servoTask(void* param) {
@@ -209,6 +271,7 @@ void allRelaysOff() {
   ssrWrite(RELAY5, false);
   relayWrite(PUMP_PIN, false);
   fogOn = fanMainOn = fan3On = fan4On = heaterOn = false;
+  pumpOn = false;   // เดิมไม่ได้รีเซ็ต → เว็บค้าง "ปั๊ม ON" ทั้งที่ปั๊มดับ และ autoPump ไม่สั่งเปิดใหม่
 }
 
 // ===== Servo =====
@@ -522,7 +585,9 @@ void autoPump() {
 
 // ===== SETUP =====
 void setup() {
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);  // disable brownout detector
   Serial.begin(115200);
+
   i2cMutex         = xSemaphoreCreateMutex();
   servoStatusMutex = xSemaphoreCreateMutex();
   Wire.begin();
@@ -563,7 +628,13 @@ void setup() {
   ArduinoOTA.onError([](ota_error_t e) { Serial.printf("[OTA] Error %u\n", e); });
   ArduinoOTA.begin();
 
-  esp_task_wdt_init(WDT_TIMEOUT, true);
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+  // core 3.x: WDT ถูก init ไว้แล้ว → reconfigure ด้วย struct (API เปลี่ยน)
+  { esp_task_wdt_config_t wdtCfg = { .timeout_ms = WDT_TIMEOUT * 1000, .idle_core_mask = 0, .trigger_panic = true };
+    esp_task_wdt_reconfigure(&wdtCfg); }
+#else
+  esp_task_wdt_init(WDT_TIMEOUT, true);   // core 2.x
+#endif
   esp_task_wdt_add(NULL);
 
   config.api_key      = API_KEY;
@@ -737,8 +808,11 @@ void loop() {
       if (reserve >= RESERVE_MIN_PCT + 10.0f) waterAlerted = false;
     }
 
-    // ถังหมอก (float switch)
-    fogTankLow = (digitalRead(FOG_FLOAT_PIN) == LOW);  // LOW = น้ำน้อย (NC float switch)
+    // ถังหมอก (float switch) — debounce 3 ครั้งต่อเนื่อง
+    { bool r1 = digitalRead(FOG_FLOAT_PIN)==LOW;
+      delay(10); bool r2 = digitalRead(FOG_FLOAT_PIN)==LOW;
+      delay(10); bool r3 = digitalRead(FOG_FLOAT_PIN)==LOW;
+      if (r1==r2 && r2==r3) fogTankLow = r1; }  // เชื่อเฉพาะเมื่อ 3 ครั้งตรงกัน
     if (fogTankLow && !fogTankAlerted) {
       fogTankAlerted = true;
       sendLineAlert("🪣 ถังพ่นหมอกน้ำน้อย!\nกรุณาเติมน้ำในถังพ่นหมอก\n");
