@@ -434,13 +434,13 @@
     <div class="water-tanks">
       <div class="water-tank">
         <div class="water-tank-label">ภายในตู้</div>
-        <img id="cam-inside" src="" style="width:100%;border-radius:6px;background:var(--sur2);min-height:120px;object-fit:cover" onerror="this.style.opacity=0.3">
+        <img id="cam-inside" alt="" style="width:100%;border-radius:6px;background:var(--sur2);min-height:120px;object-fit:cover" onload="this.style.opacity=1" onerror="if(this.getAttribute('src'))this.style.opacity=0.3">
         <div class="cam-ts" id="cam-inside-ts"></div>
         <div style="margin-top:6px;font-size:13px;color:var(--mu)" id="hatch-line">ลูกไก่: <span id="hatch-count" style="font-weight:600;color:var(--tx)">--</span></div>
       </div>
       <div class="water-tank">
         <div class="water-tank-label">ภายนอกตู้</div>
-        <img id="cam-outside" src="" style="width:100%;border-radius:6px;background:var(--sur2);min-height:120px;object-fit:cover" onerror="this.style.opacity=0.3">
+        <img id="cam-outside" alt="" style="width:100%;border-radius:6px;background:var(--sur2);min-height:120px;object-fit:cover" onload="this.style.opacity=1" onerror="if(this.getAttribute('src'))this.style.opacity=0.3">
         <div class="cam-ts" id="cam-outside-ts"></div>
         <div id="cam-alert" style="margin-top:6px;font-size:13px;display:none;padding:4px 10px;border-radius:6px;background:var(--rd-bg);color:var(--rd);font-weight:500"></div>
       </div>
