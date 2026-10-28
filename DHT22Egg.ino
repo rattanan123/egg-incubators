@@ -18,6 +18,7 @@
 #include <WiFiManager.h>
 #include <ArduinoOTA.h>
 #include <esp_task_wdt.h>
+#include <Preferences.h>   // ServoGuard: จำมุมเซอร์โวข้ามการรีบูต
 #include <soc/soc.h>
 #include <soc/rtc_cntl_reg.h>
 #include "addons/TokenHelper.h"
@@ -70,6 +71,9 @@ SemaphoreHandle_t servoStatusMutex;
 volatile bool servoResetRequest = false;
 volatile bool servoStartRequest = false;
 bool turningEnabled = true;
+// ServoGuard.ino เขียนค่า — ประกาศไว้ที่นี่เพราะ sendCurrentData() ใช้ก่อนไฟล์ module
+volatile float trayAngle = -1;             // มุมถาดจริงจาก MPU6050 (-1 = ไม่มีเซ็นเซอร์)
+volatile unsigned long trayStuckSec = 0;   // ถาดไม่หมุนตามเซอร์โวมากี่วินาที
 
 // ===== Thresholds =====
 float hum_on = 0, hum_off = 0;
@@ -120,6 +124,9 @@ const unsigned long WATER_INTERVAL = 5000UL;
 unsigned long pumpOnStart      = 0;
 const unsigned long PUMP_MAX_MS = 5UL * 60000UL; // แจ้งเตือนถ้าปั๊มทำงาน > 5 นาที
 bool  pumpOverrunAlerted = false;
+// ระบบน้ำเปิด/ปิดจากหน้าเว็บ (control/waterEnabled) — ปิด = ปั๊มไม่ทำงาน + ไม่แจ้งเตือนเรื่องน้ำ (WaterGuard.ino)
+// ค่าเริ่มต้น "ปิด": ยังไม่ได้ต่อปั๊ม/เซ็นเซอร์ ขา 36 ลอย อ่านค่ามั่ว → รีเลย์ปั๊มติดๆ ดับๆ + แจ้ง LINE ผิด
+bool  waterEnabled = false;
 
 // ===== WiFi watchdog =====
 unsigned long wifiLostMs = 0;
@@ -229,12 +236,19 @@ void lineFlushTask(void*) {
   }
 }
 
+// เรียกใน setup() ก่อนสร้าง task อื่น — มีหลาย task ส่ง LINE (loop, EnvAlert, ServoGuard)
+void lineInit() {
+  if (lineMutex) return;
+  lineMutex = xSemaphoreCreateMutex();
+  xTaskCreatePinnedToCore(lineFlushTask, "lineFlush", 3072, NULL, 1, NULL, 0);
+}
+
 static void queueLine(String message, bool force) {
-  if (!lineMutex) {   // สร้างครั้งแรกที่ใช้ (sendLineAlert ถูกเรียกจาก loop task เท่านั้น)
-    lineMutex = xSemaphoreCreateMutex();
-    xTaskCreatePinnedToCore(lineFlushTask, "lineFlush", 3072, NULL, 1, NULL, 0);
-  }
-  if (!lineCooldownOk(lineKeyOf(message), force)) return;
+  if (!lineMutex) lineInit();   // กันลืมเรียก (ปกติ setup เรียกแล้ว)
+  xSemaphoreTake(lineMutex, portMAX_DELAY);
+  bool ok = lineCooldownOk(lineKeyOf(message), force);   // lineKeys ใช้ร่วมหลาย task → ต้องอยู่ใน mutex
+  xSemaphoreGive(lineMutex);
+  if (!ok) return;
   struct tm ti; String timeStr = "--";
   if (getLocalTime(&ti, 50)) {
     char buf[20]; strftime(buf, sizeof(buf), "%d/%m/%y %H:%M", &ti); timeStr = String(buf);
@@ -253,7 +267,13 @@ static void queueLine(String message, bool force) {
   xSemaphoreGive(lineMutex);
 }
 
-void sendLineAlert(String message) { queueLine(message, false); }
+// แจ้งเตือนอุณหภูมิ/ความชื้นแบบเลขตายตัวใน loop() (38/36/61/49…) ถูกแทนด้วย EnvAlert.ino (ตามช่วงโปรไฟล์)
+// แก้ loop() ไม่ได้ (กฎเหล็ก) → กรองทิ้งตรงนี้แทน
+void sendLineAlert(String message) {
+  if (envAlertIsLegacy(message)) return;
+  if (waterAlertIsMuted(message)) return;   // ระบบน้ำปิด → ไม่แจ้งเรื่องน้ำ (WaterGuard.ino)
+  queueLine(message, false);
+}
 void sendLineForce(String message) { queueLine(message, true); }
 
 // ===== Servo Task =====
@@ -441,6 +461,7 @@ void readControlFromFirebase() {
   }
 
   if (json.get(r, "turning") && r.success) turningEnabled = r.boolValue;
+  if (json.get(r, "waterEnabled") && r.success) waterSetEnabled(r.boolValue);
   if (json.get(r, "pumpManual") && r.success) pumpManual = r.boolValue;
   if (pumpManual && json.get(r, "pumpOn") && r.success) setPump(r.boolValue);
 
@@ -507,9 +528,13 @@ void sendCurrentData() {
   json.set("online",         true);
   json.set("sensorFailed",   sensorFailed);
   json.set("waterLevel",     waterLevelPct);
-  json.set("fogTankLow",     fogTankLow);
+  json.set("fogTankLow",     waterEnabled && fogTankLow);   // ปิดระบบน้ำ → ไม่ส่งค่ามั่วจากขาลอย
+  json.set("waterEnabled",   waterEnabled);
   json.set("pumpOn",         pumpOn);
   json.set("pumpManual",     pumpManual);
+  json.set("tray/sensor",    trayAngle >= 0);       // มี MPU6050 ไหม
+  json.set("tray/angle",     trayAngle);            // มุมถาดเทียบตำแหน่งกลาง (องศา)
+  json.set("tray/stuckSec",  (int)trayStuckSec);    // ถาดไม่หมุนตามเซอร์โวมากี่วินาที (0 = ปกติ)
   json.set("deviceId",       DEVICE_ID);
   json.set("deviceName",     DEVICE_NAME);
   Firebase.RTDB.setJSON(&fbdo, fbPath("current").c_str(), &json);
@@ -572,11 +597,13 @@ float measureWaterLevel() {
 }
 
 void setPump(bool on) {
+  if (!waterEnabled) on = false;   // ระบบน้ำปิด → ห้ามเปิดปั๊ม (แม้สั่ง manual จากเว็บ)
   pumpOn = on;
   digitalWrite(PUMP_PIN, on ? LOW : HIGH);  // Active LOW relay
 }
 
 void autoPump() {
+  if (!waterEnabled) return;
   if (pumpManual) return;
   bool reserveOk = (waterLevelPct < 0 || waterLevelPct > 0);
   if (!pumpOn && fogTankLow && reserveOk)  setPump(true);
@@ -587,6 +614,7 @@ void autoPump() {
 void setup() {
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);  // disable brownout detector
   Serial.begin(115200);
+  lineInit();          // คิว LINE ต้องพร้อมก่อนมี task ไหนส่งข้อความ
 
   i2cMutex         = xSemaphoreCreateMutex();
   servoStatusMutex = xSemaphoreCreateMutex();
@@ -604,7 +632,7 @@ void setup() {
 
   myServo.setPeriodHertz(50);
   myServo.attach(SERVO_PIN, 500, 2500);
-  myServo.write(CENTER);
+  servoGuardBegin();   // เริ่มจากมุมเดิมก่อนรีบูต (เดิม write(CENTER) ทันที = ถาดดีด)
 
   WiFiManager wm;
   wm.setConfigPortalTimeout(180);
@@ -649,6 +677,8 @@ void setup() {
   Serial.println(Firebase.ready() ? " OK" : " TIMEOUT");
 
   xTaskCreatePinnedToCore(servoTask, "servoTask", 8192, NULL, 3, NULL, 0);
+  servoGuardStart();   // เฝ้าถาด (MPU6050) + จำมุม + กันเซอร์โวค้าง — ServoGuard.ino
+  envAlertStart();     // แจ้งเตือนอุณหภูมิ/ความชื้นตามโปรไฟล์ — EnvAlert.ino
 
   logHrTimer  = millis() - LOG_HR_INTERVAL;
   logMinTimer = millis() - LOG_MIN_INTERVAL;

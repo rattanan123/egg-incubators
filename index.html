@@ -70,6 +70,11 @@
     .metrics-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .water-card{background:var(--sur2);border:1px solid var(--bd);border-radius:var(--rs);padding:14px 16px;display:flex;flex-direction:column;gap:10px;margin-top:16px}
     .water-card-title{font-size:13px;font-weight:500;color:var(--mu);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px}
+    .water-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    .wtoggle{font-family:'Kanit',sans-serif;font-size:14px;min-height:34px;padding:5px 14px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur);color:var(--mu);cursor:pointer;white-space:nowrap;transition:all .15s}
+    .wtoggle.on{color:var(--gr);border-color:rgba(22,163,74,0.4);background:var(--gr-bg)}
+    .wtoggle:disabled{opacity:.55;cursor:wait}
+    .water-off{font-size:14px;color:var(--mu);line-height:1.55;overflow-wrap:anywhere}
     .water-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
     .water-label{font-size:15px;font-weight:500;color:var(--tx)}
     .water-pct{font-family:'Kanit',sans-serif;font-size:18px;font-weight:600}
@@ -175,6 +180,12 @@
     .lheader{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
     .lhl{display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex:1;min-width:0}
     .lhbtns{display:flex;gap:8px;flex-shrink:0}
+    .ldate{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin:-4px 0 12px;max-width:340px}
+    .ldate-in{font-family:'Kanit',sans-serif;font-size:14px;padding:4px 8px;height:36px;border-radius:var(--rs);border:1px solid var(--bd2);background:var(--sur2);color:var(--tx);min-width:0;flex:1 1 150px;color-scheme:light dark}
+    .ldate-nav,.ldate-latest{font-family:'Kanit',sans-serif;font-size:15px;height:36px;min-width:36px;padding:4px 10px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer;line-height:1;flex-shrink:0;white-space:nowrap}
+    .ldate-nav{font-size:20px;padding:0 8px}
+    .ldate-nav:disabled{opacity:.35;cursor:default}
+    .ldate-latest.active{color:var(--gr);border-color:rgba(22,163,74,0.4);background:var(--gr-bg)}
     .btn-clr{font-family:'Kanit',sans-serif;font-size:16px;padding:7px 18px;border-radius:99px;border:1px solid rgba(220,38,38,0.35);background:rgba(220,38,38,0.06);color:var(--rd);cursor:pointer;white-space:nowrap}
     .btn-clr:hover{background:rgba(220,38,38,0.12)}
     .btn-csv{font-family:'Kanit',sans-serif;font-size:16px;padding:7px 18px;border-radius:99px;border:1px solid rgba(22,163,74,0.35);background:rgba(22,163,74,0.06);color:var(--gr);cursor:pointer;white-space:nowrap}
@@ -255,6 +266,10 @@
       .skey{font-size:16px}.sval{font-size:18px}
     }
     @media(max-width:360px){
+      .ldate{gap:4px}
+      .ldate-nav{min-width:30px;padding:0 6px}
+      .ldate-latest{font-size:13px;padding:4px 8px}
+      .ldate-in{font-size:13px;padding:4px 4px}
       .mc-val{font-size:40px}.mc-unit{font-size:18px}
       .ifield{font-size:18px}
       .metrics-row{grid-template-columns:1fr}
@@ -315,8 +330,8 @@
       <div id="csv-count" style="font-size:15px;color:var(--mu);text-align:center;min-height:20px"></div>
     </div>
     <div class="dbtns" style="margin-top:20px">
-      <button class="dbtn sec" onclick="closeCsvDlg()">ยกเลิก</button>
-      <button class="dbtn" id="csv-dl-btn" onclick="doExportCSV()">⬇ ดาวน์โหลด</button>
+      <button class="dcancel" onclick="closeCsvDlg()">ยกเลิก</button>
+      <button class="dconfirm-gr" id="csv-dl-btn" onclick="doExportCSV()">⬇ ดาวน์โหลด</button>
     </div>
     <div style="margin-top:12px;text-align:center">
       <button onclick="doExportCSV(true)" style="background:none;border:none;color:var(--mu);font-size:15px;cursor:pointer;text-decoration:underline;font-family:'Sarabun','Kanit',sans-serif">ดาวน์โหลดทั้งหมด</button>
@@ -390,8 +405,12 @@
     </div>
 
     <div class="water-card" id="water-card">
-      <div class="water-card-title">ระบบน้ำ</div>
-      <div class="water-tanks">
+      <div class="water-head">
+        <div class="water-card-title">ระบบน้ำ</div>
+        <button class="wtoggle" id="water-toggle" onclick="toggleWater()" disabled>--</button>
+      </div>
+      <div class="water-off" id="water-off" style="display:none">ปิดใช้งานอยู่ — ปั๊มไม่ทำงาน และไม่แจ้งเตือนเรื่องน้ำ<br>ต่อปั๊มและเซ็นเซอร์ระดับน้ำเสร็จแล้ว ค่อยกด "เปิดใช้"</div>
+      <div class="water-tanks" id="water-tanks">
         <div class="water-tank">
           <div class="water-tank-label">ถังพ่นหมอก</div>
           <div id="fog-badge" style="font-family:'Kanit',sans-serif;font-size:14px;padding:4px 12px;border-radius:99px;background:var(--sur2);color:var(--mu);border:1px solid var(--bd2);display:inline-block">--</div>
@@ -507,12 +526,7 @@
         </div>
       </div>
     </div>
-    <div id="egg-stop-row" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-      <div class="ig" style="flex:1;">
-        <div class="ilabel">จำนวนไข่ที่ใส่</div>
-        <div class="iwrap"><input class="ifield" type="number" id="egg-count" placeholder="30" min="1" max="500" step="1"><span class="iunit">ฟอง</span></div>
-        <div class="ihint">ใส่เพื่อคำนวณอัตราการฟักหลังครบรอบ</div>
-      </div>
+    <div id="egg-stop-row" style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:8px;">
       <button class="btn-stop" id="bstop" onclick="stopSys()" style="display:none;flex-shrink:0;">⏹ หยุดทำงาน</button>
     </div>
 
@@ -570,6 +584,12 @@
       </div>
       <button class="btn-clr" onclick="clearSysLog()">ล้าง</button>
     </div>
+    <div class="ldate">
+      <button class="ldate-nav" onclick="shiftLogDate('slog',-1)" aria-label="วันก่อนหน้า">‹</button>
+      <input type="date" class="ldate-in" id="slog-date" onchange="setLogDate('slog',this.value)" aria-label="เลือกวันที่">
+      <button class="ldate-nav" id="slog-next" onclick="shiftLogDate('slog',1)" aria-label="วันถัดไป">›</button>
+      <button class="ldate-latest active" id="slog-latest" onclick="setLogDate('slog','')">ล่าสุด</button>
+    </div>
     <table>
       <thead><tr>
         <th style="width:90px;">วันที่/เวลา</th>
@@ -594,6 +614,12 @@
         <button class="btn-clr" onclick="openDlg()">ล้าง Log</button>
       </div>
     </div>
+    <div class="ldate">
+      <button class="ldate-nav" onclick="shiftLogDate('hlog',-1)" aria-label="วันก่อนหน้า">‹</button>
+      <input type="date" class="ldate-in" id="hlog-date" onchange="setLogDate('hlog',this.value)" aria-label="เลือกวันที่">
+      <button class="ldate-nav" id="hlog-next" onclick="shiftLogDate('hlog',1)" aria-label="วันถัดไป">›</button>
+      <button class="ldate-latest active" id="hlog-latest" onclick="setLogDate('hlog','')">ล่าสุด</button>
+    </div>
     <table>
       <thead><tr>
         <th class="sortable" style="width:90px;" onclick="sortLog('time')">วันที่/เวลา</th>
@@ -615,7 +641,7 @@
 <script type="module">
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref, onValue, get, remove, update, set, query, limitToLast, orderByKey, startAt }
+import { getDatabase, ref, onValue, get, remove, update, set, query, limitToLast, limitToFirst, orderByKey, startAt, endAt }
   from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const urlParams = new URLSearchParams(location.search);
@@ -721,6 +747,36 @@ function fmtMs(ms) {
     time:d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})
   };
 }
+// ── ระบบน้ำ เปิด/ปิด ──
+let waterOn = true, waterPending = null, waterPendingUntil = 0;
+function renderWater(on) {
+  waterOn = on;
+  if (waterPending !== null) {
+    // รอ ESP32 รับคำสั่ง (อ่าน control ทุก 3 วิ ส่งสถานะทุก 5 วิ) — ระหว่างนี้ไม่ให้กดซ้ำ
+    if (on === waterPending || Date.now() > waterPendingUntil) waterPending = null;
+  }
+  $('water-tanks').style.display = on ? '' : 'none';
+  $('water-off').style.display   = on ? 'none' : '';
+  const b = $('water-toggle');
+  b.classList.toggle('on', on);
+  b.disabled = waterPending !== null;
+  b.textContent = waterPending !== null ? 'กำลังส่งคำสั่ง…' : (on ? 'เปิดอยู่ · กดเพื่อปิด' : 'ปิดอยู่ · กดเพื่อเปิด');
+}
+async function toggleWater() {
+  const next = !waterOn;
+  if (next && !confirm("เปิดระบบน้ำ?\n\nปั๊มจะเติมน้ำอัตโนมัติเมื่อถังพ่นหมอกน้ำน้อย\nต่อปั๊มและเซ็นเซอร์ระดับน้ำ (ผ่านตัวต้านทานแบ่งแรงดัน) เรียบร้อยแล้วใช่ไหม?")) return;
+  if (!next && !confirm("ปิดระบบน้ำ?\n\nปั๊มจะหยุดทันที และไม่แจ้งเตือนเรื่องน้ำ")) return;
+  waterPending = next; waterPendingUntil = Date.now() + 20000;
+  renderWater(waterOn);
+  try {
+    await update(ref(db, fbp('control')), next ? { waterEnabled: true } : { waterEnabled: false, pumpManual: false, pumpOn: false });
+  } catch (e) {
+    waterPending = null; renderWater(waterOn);
+    alert('ส่งคำสั่งไม่สำเร็จ: ' + e.message);
+  }
+}
+window.toggleWater = toggleWater;
+
 function setBadge(id,val) {
   const el=$(id); if(!el)return;
   el.textContent=val==="ON"?"ON":"OFF";
@@ -764,6 +820,12 @@ let currentRunEndMs=0;
 let isLockdownStage=false;
 let lastAutoStageIdx=-1;
 let allHourlyLogs={};
+let hlogDay='';   // วันที่ที่ตารางรายชั่วโมงกำลังแสดง ('' = ล่าสุด)
+
+// ── วันที่ตามเวลาเครื่อง (ไทย) — ห้ามใช้ toISOString() เพราะเป็น UTC (เพี้ยน 7 ชม. → ข้ามวัน) ──
+const localDay = ms => { const d = new Date(ms); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const dayRange = day => { const [y, m, d] = day.split('-').map(Number); const a = new Date(y, m - 1, d).getTime(); return [a, a + 86399999]; };
+const fmtDay   = day => new Date(dayRange(day)[0]).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
 
 // LINE แจ้งเตือนส่งจาก ESP32 (Messaging API) — LINE Notify เดิมปิดบริการแล้ว 31 มี.ค. 2025
 try{localStorage.removeItem('lineToken')}catch(_){}
@@ -894,7 +956,7 @@ function validate() {
 }
 
 function setAllDisabled(f,dis) {
-  [f.tMin,f.tMax,f.hMin,f.hMax,f.durDays,f.durHrs,f.durMin,f.servoHold,$('profile-sel'),$('egg-count')].forEach(el=>el&&(el.disabled=dis));
+  [f.tMin,f.tMax,f.hMin,f.hMax,f.durDays,f.durHrs,f.durMin,f.servoHold,$('profile-sel')].forEach(el=>el&&(el.disabled=dis));
 }
 
 function updateUI(state) {
@@ -1014,8 +1076,7 @@ async function startSys() {
   const servoH=parseFloat(f.servoHold.value);
   const durationMs=durD*86400000+durH*3600000+durM*60000;
   const st=Date.now(), et=st+durationMs;
-  const eggCount=parseInt($('egg-count').value)||0;
-  currentRunStartTime=st; currentStartStageIdx=selectedStageIdx; currentEggCount=eggCount;
+  currentRunStartTime=st; currentStartStageIdx=selectedStageIdx;
 
   if(!isCustom){
     const p=PROFILES[currentProfileKey];
@@ -1032,7 +1093,7 @@ async function startSys() {
   await update(ref(db, fbp('control')),{
     system:"RUN", tempMin:tMin, tempMax:tMax, humMin:hMin, humMax:hMax,
     durationMs, startTime:st, endTime:et, servoHoldHours:servoH,
-    activeProfile:currentProfileKey, startStageIdx:selectedStageIdx, eggCount,
+    activeProfile:currentProfileKey, startStageIdx:selectedStageIdx,
     startDayOffset, turning:selTurning
   });
   updateUI("RUN"); startCD(et);
@@ -1054,7 +1115,7 @@ async function startSys() {
 
   await set(ref(db, fbp('runs/'+st)),{
     startTime:st, endTime:et, profile:currentProfileKey,
-    eggCount, status:"running",
+    status:"running",
     tempMin:tMin, tempMax:tMax, humMin:hMin, humMax:hMax
   });
 
@@ -1073,6 +1134,7 @@ async function stopSys() {
 function openDlg(){$('dlg').classList.add('show')}
 function closeDlg(){$('dlg').classList.remove('show')}
 $('dlg').addEventListener('click',e=>{if(e.target===$('dlg'))closeDlg();});
+$('csv-dlg').addEventListener('click',e=>{if(e.target===$('csv-dlg')&&!csvBusy)closeCsvDlg();});
 
 async function confirmClear(){
   closeDlg();
@@ -1105,42 +1167,67 @@ async function submitHatch(){
   });
 }
 
-function openCsvDlg(){
-  if(!Object.keys(allHourlyLogs).length){alert("ยังไม่มีข้อมูล log");return;}
-  // หา min/max จากข้อมูลจริง
-  const tsList=Object.values(allHourlyLogs).map(v=>parseInt(v.timestamp)||0).filter(Boolean).sort((a,b)=>a-b);
-  const toDate=ms=>new Date(ms).toISOString().slice(0,10);
-  document.getElementById('csv-from').value=tsList.length?toDate(tsList[0]):'';
-  document.getElementById('csv-to').value=tsList.length?toDate(tsList[tsList.length-1]):'';
+// ── CSV ──
+// เดิมใช้ไม่ได้: (1) เปิด dialog ด้วย class 'open' แต่ CSS มีแค่ .dov.show → dialog ไม่ขึ้นเลย
+// (2) ได้แค่ 48 ชม.ล่าสุดที่โหลดมาแสดง (3) toISOString() = UTC วันเพี้ยน 7 ชม. (4) link ไม่ได้ติดหน้า + revoke ทันที
+// ใหม่: ดึงตามช่วงวันที่จาก Firebase ตรงๆ (key = timestamp ms)
+function csvRange(){
+  let from=$('csv-from').value, to=$('csv-to').value;
+  if(!from||!to) return null;
+  if(from>to) [from,to]=[to,from];                 // เลือกกลับด้าน → สลับให้
+  return {from, to, a:dayRange(from)[0], b:dayRange(to)[1]};
+}
+async function fetchHourly(a, b){
+  const q = (a==null) ? ref(db, fbp('logs'))
+                      : query(ref(db, fbp('logs')), orderByKey(), startAt(String(a)), endAt(String(b)));
+  return (await get(q)).val() || {};
+}
+async function openCsvDlg(){
+  const today=localDay(Date.now());
+  $('csv-from').max=today; $('csv-to').max=today;
+  // ค่าเริ่มต้น: ตั้งแต่ log แรกสุด ถึงวันนี้
+  let first=today;
+  try{
+    const s=await get(query(ref(db, fbp('logs')), limitToFirst(1)));
+    const k=s.exists()?Object.keys(s.val())[0]:null;
+    if(k) first=localDay(parseInt(k));
+  }catch(_){}
+  $('csv-from').min=first; $('csv-to').min=first;
+  $('csv-from').value=first; $('csv-to').value=today;
+  $('csv-dlg').classList.add('show');
   updateCsvCount();
-  document.getElementById('csv-dlg').classList.add('open');
 }
-function closeCsvDlg(){document.getElementById('csv-dlg').classList.remove('open');}
-function updateCsvCount(){
-  const from=document.getElementById('csv-from').value;
-  const to=document.getElementById('csv-to').value;
-  const el=document.getElementById('csv-count');
-  if(!from||!to){el.textContent='';return;}
-  const fromMs=new Date(from).getTime();
-  const toMs=new Date(to).getTime()+86399999;
-  const n=Object.values(allHourlyLogs).filter(v=>{const ms=parseInt(v.timestamp)||0;return ms>=fromMs&&ms<=toMs;}).length;
-  el.textContent=n?`พบ ${n} รายการในช่วงที่เลือก`:'ไม่พบข้อมูลในช่วงนี้';
-  el.style.color=n?'var(--gr)':'var(--rd)';
+function closeCsvDlg(){$('csv-dlg').classList.remove('show');}
+let csvCountSeq=0;
+async function updateCsvCount(){
+  const el=$('csv-count'), r=csvRange(), seq=++csvCountSeq;
+  if(!r){el.textContent='';return;}
+  el.textContent='กำลังนับ…'; el.style.color='var(--mu)';
+  try{
+    const n=Object.keys(await fetchHourly(r.a, r.b)).length;
+    if(seq!==csvCountSeq) return;                   // เปลี่ยนวันที่ระหว่างโหลด → ใช้ผลล่าสุดเท่านั้น
+    el.textContent=n?`พบ ${n} รายการในช่วงที่เลือก`:'ไม่พบข้อมูลในช่วงนี้';
+    el.style.color=n?'var(--gr)':'var(--rd)';
+  }catch(e){ if(seq===csvCountSeq){el.textContent='โหลดไม่สำเร็จ: '+e.message; el.style.color='var(--rd)';} }
 }
-function doExportCSV(all=false){
-  let entries=Object.entries(allHourlyLogs).sort((a,b)=>parseInt(a[0])-parseInt(b[0]));
-  if(!entries.length){alert("ยังไม่มีข้อมูล log");return;}
-  let suffix='all';
-  if(!all){
-    const from=document.getElementById('csv-from').value;
-    const to=document.getElementById('csv-to').value;
-    if(!from||!to){alert("กรุณาเลือกวันที่");return;}
-    const fromMs=new Date(from).getTime();
-    const toMs=new Date(to).getTime()+86399999;
-    entries=entries.filter(([,v])=>{const ms=parseInt(v.timestamp)||0;return ms>=fromMs&&ms<=toMs;});
-    if(!entries.length){alert("ไม่พบข้อมูลในช่วงที่เลือก");return;}
-    suffix=from+(from!==to?'_to_'+to:'');
-  }
+let csvBusy=false;
+async function doExportCSV(all=false){
+  if(csvBusy) return;                               // กันกดซ้ำระหว่างโหลด
+  const r=all?null:csvRange();
+  if(!all&&!r){alert("กรุณาเลือกวันที่");return;}
+  const btn=$('csv-dl-btn'), label=btn.textContent;
+  csvBusy=true; btn.disabled=true; btn.textContent='กำลังโหลด…';
+  try{
+    const logs=all?await fetchHourly(null):await fetchHourly(r.a, r.b);
+    const entries=Object.entries(logs).sort((x,y)=>parseInt(x[0])-parseInt(y[0]));
+    if(!entries.length){alert(all?"ยังไม่มีข้อมูล log":"ไม่พบข้อมูลในช่วงที่เลือก");return;}
+    const suffix=all?'all':r.from+(r.from!==r.to?'_to_'+r.to:'');
+    downloadCsv(entries, suffix);
+    closeCsvDlg();
+  }catch(e){ alert('ดาวน์โหลดไม่สำเร็จ: '+e.message); }
+  finally{ csvBusy=false; btn.disabled=false; btn.textContent=label; }
+}
+function downloadCsv(entries, suffix){
   const header="timestamp,datetime,temp,humidity,heater,fog,fanMain,fan3,fan4,pump,servoPosition,servoStatus\n";
   const rows=entries.map(([id,v])=>{
     const ms=parseInt(v.timestamp)||parseInt(id);
@@ -1151,9 +1238,9 @@ function doExportCSV(all=false){
   const blob=new Blob(['﻿'+header+rows],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url; a.download=`egg_log_${suffix}.csv`; a.click();
-  URL.revokeObjectURL(url);
-  closeCsvDlg();
+  a.href=url; a.download=`egg_log_${suffix}.csv`; a.style.display='none';
+  document.body.appendChild(a); a.click(); a.remove();   // Firefox ต้องติด link ในหน้าก่อน click
+  setTimeout(()=>URL.revokeObjectURL(url), 10000);       // revoke ทันทีบางเบราว์เซอร์ยกเลิกดาวน์โหลด
 }
 
 let logSortKey='time', logSortDir='desc';
@@ -1183,7 +1270,7 @@ function renderHLog(){
     else{va=a.ms;vb=b2.ms;}
     return logSortDir==='asc'?va-vb:vb-va;
   });
-  entries.slice(0,20).forEach(v=>{
+  (hlogDay ? entries : entries.slice(0,20)).forEach(v=>{   // เลือกวัน = แสดงครบทั้งวัน (≤24 แถว)
     const r=v.ms>1577836800000?fmtMs(v.ms):{date:"--",time:"--"};
     const tr=document.createElement('tr');
     tr.innerHTML=`
@@ -1200,7 +1287,7 @@ function renderHLog(){
       <td class="tmu" style="font-size:14px;">${v.servoStatus??"--"}</td>`;
     b.appendChild(tr);
   });
-  $('hlog-ts').textContent='อัปเดต '+ts();
+  $('hlog-ts').textContent=hlogDay?fmtDay(hlogDay)+' · '+entries.length+' ชั่วโมง':'อัปเดต '+ts();
 }
 
 window.validate=validate;window.startSys=startSys;window.stopSys=stopSys;
@@ -1316,7 +1403,6 @@ get(ref(db, fbp('control'))).then(snap=>{
       if(c.system==="RUN"&&currentStartStageIdx>0&&currentProfileKey!=="custom")
         selectStage(currentStartStageIdx);
     }
-    if(c.eggCount) { $('egg-count').value=c.eggCount; currentEggCount=c.eggCount; }
   }
   setupListeners();
 }).catch(()=>setupListeners());
@@ -1373,12 +1459,13 @@ onValue(ref(db, fbp('current')),snap=>{
     fogBadge.textContent = 'น้ำพอ';
     fogBadge.style.cssText = 'font-family:Kanit,sans-serif;font-size:14px;padding:4px 14px;border-radius:99px;background:rgba(22,163,74,0.08);color:var(--gr);border:1px solid rgba(22,163,74,0.3)';
   }
-  // pump status — แสดงใน device status card (r-pump badge)
-  const pump = d.pumpOn === true;
+  // ระบบน้ำเปิด/ปิด — ใช้ค่าที่ ESP32 รายงานจริง (firmware เก่าไม่มี field นี้ → ถือว่าเปิด)
+  renderWater(d.waterEnabled !== false);
 
   setBadge("r1",d.relay?.fog);setBadge("r2",d.relay?.fanMain);
   setBadge("r3",d.relay?.fan3);setBadge("r4",d.relay?.fan4);setBadge("r5",d.relay?.heater);
   setBadge("r-pump", d.pumpOn===true ? "ON" : d.pumpOn===false ? "OFF" : null);
+  if (d.waterEnabled === false) { $('r-pump').textContent = 'ปิดใช้งาน'; }
   $('sstatus').textContent=d.servo?.status??"--"; $('sstatus').className='badge';
   $('spos').textContent=(d.servo?.position??'--')+'°'; $('spos').className='badge';
 
@@ -1388,11 +1475,10 @@ onValue(ref(db, fbp('current')),snap=>{
   $('sensor-banner').classList.toggle('show',d.sensorFailed===true);
 });
 
-onValue(query(ref(db, fbp('systemLogs')),limitToLast(30)),snap=>{
+function renderSLog(logs, day){
   const b=$('slog-body'); b.innerHTML='';
-  const logs=snap.val();
-  if(!logs){$('slog-ts').textContent='ยังไม่มีบันทึก';return;}
-  $('slog-ts').textContent='อัปเดต '+ts();
+  if(!logs){$('slog-ts').textContent=day?'ไม่มีบันทึกวันที่ '+fmtDay(day):'ยังไม่มีบันทึก';return;}
+  $('slog-ts').textContent=day?fmtDay(day)+' · '+Object.keys(logs).length+' รายการ':'อัปเดต '+ts();
   Object.entries(logs).sort((a,b)=>parseInt(b[0])-parseInt(a[0])).forEach(([id,v])=>{
     const ms=parseInt(v.timestamp)||parseInt(id);
     const{date,time}=fmtMs(ms);
@@ -1407,16 +1493,52 @@ onValue(query(ref(db, fbp('systemLogs')),limitToLast(30)),snap=>{
       <td class="tm">${is?(v.humMax?.toFixed(0)??"--"):"--"}</td>`;
     b.appendChild(tr);
   });
-});
+}
 
-onValue(query(ref(db, fbp('logs')),limitToLast(48)),snap=>{
-  const logs=snap.val();
-  if(!logs){$('hlog-ts').textContent='ยังไม่มีข้อมูล';return;}
-  allHourlyLogs=logs;
-  renderHLog();
-});
+// ── ดูบันทึกย้อนหลังตามวัน ──
+// "ล่าสุด" = ฟังสด (เหมือนเดิม) / เลือกวัน = query เฉพาะช่วงวันนั้นจาก Firebase (key = timestamp ms)
+const logView = { slog:{ day:'', unsub:null }, hlog:{ day:'', unsub:null } };
+function subscribeLog(kind){
+  const v = logView[kind];
+  if (v.unsub) { v.unsub(); v.unsub = null; }
+  const path = kind === 'slog' ? 'systemLogs' : 'logs';
+  const q = v.day
+    ? (([a, b]) => query(ref(db, fbp(path)), orderByKey(), startAt(String(a)), endAt(String(b))))(dayRange(v.day))
+    : query(ref(db, fbp(path)), limitToLast(kind === 'slog' ? 30 : 48));
+  if (kind === 'slog') $('slog-ts').textContent = 'กำลังโหลด…';
+  v.unsub = onValue(q, snap => {
+    if (kind === 'slog') { renderSLog(snap.val(), v.day); return; }
+    const logs = snap.val();
+    allHourlyLogs = logs || {};
+    hlogDay = v.day;
+    if (!logs) { $('hlog-body').innerHTML = ''; $('hlog-ts').textContent = v.day ? 'ไม่มีข้อมูลวันที่ ' + fmtDay(v.day) : 'ยังไม่มีข้อมูล'; return; }
+    renderHLog();
+  }, err => { $(kind + '-ts').textContent = 'โหลดไม่สำเร็จ: ' + err.message; });
+  const today = localDay(Date.now());
+  $(kind + '-date').value = v.day;
+  $(kind + '-date').max = today;
+  $(kind + '-next').disabled = !v.day || v.day >= today;
+  $(kind + '-latest').classList.toggle('active', !v.day);
+}
+function setLogDate(kind, day){
+  const today = localDay(Date.now());
+  if (day && day > today) day = today;          // ห้ามเลือกวันในอนาคต
+  logView[kind].day = day || '';
+  subscribeLog(kind);
+}
+function shiftLogDate(kind, delta){
+  const today = localDay(Date.now());
+  const base = logView[kind].day || today;
+  const next = localDay(dayRange(base)[0] + delta * 86400000 + 43200000);   // +12 ชม. กันพลาดวัน
+  if (next > today) return;
+  setLogDate(kind, next);
+}
+window.setLogDate = setLogDate; window.shiftLogDate = shiftLogDate;
+subscribeLog('slog');
+subscribeLog('hlog');
 
-onValue(query(ref(db, fbp('runs')),limitToLast(10)),snap=>{
+// ตารางประวัติรอบฟักถูกเอาออกจากหน้าแล้ว — ไม่มีตารางก็ไม่ต้องโหลด (เดิม error ทุกครั้งที่ runs เปลี่ยน + เปลืองโควต้า)
+if ($('runs-body')) onValue(query(ref(db, fbp('runs')),limitToLast(10)),snap=>{
   const b=$('runs-body'); b.innerHTML='';
   const runs=snap.val();
   if(!runs){$('runs-ts').textContent='ยังไม่มีประวัติ';return;}
