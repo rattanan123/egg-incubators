@@ -144,8 +144,8 @@ function loadUsers() {
         <div class="u-devcount">${devCount}</div>
         <div>
           <select class="role-sel ${role}" onchange="onRoleChange(this,'${uid}','${isSelf}')">
-            <option value="user"  ${role==='user' ?'selected':''}>user</option>
-            <option value="admin" ${role==='admin'?'selected':''}>admin</option>
+            <option value="user"  ${role==='user' ?'selected':''}>ผู้ใช้</option>
+            <option value="admin" ${role==='admin'?'selected':''}>ผู้ดูแล</option>
           </select>
         </div>
         <div>
@@ -177,7 +177,7 @@ async function saveRole(uid) {
   try {
     await set(ref(db, `users/${uid}/profile/role`), sel.value);
     btn.classList.remove('visible');
-    showToast(`เปลี่ยน role เป็น "${sel.value}" แล้ว`);
+    showToast(`เปลี่ยนสิทธิ์เป็น "${sel.value === 'admin' ? 'ผู้ดูแล' : 'ผู้ใช้'}" แล้ว`);
     if (uid === currentUid && sel.value !== 'admin') {
       setTimeout(() => location.href = 'dashboard.html', 1200);
     }

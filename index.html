@@ -75,6 +75,7 @@
     .wtoggle.on{color:var(--gr);border-color:rgba(22,163,74,0.4);background:var(--gr-bg)}
     .wtoggle:disabled{opacity:.55;cursor:wait}
     .water-off{font-size:14px;color:var(--mu);line-height:1.55;overflow-wrap:anywhere}
+    .cam-img{display:block;width:100%;aspect-ratio:4/3;object-fit:contain;background:#14161a;border-radius:6px}
     .cam-ts{margin-top:4px;font-size:12px;color:var(--mu);font-family:'Kanit',sans-serif;min-height:16px}
     .cam-ts.stale{color:var(--am)}
     .water-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -153,7 +154,8 @@
     .rlist{list-style:none;display:flex;flex-direction:column;gap:2px}
     .rrow{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:var(--rs)}
     .rrow:hover{background:var(--sur2)}
-    .rname{font-size:18px}
+    .rname{font-size:18px;flex:1;min-width:0}
+    .rrow .badge{flex-shrink:0;white-space:nowrap;margin-left:8px}   /* ป้ายสถานะไทยยาว (เช่น "ค้างที่ 90° (เริ่มรอบ)") ไม่ตัดกลางป้าย — ให้ชื่อด้านซ้ายขึ้นบรรทัดใหม่แทน */
     .badge{font-family:'Kanit',sans-serif;font-size:15px;font-weight:500;padding:5px 13px;border-radius:99px;background:var(--sur2);color:var(--mu);border:1px solid var(--bd)}
     .badge.lock{background:rgba(217,119,6,0.12);color:var(--am);border:1px solid rgba(217,119,6,0.4)}
     .badge.on{background:var(--sur2);color:var(--tx);border-color:var(--bd2)}
@@ -295,7 +297,7 @@
       </div>
     </div>
     <div class="hright">
-      <div class="online-pill"><div class="dot" id="odot"></div><span id="otxt">connecting…</span></div>
+      <div class="online-pill"><div class="dot" id="odot"></div><span id="otxt">กำลังเชื่อมต่อ…</span></div>
       <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙 มืด</button>
       <a href="dashboard.html" class="back-link">ย้อนกลับ</a>
     </div>
@@ -434,13 +436,13 @@
     <div class="water-tanks">
       <div class="water-tank">
         <div class="water-tank-label">ภายในตู้</div>
-        <img id="cam-inside" alt="" style="width:100%;border-radius:6px;background:var(--sur2);min-height:120px;object-fit:cover" onload="this.style.opacity=1" onerror="if(this.getAttribute('src'))this.style.opacity=0.3">
+        <img id="cam-inside" alt="" class="cam-img" onload="this.style.opacity=1" onerror="if(this.getAttribute('src'))this.style.opacity=0.3">
         <div class="cam-ts" id="cam-inside-ts"></div>
         <div style="margin-top:6px;font-size:13px;color:var(--mu)" id="hatch-line">ลูกไก่: <span id="hatch-count" style="font-weight:600;color:var(--tx)">--</span></div>
       </div>
       <div class="water-tank">
         <div class="water-tank-label">ภายนอกตู้</div>
-        <img id="cam-outside" alt="" style="width:100%;border-radius:6px;background:var(--sur2);min-height:120px;object-fit:cover" onload="this.style.opacity=1" onerror="if(this.getAttribute('src'))this.style.opacity=0.3">
+        <img id="cam-outside" alt="" class="cam-img" onload="this.style.opacity=1" onerror="if(this.getAttribute('src'))this.style.opacity=0.3">
         <div class="cam-ts" id="cam-outside-ts"></div>
         <div id="cam-alert" style="margin-top:6px;font-size:13px;display:none;padding:4px 10px;border-radius:6px;background:var(--rd-bg);color:var(--rd);font-weight:500"></div>
       </div>
@@ -549,9 +551,9 @@
       <li class="rrow"><span class="rname">พัดลมระบาย</span><span class="badge off" id="r4">ปิด</span></li>
       <li class="rrow"><span class="rname">ปั๊มน้ำ</span><span class="badge off" id="r-pump">ปิด</span></li>
       <li class="rrow" style="border-top:1px solid var(--bd);margin-top:6px;padding-top:12px;">
-        <span class="rname">สถานะเซอร์โวมอเตอร์</span><span class="badge off" id="sstatus">--</span>
+        <span class="rname">สถานะเซอร์โว</span><span class="badge off" id="sstatus">--</span>
       </li>
-      <li class="rrow"><span class="rname">มุมเซอร์โวมอเตอร์</span><span class="badge off" id="spos">--°</span></li>
+      <li class="rrow"><span class="rname">มุมเซอร์โว</span><span class="badge off" id="spos">--°</span></li>
       <li class="rrow" id="turning-row" style="display:none">
         <span class="rname">การพลิก</span>
         <span class="badge lock" id="turning-badge">🔒 หยุดพลิก</span>
@@ -781,9 +783,25 @@ async function toggleWater() {
 }
 window.toggleWater = toggleWater;
 
+// ── แปลสถานะเป็นภาษาไทย (ข้อมูลใน Firebase / CSV ยังเป็นค่าเดิม — แปลเฉพาะตอนแสดงผล) ──
+const onoffTH = v => v === "ON" || v === true ? "เปิด" : (v === "OFF" || v === false ? "ปิด" : "--");
+// ข้อความสถานะจาก ESP32 (handleServo — แก้ฝั่ง firmware ไม่ได้ตามกฎเหล็ก)
+const SERVO_TH = {
+  "Move to 135":     "กำลังเอียงไป 135°",
+  "Hold 135":        "ค้างที่ 135°",
+  "Move to 90":      "กำลังกลับ 90°",
+  "Hold 90 (mid)":   "ค้างที่ 90° (กลางรอบ)",
+  "Move to 45":      "กำลังเอียงไป 45°",
+  "Hold 45":         "ค้างที่ 45°",
+  "Hold 90 (start)": "ค้างที่ 90° (เริ่มรอบ)",
+  "Return to 90":    "กำลังกลับ 90°",
+  "STOPPED":         "หยุด",
+};
+const servoTH = s => s == null ? "--" : (SERVO_TH[s] ?? s);   // ไม่รู้จัก → แสดงตามเดิม (กันข้อความใหม่หาย)
+
 function setBadge(id,val) {
   const el=$(id); if(!el)return;
-  el.textContent=val==="ON"?"ON":"OFF";
+  el.textContent=val==="ON"?"เปิด":"ปิด";
   el.className="badge "+(val==="ON"?"on":"off");
 }
 function setMetric(cid,vid,raw) {
@@ -810,7 +828,7 @@ let lastUp=0;
 setInterval(()=>{
   if(!lastUp)return;
   const e=Date.now()-lastUp;
-  if(e>120000){$('odot').className='dot err';$('otxt').textContent='offline';}
+  if(e>120000){$('odot').className='dot err';$('otxt').textContent='ออฟไลน์';}
   else if(e>30000){$('odot').className='dot warn';$('otxt').textContent='ไม่ตอบสนอง';}
 },10000);
 
@@ -1281,14 +1299,14 @@ function renderHLog(){
       <td class="tm" style="line-height:1.5;"><span>${r.time}</span><br><span style="color:var(--mu);font-size:13px;">${r.date}</span></td>
       <td class="tm">${v.temp!=null?parseFloat(v.temp).toFixed(2):"--"}</td>
       <td class="tm">${v.humidity!=null?parseFloat(v.humidity).toFixed(2):"--"}</td>
-      <td><span class="dbadge ${v.heater==="ON"?"on":"off"}">${v.heater??"--"}</span></td>
-      <td><span class="dbadge ${v.fog==="ON"?"on":"off"}">${v.fog??"--"}</span></td>
-      <td><span class="dbadge ${v.fanMain==="ON"?"on":"off"}">${v.fanMain??"--"}</span></td>
-      <td><span class="dbadge ${v.fan3==="ON"?"on":"off"}">${v.fan3??"--"}</span></td>
-      <td><span class="dbadge ${v.fan4==="ON"?"on":"off"}">${v.fan4??"--"}</span></td>
-      <td><span class="dbadge ${v.pumpOn===true?"on":v.pumpOn===false?"off":""}">${v.pumpOn===true?"ON":v.pumpOn===false?"OFF":"--"}</span></td>
+      <td><span class="dbadge ${v.heater==="ON"?"on":"off"}">${onoffTH(v.heater)}</span></td>
+      <td><span class="dbadge ${v.fog==="ON"?"on":"off"}">${onoffTH(v.fog)}</span></td>
+      <td><span class="dbadge ${v.fanMain==="ON"?"on":"off"}">${onoffTH(v.fanMain)}</span></td>
+      <td><span class="dbadge ${v.fan3==="ON"?"on":"off"}">${onoffTH(v.fan3)}</span></td>
+      <td><span class="dbadge ${v.fan4==="ON"?"on":"off"}">${onoffTH(v.fan4)}</span></td>
+      <td><span class="dbadge ${v.pumpOn===true?"on":v.pumpOn===false?"off":""}">${onoffTH(v.pumpOn)}</span></td>
       <td class="tm">${v.servoPosition!=null?v.servoPosition+"°":"--"}</td>
-      <td class="tmu" style="font-size:14px;">${v.servoStatus??"--"}</td>`;
+      <td class="tmu" style="font-size:14px;">${servoTH(v.servoStatus)}</td>`;
     b.appendChild(tr);
   });
   $('hlog-ts').textContent=hlogDay?fmtDay(hlogDay)+' · '+entries.length+' ชั่วโมง':'อัปเดต '+ts();
@@ -1422,7 +1440,7 @@ onValue(ref(db, fbp('control')),snap=>{
 onValue(ref(db, fbp('current')),snap=>{
   const d=snap.val(); if(!d)return;
   lastUp=Date.now();
-  $('odot').className='dot';$('otxt').textContent='online';
+  $('odot').className='dot';$('otxt').textContent='ออนไลน์';
 
   const ns=d.systemState??"STOP";
   if(ns==="STOP") stopGuardUntil=0;
@@ -1470,7 +1488,7 @@ onValue(ref(db, fbp('current')),snap=>{
   setBadge("r3",d.relay?.fan3);setBadge("r4",d.relay?.fan4);setBadge("r5",d.relay?.heater);
   setBadge("r-pump", d.pumpOn===true ? "ON" : d.pumpOn===false ? "OFF" : null);
   if (d.waterEnabled === false) { $('r-pump').textContent = 'ปิดใช้งาน'; }
-  $('sstatus').textContent=d.servo?.status??"--"; $('sstatus').className='badge';
+  $('sstatus').textContent=servoTH(d.servo?.status); $('sstatus').className='badge';
   $('spos').textContent=(d.servo?.position??'--')+'°'; $('spos').className='badge';
 
   const turning=d.servo?.turning!==false;
@@ -1490,7 +1508,7 @@ function renderSLog(logs, day){
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td class="tm" style="line-height:1.5;"><span>${time}</span><br><span style="color:var(--mu);font-size:13px;">${date}</span></td>
-      <td><span class="dbadge ${is?'on':'off'}">${is?'START':'STOP'}</span></td>
+      <td><span class="dbadge ${is?'on':'off'}">${is?'เริ่มทำงาน':'หยุด'}</span></td>
       <td class="tm">${is?(v.tempMin?.toFixed(1)??"--"):"--"}</td>
       <td class="tm">${is?(v.tempMax?.toFixed(1)??"--"):"--"}</td>
       <td class="tm">${is?(v.humMin?.toFixed(0)??"--"):"--"}</td>
