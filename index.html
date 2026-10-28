@@ -75,6 +75,8 @@
     .wtoggle.on{color:var(--gr);border-color:rgba(22,163,74,0.4);background:var(--gr-bg)}
     .wtoggle:disabled{opacity:.55;cursor:wait}
     .water-off{font-size:14px;color:var(--mu);line-height:1.55;overflow-wrap:anywhere}
+    .cam-ts{margin-top:4px;font-size:12px;color:var(--mu);font-family:'Kanit',sans-serif;min-height:16px}
+    .cam-ts.stale{color:var(--am)}
     .water-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
     .water-label{font-size:15px;font-weight:500;color:var(--tx)}
     .water-pct{font-family:'Kanit',sans-serif;font-size:18px;font-weight:600}
@@ -433,11 +435,13 @@
       <div class="water-tank">
         <div class="water-tank-label">ภายในตู้</div>
         <img id="cam-inside" src="" style="width:100%;border-radius:6px;background:var(--sur2);min-height:120px;object-fit:cover" onerror="this.style.opacity=0.3">
-        <div style="margin-top:6px;font-size:13px;color:var(--mu)">ไข่: <span id="egg-count" style="font-weight:600;color:var(--tx)">--</span> ฟอง &nbsp; ลูกไก่: <span id="hatch-count" style="font-weight:600;color:var(--gr)">--</span> ตัว</div>
+        <div class="cam-ts" id="cam-inside-ts"></div>
+        <div style="margin-top:6px;font-size:13px;color:var(--mu)" id="hatch-line">ลูกไก่: <span id="hatch-count" style="font-weight:600;color:var(--tx)">--</span></div>
       </div>
       <div class="water-tank">
         <div class="water-tank-label">ภายนอกตู้</div>
         <img id="cam-outside" src="" style="width:100%;border-radius:6px;background:var(--sur2);min-height:120px;object-fit:cover" onerror="this.style.opacity=0.3">
+        <div class="cam-ts" id="cam-outside-ts"></div>
         <div id="cam-alert" style="margin-top:6px;font-size:13px;display:none;padding:4px 10px;border-radius:6px;background:var(--rd-bg);color:var(--rd);font-weight:500"></div>
       </div>
     </div>
@@ -1563,26 +1567,76 @@ if ($('runs-body')) onValue(query(ref(db, fbp('runs')),limitToLast(10)),snap=>{
 });
 
 // ===== Camera =====
-onValue(ref(db, fbp('camera/inside')), snap => {
-  const d = snap.val(); if(!d) return;
-  document.getElementById('camera-card').style.display = '';
-  document.getElementById('egg-count').textContent   = d.eggCount   ?? '--';
-  document.getElementById('hatch-count').textContent = d.hatchCount ?? '--';
-  if(d.snapshot) document.getElementById('cam-inside').src = 'data:image/jpeg;base64,' + d.snapshot;
+// รูป (~45KB) อัปเดตทุก 30 วิ = ตัวกินโควต้า Firebase (ฟรี 10GB/เดือน) + เน็ต Pocket WiFi
+// เดิม: ฟังทั้ง node → ทุกครั้งที่ Pi อัปเดต timestamp ก็โหลดรูปซ้ำ (กล้องนอกโหลดรูปเก่าซ้ำทุก 30 วิ ทั้งที่ไม่เปลี่ยน)
+// ใหม่: ฟังเฉพาะ field เล็กตลอด · รูปโหลดเฉพาะตอนหน้าเว็บเปิดอยู่ + การ์ดกล้องอยู่ในจอ
+const camCard = $('camera-card');
+const showCamCard = () => { camCard.style.display = ''; };
+let outsideAlert = false;
+
+onValue(ref(db, fbp('camera/inside/hatchCount')), snap => {
+  if (!snap.exists()) return;
+  showCamCard();
+  const hc = $('hatch-count'), n = snap.val();   // ไม่นับไข่แล้ว — แสดงแค่สถานะลูกไก่ฟัก
+  hc.textContent = n > 0 ? `🐣 ฟักแล้ว ${n} ตัว` : (n === 0 ? 'ยังไม่ฟัก' : '--');
+  hc.style.color = n > 0 ? 'var(--gr)' : 'var(--tx)';
+});
+onValue(ref(db, fbp('camera/outside/alert')), snap => {
+  if (!snap.exists()) return;
+  showCamCard();
+  outsideAlert = snap.val() === true;
+  if (!outsideAlert) $('cam-alert').style.display = 'none';
+});
+onValue(ref(db, fbp('camera/outside/detected')), snap => {
+  const v = snap.val();
+  const el = $('cam-alert');
+  if (v) { el.textContent = '⚠️ พบ: ' + v; el.style.display = outsideAlert ? '' : 'none'; }
+  else el.style.display = 'none';
 });
 
-onValue(ref(db, fbp('camera/outside')), snap => {
-  const d = snap.val(); if(!d) return;
-  document.getElementById('camera-card').style.display = '';
-  const alertEl = document.getElementById('cam-alert');
-  if(d.alert && d.detected) {
-    alertEl.style.display = '';
-    alertEl.textContent   = '⚠️ พบ: ' + d.detected;
-    if(d.snapshot) document.getElementById('cam-outside').src = 'data:image/jpeg;base64,' + d.snapshot;
-  } else {
-    alertEl.style.display = 'none';
+// เวลาของภาพล่าสุด (ข้อมูลเล็ก ฟังตลอด) — Pi ส่งทุก 30 วิ · เกิน 2 นาที = กล้อง/Pi อาจหลุด
+const camTs = { inside: 0, outside: 0 };
+function renderCamTs() {
+  for (const src of ['inside', 'outside']) {
+    const el = $('cam-' + src + '-ts'), t = camTs[src];
+    if (!el || !t) continue;
+    const age = (Date.now() - t) / 1000;
+    const hhmm = new Date(t).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    el.textContent = age > 120 ? `⚠️ ภาพล่าสุด ${hhmm} (ไม่อัปเดต ${Math.round(age / 60)} นาที — กล้อง/Pi อาจหลุด)` : `อัปเดต ${hhmm}`;
+    el.classList.toggle('stale', age > 120);
   }
-});
+}
+for (const src of ['inside', 'outside']) {
+  onValue(ref(db, fbp(`camera/${src}/timestamp`)), s => {
+    const t = s.exists() ? Date.parse(s.val()) : NaN;   // Pi ส่งเวลาท้องถิ่น (ไม่มี timezone) — เครื่องดูอยู่ไทยเหมือนกัน
+    if (!isNaN(t)) { camTs[src] = t; renderCamTs(); }
+  });
+}
+setInterval(renderCamTs, 30000);   // Pi หยุดส่ง → ข้อความเปลี่ยนเป็นเตือนเองโดยไม่ต้องรีเฟรช
+
+let camImgUnsubs = [];
+function camImages(on) {
+  if (on && !camImgUnsubs.length) {
+    camImgUnsubs = [
+      onValue(ref(db, fbp('camera/inside/snapshot')), s => {
+        if (s.exists()) { showCamCard(); $('cam-inside').src = 'data:image/jpeg;base64,' + s.val(); }
+      }),
+      onValue(ref(db, fbp('camera/outside/snapshot')), s => {   // Pi ส่งรูปนอกตู้เฉพาะตอนเจอสัตว์
+        if (s.exists()) { showCamCard(); $('cam-outside').src = 'data:image/jpeg;base64,' + s.val(); }
+      }),
+    ];
+  } else if (!on && camImgUnsubs.length) {
+    camImgUnsubs.forEach(u => u()); camImgUnsubs = [];
+  }
+}
+let camInView = true;   // ก่อนรู้ตำแหน่ง → ถือว่าเห็น (โหลดรูปแรก)
+const camUpdate = () => camImages(document.visibilityState === 'visible' && camInView);
+document.addEventListener('visibilitychange', camUpdate);   // สลับแอป/ปิดจอ/ย่อแท็บ → หยุดโหลดรูป
+if ('IntersectionObserver' in window) {
+  new IntersectionObserver(es => { camInView = es[0].isIntersecting; camUpdate(); },
+                           { rootMargin: '300px' }).observe(camCard);   // เลื่อนการ์ดพ้นจอ → หยุด
+}
+camUpdate();
 
 } // end setupListeners
 
