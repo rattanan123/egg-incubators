@@ -188,6 +188,9 @@
     .btn-hot:hover{background:rgba(217,119,6,0.14)}
     .btn-hot.active{background:var(--am);border-color:var(--am);color:#fff}
     .t-hot{color:var(--rd)!important;font-weight:600}
+    .hot-grp{display:flex;align-items:center;gap:6px;font-family:'Kanit',sans-serif;font-size:15px;color:var(--mu);white-space:nowrap}
+    .hot-in{font-family:'Kanit',sans-serif;font-size:16px;width:68px;height:36px;box-sizing:border-box;padding:4px 6px;text-align:center;border-radius:var(--rs);border:1px solid var(--bd2);background:var(--sur2);color:var(--tx);color-scheme:light dark}
+    .hot-in.bad{border-color:var(--rd);background:var(--rd-bg)}
     .ldate{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin:-4px 0 12px;max-width:340px}
     .ldate-in{font-family:'Kanit',sans-serif;font-size:14px;padding:4px 8px;height:36px;border-radius:var(--rs);border:1px solid var(--bd2);background:var(--sur2);color:var(--tx);min-width:0;flex:1 1 150px;color-scheme:light dark}
     .ldate-nav,.ldate-latest{font-family:'Kanit',sans-serif;font-size:15px;height:36px;min-width:36px;padding:4px 10px;border-radius:99px;border:1px solid var(--bd2);background:var(--sur2);color:var(--mu);cursor:pointer;line-height:1;flex-shrink:0;white-space:nowrap}
@@ -620,7 +623,12 @@
         <div style="font-size:14px;color:var(--mu);font-family:'Kanit',sans-serif;" id="hlog-ts">--</div>
       </div>
       <div class="lhbtns">
-        <button class="btn-hot" id="hlog-hot" onclick="toggleHotLog()" aria-pressed="false" title="แสดงทุกชั่วโมงที่อุณหภูมิเกิน 37.5°C">เกิน 37.5°C</button>
+        <div class="hot-grp">
+          <label for="hot-th">เกิน</label>
+          <input class="hot-in" id="hot-th" type="number" inputmode="decimal" step="0.1" min="30" max="45" value="37.5" onchange="setHotTh(this.value)">
+          <span>°C</span>
+          <button class="btn-hot" id="hlog-hot" onclick="toggleHotLog()" aria-pressed="false" title="แสดงทุกชั่วโมงที่อุณหภูมิเกินค่าที่ตั้ง">ดู</button>
+        </div>
         <button class="btn-csv" onclick="openCsvDlg()">⬇ CSV</button>
         <button class="btn-clr" onclick="openDlg()">ล้าง Log</button>
       </div>
@@ -848,7 +856,8 @@ let isLockdownStage=false;
 let lastAutoStageIdx=-1;
 let allHourlyLogs={};
 let hlogDay='';   // วันที่ที่ตารางรายชั่วโมงกำลังแสดง ('' = ล่าสุด)
-const HOT_TEMP=37.5;
+let HOT_TEMP=37.5;   // เกณฑ์ "อุณหภูมิเกิน" — ผู้ใช้ตั้งเองได้ (จำไว้ในเครื่อง)
+try{ const s=parseFloat(localStorage.getItem('hotTh')); if(s>=30&&s<=45) HOT_TEMP=s; }catch(e){}
 let hlogHot=false;   // true = ตารางแสดงเฉพาะชั่วโมงที่อุณหภูมิเกิน HOT_TEMP (ทุกวัน)
 
 // ── วันที่ตามเวลาเครื่อง (ไทย) — ห้ามใช้ toISOString() เพราะเป็น UTC (เพี้ยน 7 ชม. → ข้ามวัน) ──
@@ -1170,7 +1179,7 @@ async function confirmClear(){
   await remove(ref(db, fbp('logs')));
   $('hlog-body').innerHTML='';$('hlog-ts').textContent='ล้างแล้ว';
   hotCache={t:0,data:null}; if(hlogHot) allHourlyLogs={};
-  $('hlog-hot').textContent='เกิน '+HOT_TEMP+'°C';
+  $('hlog-hot').textContent='ดู';
   hChart.data.labels=[];hChart.data.datasets[0].data=[];hChart.data.datasets[1].data=[];
   hChart.update();$('cnote').textContent='ยังไม่มีข้อมูล';
 }
@@ -1571,7 +1580,7 @@ function shiftLogDate(kind, delta){
   if (next > today) return;
   setLogDate(kind, next);
 }
-// ── ปุ่ม "เกิน 37.5°C": ดึง log รายชั่วโมงทั้งหมดครั้งเดียว (get ไม่ใช่ฟังสด) แล้วกรอง ──
+// ── ปุ่มกรอง "อุณหภูมิเกิน X°C": ดึง log รายชั่วโมงทั้งหมดครั้งเดียว (get ไม่ใช่ฟังสด) แล้วกรอง ──
 // cache 60 วิ กันกดซ้ำแล้วโหลดใหม่ทุกครั้ง (ประหยัดโควต้า Firebase/Pocket WiFi)
 let hotCache = { t: 0, data: null }, hotSeq = 0;
 function setHotUI(on){
@@ -1580,12 +1589,31 @@ function setHotUI(on){
   btn.classList.toggle('active', on);
   btn.setAttribute('aria-pressed', on ? 'true' : 'false');
   if (on) $('hlog-latest').classList.remove('active');
+  else btn.textContent = 'ดู';
 }
-async function toggleHotLog(){
+// เปลี่ยนเกณฑ์: ถ้ากำลังกรองอยู่ → กรองใหม่จากข้อมูลที่จำไว้ทันที, ไม่งั้นแค่อัปเดตสีแดงในตาราง
+function setHotTh(val){
+  const inp = $('hot-th'), t = parseFloat(String(val).replace(',', '.'));
+  if (!(t >= 30 && t <= 45)) {
+    inp.classList.add('bad');
+    $('hlog-ts').textContent = 'ใส่อุณหภูมิ 30–45°C';
+    return;
+  }
+  inp.classList.remove('bad');
+  HOT_TEMP = Math.round(t * 10) / 10;
+  inp.value = HOT_TEMP;
+  try { localStorage.setItem('hotTh', String(HOT_TEMP)); } catch (e) {}
+  if (hlogHot) loadHot(); else renderHLog();
+}
+$('hot-th').value = HOT_TEMP;
+function toggleHotLog(){
   if (hlogHot) { setLogDate('hlog', logView.hlog.day); return; }   // กดซ้ำ = กลับไปมุมมองเดิม
   const v = logView.hlog;
   if (v.unsub) { v.unsub(); v.unsub = null; }
   setHotUI(true);
+  loadHot();
+}
+async function loadHot(){
   const seq = ++hotSeq;
   $('hlog-ts').textContent = 'กำลังโหลด…';
   try {
@@ -1599,13 +1627,13 @@ async function toggleHotLog(){
       if (Number.isFinite(t) && t > HOT_TEMP) hot[k] = r;
     }
     allHourlyLogs = hot; hlogDay = '';
-    $('hlog-hot').textContent = 'เกิน ' + HOT_TEMP + '°C · ' + Object.keys(hot).length + ' ครั้ง';   // นับ 1 ครั้ง = 1 ชั่วโมงที่เกิน
+    $('hlog-hot').textContent = 'ปิด · ' + Object.keys(hot).length + ' ครั้ง';   // นับ 1 ครั้ง = 1 ชั่วโมงที่เกิน
     renderHLog();
   } catch (err) {
     if (seq === hotSeq) $('hlog-ts').textContent = 'โหลดไม่สำเร็จ: ' + err.message;
   }
 }
-window.toggleHotLog = toggleHotLog;
+window.toggleHotLog = toggleHotLog; window.setHotTh = setHotTh;
 window.setLogDate = setLogDate; window.shiftLogDate = shiftLogDate;
 subscribeLog('slog');
 subscribeLog('hlog');
