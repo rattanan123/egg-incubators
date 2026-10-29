@@ -183,7 +183,7 @@
     .lwrap{background:var(--sur);border:1px solid var(--bd);border-radius:var(--ra);padding:18px 16px;overflow-x:auto}
     .lheader{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
     .lhl{display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex:1;min-width:0}
-    .lhbtns{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+    .lhbtns{display:flex;gap:8px;flex:0 1 auto;min-width:0;max-width:100%;flex-wrap:wrap;justify-content:flex-end}
     .btn-hot{font-family:'Kanit',sans-serif;font-size:16px;padding:7px 16px;border-radius:99px;border:1px solid rgba(217,119,6,0.4);background:rgba(217,119,6,0.06);color:var(--am);cursor:pointer;white-space:nowrap}
     .btn-hot:hover{background:rgba(217,119,6,0.14)}
     .btn-hot.active{background:var(--am);border-color:var(--am);color:#fff}
@@ -1170,6 +1170,7 @@ async function confirmClear(){
   await remove(ref(db, fbp('logs')));
   $('hlog-body').innerHTML='';$('hlog-ts').textContent='ล้างแล้ว';
   hotCache={t:0,data:null}; if(hlogHot) allHourlyLogs={};
+  $('hlog-hot').textContent='เกิน '+HOT_TEMP+'°C';
   hChart.data.labels=[];hChart.data.datasets[0].data=[];hChart.data.datasets[1].data=[];
   hChart.update();$('cnote').textContent='ยังไม่มีข้อมูล';
 }
@@ -1322,7 +1323,7 @@ function renderHLog(){
   });
   if(hlogHot){
     const mx=Math.max(...entries.map(e=>parseFloat(e.temp)));
-    $('hlog-ts').textContent='เกิน '+HOT_TEMP+'°C · '+entries.length+' ชั่วโมง · สูงสุด '+mx.toFixed(2)+'°C';
+    $('hlog-ts').textContent='เกิน '+HOT_TEMP+'°C ทั้งหมด '+entries.length+' ครั้ง · สูงสุด '+mx.toFixed(2)+'°C';
   } else $('hlog-ts').textContent=hlogDay?fmtDay(hlogDay)+' · '+entries.length+' ชั่วโมง':'อัปเดต '+ts();
 }
 
@@ -1598,6 +1599,7 @@ async function toggleHotLog(){
       if (Number.isFinite(t) && t > HOT_TEMP) hot[k] = r;
     }
     allHourlyLogs = hot; hlogDay = '';
+    $('hlog-hot').textContent = 'เกิน ' + HOT_TEMP + '°C · ' + Object.keys(hot).length + ' ครั้ง';   // นับ 1 ครั้ง = 1 ชั่วโมงที่เกิน
     renderHLog();
   } catch (err) {
     if (seq === hotSeq) $('hlog-ts').textContent = 'โหลดไม่สำเร็จ: ' + err.message;
